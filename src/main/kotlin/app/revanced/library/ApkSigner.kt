@@ -137,7 +137,7 @@ object ApkSigner {
      * @param keyStorePassword The password for the keystore.
      * @param entries The entries to add to the keystore.
      */
-    fun newKeystore(
+    fun newKeyStore(
         keyStoreOutputStream: OutputStream,
         keyStorePassword: String,
         entries: List<KeyStoreEntry>
