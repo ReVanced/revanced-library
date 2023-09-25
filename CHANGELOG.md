@@ -1,3 +1,10 @@
+# [1.1.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2023-09-25)
+
+
+### Bug Fixes
+
+* Use correct function name casing ([ef38d8b](https://github.com/ReVanced/revanced-library/commit/ef38d8b4bfe3a79c25fb40588c6217c09574770f))
+
 # [1.1.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.0.2-dev.1...v1.1.0-dev.1) (2023-09-25)
 
 
