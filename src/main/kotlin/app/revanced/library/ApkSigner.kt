@@ -116,8 +116,9 @@ object ApkSigner {
         logger.fine("Creating keystore")
 
         return KeyStore.getInstance("BKS", BouncyCastleProvider.PROVIDER_NAME).apply {
+            load(null)
+
             entries.forEach { entry ->
-                load(null)
                 // Add all entries to the keystore.
                 setKeyEntry(
                     entry.alias,
