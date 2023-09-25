@@ -45,7 +45,7 @@ object ApkSigner {
 
         // Generate a new key pair.
         val keyPair = KeyPairGenerator.getInstance("RSA").apply {
-            initialize(2048)
+            initialize(4096)
         }.generateKeyPair()
 
         var serialNumber: BigInteger
