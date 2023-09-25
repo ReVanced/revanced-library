@@ -1,3 +1,10 @@
+## [1.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.0.1...v1.0.2-dev.1) (2023-09-25)
+
+
+### Bug Fixes
+
+* Only load the keystore once per instantiation ([5993f7e](https://github.com/ReVanced/revanced-library/commit/5993f7e568543c777bee51a140c34fa8953a178a))
+
 ## [1.0.1](https://github.com/ReVanced/revanced-library/compare/v1.0.0...v1.0.1) (2023-09-24)
 
 
