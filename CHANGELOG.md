@@ -1,3 +1,10 @@
+# [1.1.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.0.2-dev.1...v1.1.0-dev.1) (2023-09-25)
+
+
+### Features
+
+* Increase the key size to 4096 ([892e083](https://github.com/ReVanced/revanced-library/commit/892e0835c6b2da0836bd6ba1d8603db1848cc2d9))
+
 ## [1.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.0.1...v1.0.2-dev.1) (2023-09-25)
 
 
