@@ -1,3 +1,24 @@
+# [1.1.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2023-09-25)
+
+
+### Bug Fixes
+
+* Use correct function name casing ([ef38d8b](https://github.com/ReVanced/revanced-library/commit/ef38d8b4bfe3a79c25fb40588c6217c09574770f))
+
+# [1.1.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.0.2-dev.1...v1.1.0-dev.1) (2023-09-25)
+
+
+### Features
+
+* Increase the key size to 4096 ([892e083](https://github.com/ReVanced/revanced-library/commit/892e0835c6b2da0836bd6ba1d8603db1848cc2d9))
+
+## [1.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.0.1...v1.0.2-dev.1) (2023-09-25)
+
+
+### Bug Fixes
+
+* Only load the keystore once per instantiation ([5993f7e](https://github.com/ReVanced/revanced-library/commit/5993f7e568543c777bee51a140c34fa8953a178a))
+
 ## [1.0.1](https://github.com/ReVanced/revanced-library/compare/v1.0.0...v1.0.1) (2023-09-24)
 
 

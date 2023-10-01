@@ -45,7 +45,7 @@ object ApkSigner {
 
         // Generate a new key pair.
         val keyPair = KeyPairGenerator.getInstance("RSA").apply {
-            initialize(2048)
+            initialize(4096)
         }.generateKeyPair()
 
         var serialNumber: BigInteger
@@ -116,8 +116,9 @@ object ApkSigner {
         logger.fine("Creating keystore")
 
         return KeyStore.getInstance("BKS", BouncyCastleProvider.PROVIDER_NAME).apply {
+            load(null)
+
             entries.forEach { entry ->
-                load(null)
                 // Add all entries to the keystore.
                 setKeyEntry(
                     entry.alias,
@@ -136,7 +137,7 @@ object ApkSigner {
      * @param keyStorePassword The password for the keystore.
      * @param entries The entries to add to the keystore.
      */
-    fun newKeystore(
+    fun newKeyStore(
         keyStoreOutputStream: OutputStream,
         keyStorePassword: String,
         entries: List<KeyStoreEntry>
