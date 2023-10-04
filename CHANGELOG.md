@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/ReVanced/revanced-library/compare/v1.1.0...v1.1.1) (2023-10-04)
+
+
+### Performance Improvements
+
+* Use maps to set options ([13823b7](https://github.com/ReVanced/revanced-library/commit/13823b74db1de3a104b5022b6bf0db0ef945f47b))
+
 ## [1.1.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.1.0...v1.1.1-dev.1) (2023-10-04)
 
 
