@@ -61,13 +61,15 @@ object Options {
         filter { it.options.any() }.let { patches ->
             if (patches.isEmpty()) return
 
-            val patchOptions = deserialize(json)
+            val jsonPatches = deserialize(json).associate {
+                it.patchName to it.options.associate { option -> option.key to option.value }
+            }
 
-            patches.forEach patch@{ patch ->
-                patchOptions.find { option -> option.patchName == patch.name!! }?.let {
-                    it.options.forEach { option ->
+            patches.forEach { patch ->
+                jsonPatches[patch.name]?.let { jsonPatchOptions ->
+                    jsonPatchOptions.forEach { (option, value) ->
                         try {
-                            patch.options[option.key] = option.value
+                            patch.options[option] = value
                         } catch (e: PatchOptionException) {
                             logger.severe(e.toString())
                         }
