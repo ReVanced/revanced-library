@@ -5,7 +5,7 @@ jackson-module-kotlin = "2.14.3"
 jadb = "2531a28109"
 kotlin-reflect = "1.9.0"
 kotlin-test = "1.8.20-RC"
-revanced-patcher = "16.0.0"
+revanced-patcher = "16.0.1"
 binary-compatibility-validator = "0.13.2"
 
 [libraries]
