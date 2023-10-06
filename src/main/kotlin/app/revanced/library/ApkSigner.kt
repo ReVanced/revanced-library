@@ -187,6 +187,7 @@ object ApkSigner {
         privateKeyCertificatePair: PrivateKeyCertificatePair,
         signer: String,
         createdBy: String,
+        sigLevels: Set<Int>,
     ): ApkSigner.Builder {
         logger.fine(
             "Creating new ApkSigner " +
@@ -205,6 +206,9 @@ object ApkSigner {
         // Create the signer.
         return ApkSigner.Builder(listOf(signerConfig)).apply {
             setCreatedBy(createdBy)
+            setV1SigningEnabled(sigLevels.contains(1))
+            setV2SigningEnabled(sigLevels.contains(2))
+            setV3SigningEnabled(sigLevels.contains(3))
         }
     }
 
@@ -228,10 +232,12 @@ object ApkSigner {
         keyStoreEntryPassword: String,
         signer: String,
         createdBy: String,
+        sigLevels: Set<Int>,
     ) = newApkSignerBuilder(
         readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword),
         signer,
         createdBy,
+        sigLevels,
     )
 
     fun ApkSigner.Builder.signApk(

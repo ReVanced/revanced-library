@@ -90,6 +90,7 @@ object ApkUtils {
             signingOptions.password,
             signingOptions.signer,
             signingOptions.signer,
+            signingOptions.sigLevels,
         ).signApk(apk, output)
     }
 
@@ -108,5 +109,6 @@ object ApkUtils {
         val alias: String = "ReVanced Key",
         val password: String = "",
         val signer: String = "ReVanced",
+        val sigLevels: Set<Int>,
     )
 }
