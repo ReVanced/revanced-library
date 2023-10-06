@@ -21,11 +21,13 @@ object ApkUtils {
      * @param apkFile The apk to copy entries from.
      * @param outputFile The apk to write the new entries to.
      * @param patchedEntriesSource The result of the patcher to add the patched dex files and resources.
+     * @param ignoreRes not copy resources if true.
      */
     fun copyAligned(
         apkFile: File,
         outputFile: File,
         patchedEntriesSource: PatcherResult,
+        ignoreRes: Boolean,
     ) {
         logger.info("Aligning ${apkFile.name}")
 
@@ -42,16 +44,16 @@ object ApkUtils {
             patchedEntriesSource.resourceFile?.let {
                 file.copyEntriesFromFileAligned(
                     ZipFile(it),
-                    ZipFile.apkZipEntryAlignment,
+                    entryAlignment = ZipFile.apkZipEntryAlignment,
                 )
             }
 
             // TODO: Do not compress result.doNotCompress
 
-            // TODO: Fix copying resources that are not needed anymore.
             file.copyEntriesFromFileAligned(
                 ZipFile(apkFile),
-                ZipFile.apkZipEntryAlignment,
+                ignoreEntryNamePrefixes = if (ignoreRes) listOf("res/", "r/", "R/") else listOf(),
+                entryAlignment = ZipFile.apkZipEntryAlignment,
             )
         }
     }

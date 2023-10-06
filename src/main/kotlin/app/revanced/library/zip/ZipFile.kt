@@ -182,14 +182,17 @@ class ZipFile(file: File) : Closeable {
      * Copies all entries from [file] to this file but skip already existing entries.
      *
      * @param file The file to copy entries from.
+     * @param ignoreEntryNamePrefixes entry name prefixes to ignore.
      * @param entryAlignment A function that returns the alignment for a given entry.
      */
     fun copyEntriesFromFileAligned(
         file: ZipFile,
+        ignoreEntryNamePrefixes: List<String> = listOf(),
         entryAlignment: (entry: ZipEntry) -> Int?,
     ) {
         for (entry in file.entries) {
             if (entries.any { it.fileName == entry.fileName }) continue // Skip duplicates
+            if (ignoreEntryNamePrefixes.any { entry.fileName.startsWith(it) }) continue
 
             val data = file.getDataForEntry(entry)
             addEntryCopyData(entry, data, entryAlignment(entry))
