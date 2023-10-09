@@ -1,18 +1,18 @@
 [versions]
-apksig = "8.1.1"
+apksig = "8.1.2"
 bcpkix-jdk18on = "1.76"
 jackson-module-kotlin = "2.14.3"
-jadb = "2531a28109"
+jadb = "1.2.1"
 kotlin-reflect = "1.9.0"
 kotlin-test = "1.8.20-RC"
-revanced-patcher = "16.0.1"
+revanced-patcher = "17.0.0"
 binary-compatibility-validator = "0.13.2"
 
 [libraries]
 apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-jdk18on" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }
-jadb = { module = "com.github.revanced:jadb", version.ref = "jadb" }
+jadb = { module = "app.revanced:jadb", version.ref = "jadb" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-reflect" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-test" }
 revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
