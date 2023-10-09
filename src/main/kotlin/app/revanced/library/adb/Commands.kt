@@ -21,7 +21,7 @@ internal fun JadbDevice.run(command: String, su: Boolean = true): ShellProcess {
 }
 
 internal fun JadbDevice.hasSu() =
-    this.startCommand("su -h", false).waitFor() == 0
+    this.startCommand("which su", false).waitFor() == 0
 
 internal fun JadbDevice.push(file: File, targetFilePath: String) =
     push(file, RemoteFile(targetFilePath))

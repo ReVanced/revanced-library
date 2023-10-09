@@ -84,14 +84,14 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
 
             device.push(apk.file, TMP_PATH)
 
-            device.run("$CREATE_DIR $INSTALLATION_PATH")
-            device.run(INSTALL_PATCHED_APK, packageName)
+            device.run("$CREATE_DIR $INSTALLATION_PATH").waitFor()
+            device.run(INSTALL_PATCHED_APK, packageName).waitFor()
 
             device.createFile(TMP_PATH, MOUNT_SCRIPT.applyReplacement(packageName))
 
-            device.run(INSTALL_MOUNT, packageName)
-            device.run(UMOUNT, packageName) // Sanity check.
-            device.run(MOUNT_PATH, packageName)
+            device.run(INSTALL_MOUNT, packageName).waitFor()
+            device.run(UMOUNT, packageName).waitFor() // Sanity check.
+            device.run(MOUNT_PATH, packageName).waitFor()
             device.run(RESTART, packageName)
             device.run(DELETE, TMP_PATH)
 
