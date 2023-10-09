@@ -1,3 +1,7 @@
+## [1.1.3-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.1.3-dev.1...v1.1.3-dev.2) (2023-10-09)
+
+## [1.1.3-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.1.2...v1.1.3-dev.1) (2023-10-09)
+
 ## [1.1.2](https://github.com/ReVanced/revanced-library/compare/v1.1.1...v1.1.2) (2023-10-05)
 
 ## [1.1.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.1.1...v1.1.2-dev.1) (2023-10-05)
