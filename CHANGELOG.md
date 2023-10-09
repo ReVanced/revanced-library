@@ -1,3 +1,10 @@
+## [1.1.4-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.1.3...v1.1.4-dev.1) (2023-10-09)
+
+
+### Bug Fixes
+
+* Execute ADB commands sequentially to fix mounting issues ([#12](https://github.com/ReVanced/revanced-library/issues/12)) ([fda3eca](https://github.com/ReVanced/revanced-library/commit/fda3eca74f30b968d8ee816d63a3dcf493e026de))
+
 ## [1.1.3](https://github.com/ReVanced/revanced-library/compare/v1.1.2...v1.1.3) (2023-10-09)
 
 ## [1.1.3-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.1.3-dev.1...v1.1.3-dev.2) (2023-10-09)
