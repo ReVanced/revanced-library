@@ -15,7 +15,7 @@ jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-
 jadb = { module = "app.revanced:jadb", version.ref = "jadb" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-reflect" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-test" }
-revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
+revanced-patcher = { module = "app.revanced.revanced-patcher:revanced-patcher", version.ref = "revanced-patcher" }
 
 [plugins]
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
