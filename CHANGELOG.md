@@ -1,3 +1,10 @@
+## [1.1.4-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.1.4-dev.1...v1.1.4-dev.2) (2023-10-10)
+
+
+### Bug Fixes
+
+* Ask for root permissions before trying to use them ([aea1d69](https://github.com/ReVanced/revanced-library/commit/aea1d6915766d9757075ee459955aa335d906bab))
+
 ## [1.1.4-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.1.3...v1.1.4-dev.1) (2023-10-09)
 
 
