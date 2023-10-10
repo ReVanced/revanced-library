@@ -19,7 +19,7 @@ internal fun JadbDevice.run(command: String, su: Boolean = true) =
     this.buildCommand(command, su).start()
 
 internal fun JadbDevice.hasSu() =
-    this.startCommand("which su", false).waitFor() == 0
+    this.run("whoami", true).waitFor() == 0
 
 internal fun JadbDevice.push(file: File, targetFilePath: String) =
     push(file, RemoteFile(targetFilePath))
