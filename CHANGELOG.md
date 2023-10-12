@@ -1,3 +1,11 @@
+## [1.1.4](https://github.com/ReVanced/revanced-library/compare/v1.1.3...v1.1.4) (2023-10-12)
+
+
+### Bug Fixes
+
+* Ask for root permissions before trying to use them ([aea1d69](https://github.com/ReVanced/revanced-library/commit/aea1d6915766d9757075ee459955aa335d906bab))
+* Execute ADB commands sequentially to fix mounting issues ([#12](https://github.com/ReVanced/revanced-library/issues/12)) ([fda3eca](https://github.com/ReVanced/revanced-library/commit/fda3eca74f30b968d8ee816d63a3dcf493e026de))
+
 ## [1.1.4-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.1.4-dev.1...v1.1.4-dev.2) (2023-10-10)
 
 
