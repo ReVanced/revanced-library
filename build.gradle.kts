@@ -1,10 +1,17 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
     alias(libs.plugins.binary.compatibility.validator)
     `maven-publish`
 }
 
 group = "app.revanced"
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = uri("https://jitpack.io") }
+    google()
+}
 
 dependencies {
     implementation(libs.revanced.patcher)
