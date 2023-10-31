@@ -34,7 +34,7 @@ object Options {
                     val optionValue = try {
                         option.value
                     } catch (e: PatchOptionException) {
-                        logger.severe(e.toString())
+                        logger.warning("Using default option value for the ${patch.name} patch: ${e.message}")
                         option.default
                     }
 
@@ -80,7 +80,7 @@ object Options {
                         try {
                             patch.options[option] = value
                         } catch (e: PatchOptionException) {
-                            logger.severe(e.toString())
+                            logger.warning("Could not set option value for the ${patch.name} patch: ${e.message}")
                         }
                     }
                 }
