@@ -3,8 +3,9 @@ package app.revanced.library
 import app.revanced.library.Options.setOptions
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
-import app.revanced.patcher.patch.options.types.BooleanPatchOption.Companion.booleanPatchOption
-import app.revanced.patcher.patch.options.types.StringPatchOption.Companion.stringPatchOption
+import app.revanced.patcher.patch.annotation.Patch
+import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.booleanPatchOption
+import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.stringPatchOption
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
@@ -35,9 +36,10 @@ internal object PatchOptionsTest {
     private const val CHANGED_JSON =
         "[{\"patchName\":\"PatchOptionsTestPatch\",\"options\":[{\"key\":\"key1\",\"value\":\"test\"},{\"key\":\"key2\",\"value\":false}]}]"
 
-    object PatchOptionsTestPatch : BytecodePatch(name = "PatchOptionsTestPatch") {
-        var option1 by stringPatchOption("key1", null, "title1", "description1")
-        var option2 by booleanPatchOption("key2", true, "title2", "description2")
+    @Patch("PatchOptionsTestPatch")
+    object PatchOptionsTestPatch : BytecodePatch() {
+        var option1 by stringPatchOption("key1", null, null, "title1", "description1")
+        var option2 by booleanPatchOption("key2", true, null, "title2", "description2")
 
         override fun execute(context: BytecodeContext) {
             // Do nothing
