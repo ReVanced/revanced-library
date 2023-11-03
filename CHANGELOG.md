@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/ReVanced/revanced-library/compare/v1.1.5...v1.2.0) (2023-11-03)
+
+
+### Bug Fixes
+
+* Catch exceptions when serializing invalid patch options ([cd73bd3](https://github.com/ReVanced/revanced-library/commit/cd73bd39ce7be5963a3c84ec43409b87c327579b))
+
+
+### Features
+
+* Log warnings when compiling resources ([1dc8e2e](https://github.com/ReVanced/revanced-library/commit/1dc8e2e2eb76bcade9167be0c4b4a628ff114f63))
+* Use better log messages when handling exceptions ([5896968](https://github.com/ReVanced/revanced-library/commit/58969683582e70f36d6ed169b41c37928a2cf602))
+
 # [1.2.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.2.0-dev.1...v1.2.0-dev.2) (2023-11-03)
 
 
