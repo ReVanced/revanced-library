@@ -7,6 +7,14 @@ import java.util.logging.SimpleFormatter
 
 @Suppress("MemberVisibilityCanBePrivate")
 object Logger {
+    /**
+     * Rules for allowed loggers.
+     */
+    private val allowedLoggersRules = arrayOf<String.() -> Boolean>(
+        { startsWith("app.revanced") }, //  ReVanced loggers.
+        { this == "" } // Logs warnings when compiling resources (Logger in class brut.util.OS).
+    )
+
     private val rootLogger = java.util.logging.Logger.getLogger("")
 
     /**
@@ -64,7 +72,9 @@ object Logger {
         removeAllHandlers()
 
         val publishHandler = handler@{ log: String, level: Level, loggerName: String? ->
-            if (loggerName?.startsWith("app.revanced") != true) return@handler
+            loggerName?.let { name ->
+                if (allowedLoggersRules.none { it(name) }) return@handler
+            }
 
             log.toByteArray().let {
                 if (level.intValue() > Level.WARNING.intValue())
