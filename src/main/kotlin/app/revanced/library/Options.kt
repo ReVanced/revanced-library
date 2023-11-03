@@ -30,7 +30,16 @@ object Options {
         .map { patch ->
             Patch(
                 patch.name!!,
-                patch.options.values.map { option -> Option(option.key, option.value) }
+                patch.options.values.map { option ->
+                    val optionValue = try {
+                        option.value
+                    } catch (e: PatchOptionException) {
+                        logger.warning("Using default option value for the ${patch.name} patch: ${e.message}")
+                        option.default
+                    }
+
+                    Option(option.key, optionValue)
+                }
             )
         }
         // See https://github.com/revanced/revanced-patches/pull/2434/commits/60e550550b7641705e81aa72acfc4faaebb225e7.
@@ -71,7 +80,7 @@ object Options {
                         try {
                             patch.options[option] = value
                         } catch (e: PatchOptionException) {
-                            logger.severe(e.toString())
+                            logger.warning("Could not set option value for the ${patch.name} patch: ${e.message}")
                         }
                     }
                 }
