@@ -1,3 +1,10 @@
+# [1.2.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.2.0-dev.1...v1.2.0-dev.2) (2023-11-03)
+
+
+### Features
+
+* Log warnings when compiling resources ([1dc8e2e](https://github.com/ReVanced/revanced-library/commit/1dc8e2e2eb76bcade9167be0c4b4a628ff114f63))
+
 # [1.2.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.1.5...v1.2.0-dev.1) (2023-10-31)
 
 
