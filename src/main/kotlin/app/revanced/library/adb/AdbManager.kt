@@ -119,6 +119,8 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
         private val packageManager = PackageManager(device)
 
         override fun install(apk: Apk) {
+            logger.info("Installing ${apk.file.name}")
+
             PackageManager(device).install(apk.file)
 
             super.install(apk)
