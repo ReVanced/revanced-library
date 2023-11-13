@@ -1,3 +1,10 @@
+## [1.2.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.2.0...v1.2.1-dev.1) (2023-11-13)
+
+
+### Bug Fixes
+
+* Add missing log when calling `UserAdbManager#install` ([90b612b](https://github.com/ReVanced/revanced-library/commit/90b612bee8591c01b8befabde4147c7de7a2a09f))
+
 # [1.2.0](https://github.com/ReVanced/revanced-library/compare/v1.1.5...v1.2.0) (2023-11-03)
 
 
