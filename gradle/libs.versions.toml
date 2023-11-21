@@ -1,10 +1,10 @@
 [versions]
-apksig = "8.1.2"
+apksig = "8.1.4"
 bcpkix-jdk18on = "1.76"
 jackson-module-kotlin = "2.14.3"
 jadb = "1.2.1"
 kotlin-reflect = "1.9.10"
-kotlin-test = "1.8.20-RC"
+kotlin-test = "1.9.10"
 revanced-patcher = "19.0.0"
 binary-compatibility-validator = "0.13.2"
 
