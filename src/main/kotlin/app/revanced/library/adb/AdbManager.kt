@@ -103,7 +103,7 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
 
             device.run(UMOUNT, packageName)
             device.run(DELETE.applyReplacement(PATCHED_APK_PATH), packageName)
-            device.run(DELETE, MOUNT_PATH)
+            device.run(DELETE, MOUNT_PATH.applyReplacement(packageName))
             device.run(DELETE, TMP_PATH)
 
             super.uninstall(packageName)
