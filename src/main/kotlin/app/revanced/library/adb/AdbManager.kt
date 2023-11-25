@@ -3,6 +3,7 @@ package app.revanced.library.adb
 import app.revanced.library.adb.AdbManager.Apk
 import app.revanced.library.adb.Constants.CREATE_DIR
 import app.revanced.library.adb.Constants.DELETE
+import app.revanced.library.adb.Constants.GET_INSTALLED_PATH
 import app.revanced.library.adb.Constants.INSTALLATION_PATH
 import app.revanced.library.adb.Constants.INSTALL_MOUNT
 import app.revanced.library.adb.Constants.INSTALL_PATCHED_APK
@@ -10,7 +11,6 @@ import app.revanced.library.adb.Constants.MOUNT_PATH
 import app.revanced.library.adb.Constants.MOUNT_SCRIPT
 import app.revanced.library.adb.Constants.PATCHED_APK_PATH
 import app.revanced.library.adb.Constants.PLACEHOLDER
-import app.revanced.library.adb.Constants.RESOLVE_ACTIVITY
 import app.revanced.library.adb.Constants.RESTART
 import app.revanced.library.adb.Constants.TMP_PATH
 import app.revanced.library.adb.Constants.UMOUNT
@@ -77,8 +77,8 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
 
             val packageName = apk.packageName ?: throw PackageNameRequiredException()
 
-            device.run(RESOLVE_ACTIVITY, packageName).inputStream.bufferedReader().readLine().let { line ->
-                if (line != "No activity found") return@let
+            device.run(GET_INSTALLED_PATH, packageName).inputStream.bufferedReader().readLine().let { line ->
+                if (line != null) return@let
                 throw throw FailedToFindInstalledPackageException(packageName)
             }
 
@@ -105,6 +105,7 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
             device.run(DELETE.applyReplacement(PATCHED_APK_PATH), packageName)
             device.run(DELETE, MOUNT_PATH.applyReplacement(packageName))
             device.run(DELETE, TMP_PATH)
+            device.run(RESTART, packageName)
 
             super.uninstall(packageName)
         }
