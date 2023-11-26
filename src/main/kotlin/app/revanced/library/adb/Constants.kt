@@ -29,7 +29,9 @@ internal object Constants {
             #!/system/bin/sh
             MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
             MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-            while [ "${'$'}(getprop sys.boot_completed | tr -d '\r')" != "1" ]; do sleep 1; done
+
+            until [ "${'$'}(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
+            until [ -d "/sdcard/Android" ]; do sleep 1; done
             
             base_path="$PATCHED_APK_PATH"
             stock_path=${'$'}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
