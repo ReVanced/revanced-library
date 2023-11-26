@@ -21,21 +21,21 @@ internal object Constants {
             "chcon u:object_r:apk_data_file:s0  ${'$'}base_path"
 
     internal const val UMOUNT =
-        "grep $PLACEHOLDER /proc/mounts | while read -r line; do echo ${'$'}line | cut -d \" \" -f 2 | sed 's/apk.*/apk/' | xargs -r umount -l; done"
+        "grep $PLACEHOLDER /proc/mounts | while read -r line; do echo ${'$'}line | cut -d ' ' -f 2 | sed 's/apk.*/apk/' | xargs -r umount -l; done"
 
     internal const val INSTALL_MOUNT = "mv $TMP_PATH $MOUNT_PATH && chmod +x $MOUNT_PATH"
 
     internal val MOUNT_SCRIPT =
         """
         #!/system/bin/sh
-        MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
+        MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
         MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
 
-        until [ "${'$'}(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
+        until [ "$( getprop sys.boot_completed )" = 1 ]; do sleep 3; done
         until [ -d "/sdcard/Android" ]; do sleep 1; done
         
         base_path="$PATCHED_APK_PATH"
-        stock_path=${'$'}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+        stock_path=$( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
 
         chcon u:object_r:apk_data_file:s0  ${'$'}base_path
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
