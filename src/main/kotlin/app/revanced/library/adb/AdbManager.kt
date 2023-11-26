@@ -29,15 +29,16 @@ import java.util.logging.Logger
 sealed class AdbManager private constructor(deviceSerial: String?) {
     protected val logger: Logger = Logger.getLogger(AdbManager::class.java.name)
 
-    protected val device = with(JadbConnection().devices) {
-        if (isEmpty()) throw DeviceNotFoundException()
+    protected val device =
+        with(JadbConnection().devices) {
+            if (isEmpty()) throw DeviceNotFoundException()
 
-        deviceSerial?.let {
-            firstOrNull { it.serial == deviceSerial } ?: throw DeviceNotFoundException(deviceSerial)
-        } ?: first().also {
-            logger.warning("No device serial supplied. Using device with serial ${it.serial}")
-        }
-    }!!
+            deviceSerial?.let {
+                firstOrNull { it.serial == deviceSerial } ?: throw DeviceNotFoundException(deviceSerial)
+            } ?: first().also {
+                logger.warning("No device serial supplied. Using device with serial ${it.serial}")
+            }
+        }!!
 
     init {
         logger.fine("Connected to ${device.serial}")
@@ -70,8 +71,10 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
          * @return The [AdbManager].
          * @throws DeviceNotFoundException If the device can not be found.
          */
-        fun getAdbManager(deviceSerial: String? = null, root: Boolean = false): AdbManager =
-            if (root) RootAdbManager(deviceSerial) else UserAdbManager(deviceSerial)
+        fun getAdbManager(
+            deviceSerial: String? = null,
+            root: Boolean = false,
+        ): AdbManager = if (root) RootAdbManager(deviceSerial) else UserAdbManager(deviceSerial)
     }
 
     /**
@@ -123,7 +126,11 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
         }
 
         companion object Utils {
-            private fun JadbDevice.run(command: String, with: String) = run(command.applyReplacement(with))
+            private fun JadbDevice.run(
+                command: String,
+                with: String,
+            ) = run(command.applyReplacement(with))
+
             private fun String.applyReplacement(with: String) = replace(PLACEHOLDER, with)
         }
     }
@@ -162,9 +169,11 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
     class Apk(val file: File, val packageName: String? = null)
 
     class DeviceNotFoundException internal constructor(deviceSerial: String? = null) :
-        Exception(deviceSerial?.let {
-            "The device with the ADB device serial \"$deviceSerial\" can not be found"
-        } ?: "No ADB device found")
+        Exception(
+            deviceSerial?.let {
+                "The device with the ADB device serial \"$deviceSerial\" can not be found"
+            } ?: "No ADB device found",
+        )
 
     class FailedToFindInstalledPackageException internal constructor(packageName: String) :
         Exception("Failed to find installed package \"$packageName\" because no activity was found")

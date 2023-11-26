@@ -22,7 +22,7 @@ class ZipEntry private constructor(
     internal val fileName: String,
     internal val extraField: ByteArray,
     internal val fileComment: String,
-    internal var localExtraField: ByteArray = ByteArray(0), //separate for alignment
+    internal var localExtraField: ByteArray = ByteArray(0), // separate for alignment
 ) {
     internal val LFHSize: Int
         get() = LFH_HEADER_SIZE + fileName.toByteArray(Charsets.UTF_8).size + localExtraField.size
@@ -31,12 +31,12 @@ class ZipEntry private constructor(
         get() = localHeaderOffset + LFHSize.toUInt()
 
     constructor(fileName: String) : this(
-        0x1403u, //made by unix, version 20
+        0x1403u, // made by unix, version 20
         0u,
         0u,
         0u,
-        0x0821u, //seems to be static time google uses, no idea
-        0x0221u, //same as above
+        0x0821u, // seems to be static time google uses, no idea
+        0x0221u, // same as above
         0u,
         0u,
         0u,
@@ -46,21 +46,22 @@ class ZipEntry private constructor(
         0u,
         fileName,
         ByteArray(0),
-        ""
+        "",
     )
 
     companion object {
         internal const val CDE_HEADER_SIZE = 46
         internal const val CDE_SIGNATURE = 0x02014b50u
 
-        internal  const val LFH_HEADER_SIZE = 30
+        internal const val LFH_HEADER_SIZE = 30
         internal const val LFH_SIGNATURE = 0x04034b50u
 
         internal fun fromCDE(input: DataInput): ZipEntry {
             val signature = input.readUIntLE()
 
-            if (signature != CDE_SIGNATURE)
+            if (signature != CDE_SIGNATURE) {
                 throw IllegalArgumentException("Input doesn't start with central directory entry signature")
+            }
 
             val version = input.readUShortLE()
             val versionNeeded = input.readUShortLE()
@@ -97,8 +98,11 @@ class ZipEntry private constructor(
                 fileComment = fileCommentBytes.toString(Charsets.UTF_8)
             }
 
-            flags = (flags and 0b1000u.inv()
-                .toUShort()) //disable data descriptor flag as they are not used
+            flags = (
+                flags and
+                    0b1000u.inv()
+                        .toUShort()
+            ) // disable data descriptor flag as they are not used
 
             return ZipEntry(
                 version,
@@ -121,7 +125,7 @@ class ZipEntry private constructor(
         }
     }
 
-    internal  fun readLocalExtra(buffer: ByteBuffer) {
+    internal fun readLocalExtra(buffer: ByteBuffer) {
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         localExtraField = ByteArray(buffer.getUShort().toInt())
     }
@@ -129,8 +133,9 @@ class ZipEntry private constructor(
     internal fun toLFH(): ByteBuffer {
         val nameBytes = fileName.toByteArray(Charsets.UTF_8)
 
-        val buffer = ByteBuffer.allocate(LFH_HEADER_SIZE + nameBytes.size + localExtraField.size)
-            .also { it.order(ByteOrder.LITTLE_ENDIAN) }
+        val buffer =
+            ByteBuffer.allocate(LFH_HEADER_SIZE + nameBytes.size + localExtraField.size)
+                .also { it.order(ByteOrder.LITTLE_ENDIAN) }
 
         buffer.putUInt(LFH_SIGNATURE)
         buffer.putUShort(versionNeeded)

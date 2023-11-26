@@ -26,8 +26,9 @@ object ApkSigner {
     private val logger = Logger.getLogger(app.revanced.library.ApkSigner::class.java.name)
 
     init {
-        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(BouncyCastleProvider())
+        }
     }
 
     /**
@@ -39,14 +40,15 @@ object ApkSigner {
      */
     fun newPrivateKeyCertificatePair(
         commonName: String = "ReVanced",
-        validUntil: Date = Date(System.currentTimeMillis() + 356.days.inWholeMilliseconds * 24)
+        validUntil: Date = Date(System.currentTimeMillis() + 356.days.inWholeMilliseconds * 24),
     ): PrivateKeyCertificatePair {
         logger.fine("Creating certificate for $commonName")
 
         // Generate a new key pair.
-        val keyPair = KeyPairGenerator.getInstance("RSA").apply {
-            initialize(4096)
-        }.generateKeyPair()
+        val keyPair =
+            KeyPairGenerator.getInstance("RSA").apply {
+                initialize(4096)
+            }.generateKeyPair()
 
         var serialNumber: BigInteger
         do serialNumber = BigInteger.valueOf(SecureRandom().nextLong())
@@ -55,21 +57,21 @@ object ApkSigner {
         val name = X500Name("CN=$commonName")
 
         // Create a new certificate.
-        val certificate = JcaX509CertificateConverter().getCertificate(
-            X509v3CertificateBuilder(
-                name,
-                serialNumber,
-                Date(System.currentTimeMillis()),
-                validUntil,
-                Locale.ENGLISH,
-                name,
-                SubjectPublicKeyInfo.getInstance(keyPair.public.encoded)
-            ).build(JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private))
-        )
+        val certificate =
+            JcaX509CertificateConverter().getCertificate(
+                X509v3CertificateBuilder(
+                    name,
+                    serialNumber,
+                    Date(System.currentTimeMillis()),
+                    validUntil,
+                    Locale.ENGLISH,
+                    name,
+                    SubjectPublicKeyInfo.getInstance(keyPair.public.encoded),
+                ).build(JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private)),
+            )
 
         return PrivateKeyCertificatePair(keyPair.private, certificate)
     }
-
 
     /**
      * Read a [PrivateKeyCertificatePair] from a keystore entry.
@@ -87,16 +89,18 @@ object ApkSigner {
     ): PrivateKeyCertificatePair {
         logger.fine("Reading key and certificate pair from keystore entry $keyStoreEntryAlias")
 
-        if (!keyStore.containsAlias(keyStoreEntryAlias))
+        if (!keyStore.containsAlias(keyStoreEntryAlias)) {
             throw IllegalArgumentException("Keystore does not contain alias $keyStoreEntryAlias")
+        }
 
         // Read the private key and certificate from the keystore.
 
-        val privateKey = try {
-            keyStore.getKey(keyStoreEntryAlias, keyStoreEntryPassword.toCharArray()) as PrivateKey
-        } catch (exception: UnrecoverableKeyException) {
-            throw IllegalArgumentException("Invalid password for keystore entry $keyStoreEntryAlias")
-        }
+        val privateKey =
+            try {
+                keyStore.getKey(keyStoreEntryAlias, keyStoreEntryPassword.toCharArray()) as PrivateKey
+            } catch (exception: UnrecoverableKeyException) {
+                throw IllegalArgumentException("Invalid password for keystore entry $keyStoreEntryAlias")
+            }
 
         val certificate = keyStore.getCertificate(keyStoreEntryAlias) as X509Certificate
 
@@ -110,9 +114,7 @@ object ApkSigner {
      * @return The created keystore.
      * @see KeyStoreEntry
      */
-    fun newKeyStore(
-        entries: List<KeyStoreEntry>
-    ): KeyStore {
+    fun newKeyStore(entries: List<KeyStoreEntry>): KeyStore {
         logger.fine("Creating keystore")
 
         return KeyStore.getInstance("BKS", BouncyCastleProvider.PROVIDER_NAME).apply {
@@ -124,7 +126,7 @@ object ApkSigner {
                     entry.alias,
                     entry.privateKeyCertificatePair.privateKey,
                     entry.password.toCharArray(),
-                    arrayOf(entry.privateKeyCertificatePair.certificate)
+                    arrayOf(entry.privateKeyCertificatePair.certificate),
                 )
             }
         }
@@ -140,10 +142,10 @@ object ApkSigner {
     fun newKeyStore(
         keyStoreOutputStream: OutputStream,
         keyStorePassword: String,
-        entries: List<KeyStoreEntry>
+        entries: List<KeyStoreEntry>,
     ) = newKeyStore(entries).store(
         keyStoreOutputStream,
-        keyStorePassword.toCharArray()
+        keyStorePassword.toCharArray(),
     ) // Save the keystore.
 
     /**
@@ -156,7 +158,7 @@ object ApkSigner {
      */
     fun readKeyStore(
         keyStoreInputStream: InputStream,
-        keyStorePassword: String?
+        keyStorePassword: String?,
     ): KeyStore {
         logger.fine("Reading keystore")
 
@@ -164,10 +166,11 @@ object ApkSigner {
             try {
                 load(keyStoreInputStream, keyStorePassword?.toCharArray())
             } catch (exception: IOException) {
-                if (exception.cause is UnrecoverableKeyException)
+                if (exception.cause is UnrecoverableKeyException) {
                     throw IllegalArgumentException("Invalid keystore password")
-                else
+                } else {
                     throw exception
+                }
             }
         }
     }
@@ -183,20 +186,21 @@ object ApkSigner {
     fun newApkSignerBuilder(
         privateKeyCertificatePair: PrivateKeyCertificatePair,
         signer: String,
-        createdBy: String
+        createdBy: String,
     ): ApkSigner.Builder {
         logger.fine(
             "Creating new ApkSigner " +
-                    "with $signer as signer and " +
-                    "$createdBy as Created-By attribute in the APK's manifest"
+                "with $signer as signer and " +
+                "$createdBy as Created-By attribute in the APK's manifest",
         )
 
         // Create the signer config.
-        val signerConfig = ApkSigner.SignerConfig.Builder(
-            signer,
-            privateKeyCertificatePair.privateKey,
-            listOf(privateKeyCertificatePair.certificate)
-        ).build()
+        val signerConfig =
+            ApkSigner.SignerConfig.Builder(
+                signer,
+                privateKeyCertificatePair.privateKey,
+                listOf(privateKeyCertificatePair.certificate),
+            ).build()
 
         // Create the signer.
         return ApkSigner.Builder(listOf(signerConfig)).apply {
@@ -227,10 +231,13 @@ object ApkSigner {
     ) = newApkSignerBuilder(
         readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword),
         signer,
-        createdBy
+        createdBy,
     )
 
-    fun ApkSigner.Builder.signApk(input: File, output: File) {
+    fun ApkSigner.Builder.signApk(
+        input: File,
+        output: File,
+    ) {
         logger.info("Signing ${input.name}")
 
         setInputApk(input)
@@ -250,7 +257,7 @@ object ApkSigner {
     class KeyStoreEntry(
         val alias: String,
         val password: String,
-        val privateKeyCertificatePair: PrivateKeyCertificatePair = newPrivateKeyCertificatePair()
+        val privateKeyCertificatePair: PrivateKeyCertificatePair = newPrivateKeyCertificatePair(),
     )
 
     /**

@@ -13,7 +13,8 @@ internal object Constants {
     internal const val RESTART = "am start -S $PLACEHOLDER"
     internal const val GET_INSTALLED_PATH = "pm path $PLACEHOLDER"
 
-    internal const val INSTALL_PATCHED_APK = "base_path=\"$PATCHED_APK_PATH\" && " +
+    internal const val INSTALL_PATCHED_APK =
+        "base_path=\"$PATCHED_APK_PATH\" && " +
             "mv $TMP_PATH ${'$'}base_path && " +
             "chmod 644 ${'$'}base_path && " +
             "chown system:system ${'$'}base_path && " +
@@ -26,17 +27,17 @@ internal object Constants {
 
     internal val MOUNT_SCRIPT =
         """
-            #!/system/bin/sh
-            MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
-            MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
+        #!/system/bin/sh
+        MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
+        MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
 
-            until [ "${'$'}(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
-            until [ -d "/sdcard/Android" ]; do sleep 1; done
-            
-            base_path="$PATCHED_APK_PATH"
-            stock_path=${'$'}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+        until [ "${'$'}(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
+        until [ -d "/sdcard/Android" ]; do sleep 1; done
+        
+        base_path="$PATCHED_APK_PATH"
+        stock_path=${'$'}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
 
-            chcon u:object_r:apk_data_file:s0  ${'$'}base_path
-            mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
+        chcon u:object_r:apk_data_file:s0  ${'$'}base_path
+        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
         """.trimIndent()
 }

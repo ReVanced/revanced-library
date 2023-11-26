@@ -14,10 +14,11 @@ class ZipFile(file: File) : Closeable {
     private var entries: MutableList<ZipEntry> = mutableListOf()
 
     // Open file for writing if it doesn't exist (because the intention is to write) or is writable.
-    private val filePointer: RandomAccessFile = RandomAccessFile(
-        file,
-        if (!file.exists() || file.canWrite()) "rw" else "r"
-    )
+    private val filePointer: RandomAccessFile =
+        RandomAccessFile(
+            file,
+            if (!file.exists() || file.canWrite()) "rw" else "r",
+        )
 
     private var centralDirectoryNeedsRewrite = false
 
@@ -28,8 +29,9 @@ class ZipFile(file: File) : Closeable {
         if (file.length() > 0) {
             val endRecord = findEndRecord()
 
-            if (endRecord.diskNumber > 0u || endRecord.totalEntries != endRecord.diskEntries)
+            if (endRecord.diskNumber > 0u || endRecord.totalEntries != endRecord.diskEntries) {
                 throw IllegalArgumentException("Multi-file archives are not supported")
+            }
 
             entries = readEntries(endRecord).toMutableList()
         }
@@ -66,16 +68,17 @@ class ZipFile(file: File) : Closeable {
             for (i in 1..numberOfEntries) {
                 add(
                     ZipEntry.fromCDE(filePointer).also
-                    {
-                        //for some reason the local extra field can be different from the central one
-                        it.readLocalExtra(
-                            filePointer.channel.map(
-                                FileChannel.MapMode.READ_ONLY,
-                                it.localHeaderOffset.toLong() + 28,
-                                2
+                        {
+                            // for some reason the local extra field can be different from the central one
+                            it.readLocalExtra(
+                                filePointer.channel.map(
+                                    FileChannel.MapMode.READ_ONLY,
+                                    it.localHeaderOffset.toLong() + 28,
+                                    2,
+                                ),
                             )
-                        )
-                    })
+                        },
+                )
             }
         }
     }
@@ -89,20 +92,24 @@ class ZipFile(file: File) : Closeable {
 
         val entriesCount = entries.size.toUShort()
 
-        val endRecord = ZipEndRecord(
-            0u,
-            0u,
-            entriesCount,
-            entriesCount,
-            filePointer.channel.position().toUInt() - centralDirectoryStartOffset,
-            centralDirectoryStartOffset,
-            ""
-        )
+        val endRecord =
+            ZipEndRecord(
+                0u,
+                0u,
+                entriesCount,
+                entriesCount,
+                filePointer.channel.position().toUInt() - centralDirectoryStartOffset,
+                centralDirectoryStartOffset,
+                "",
+            )
 
         filePointer.channel.write(endRecord.toECD())
     }
 
-    private fun addEntry(entry: ZipEntry, data: ByteBuffer) {
+    private fun addEntry(
+        entry: ZipEntry,
+        data: ByteBuffer,
+    ) {
         centralDirectoryNeedsRewrite = true
 
         entry.localHeaderOffset = filePointer.channel.position().toUInt()
@@ -113,7 +120,10 @@ class ZipFile(file: File) : Closeable {
         entries.add(entry)
     }
 
-    fun addEntryCompressData(entry: ZipEntry, data: ByteArray) {
+    fun addEntryCompressData(
+        entry: ZipEntry,
+        data: ByteArray,
+    ) {
         val compressor = Deflater(compressionLevel, true)
         compressor.setInput(data)
         compressor.finish()
@@ -138,7 +148,11 @@ class ZipFile(file: File) : Closeable {
         addEntry(entry, compressedBuffer)
     }
 
-    private fun addEntryCopyData(entry: ZipEntry, data: ByteBuffer, alignment: Int? = null) {
+    private fun addEntryCopyData(
+        entry: ZipEntry,
+        data: ByteBuffer,
+        alignment: Int? = null,
+    ) {
         alignment?.let {
             // Calculate where data would end up.
             val dataOffset = filePointer.filePointer + entry.LFHSize
@@ -160,7 +174,7 @@ class ZipFile(file: File) : Closeable {
         return filePointer.channel.map(
             FileChannel.MapMode.READ_ONLY,
             entry.dataOffset.toLong(),
-            entry.compressedSize.toLong()
+            entry.compressedSize.toLong(),
         )
     }
 
@@ -170,7 +184,10 @@ class ZipFile(file: File) : Closeable {
      * @param file The file to copy entries from.
      * @param entryAlignment A function that returns the alignment for a given entry.
      */
-    fun copyEntriesFromFileAligned(file: ZipFile, entryAlignment: (entry: ZipEntry) -> Int?) {
+    fun copyEntriesFromFileAligned(
+        file: ZipFile,
+        entryAlignment: (entry: ZipEntry) -> Int?,
+    ) {
         for (entry in file.entries) {
             if (entries.any { it.fileName == entry.fileName }) continue // Skip duplicates
 
@@ -189,9 +206,13 @@ class ZipFile(file: File) : Closeable {
         private const val LIBRARY_ALIGNMENT = 4096
 
         val apkZipEntryAlignment = { entry: ZipEntry ->
-            if (entry.compression.toUInt() != 0u) null
-            else if (entry.fileName.endsWith(".so")) LIBRARY_ALIGNMENT
-            else DEFAULT_ALIGNMENT
+            if (entry.compression.toUInt() != 0u) {
+                null
+            } else if (entry.fileName.endsWith(".so")) {
+                LIBRARY_ALIGNMENT
+            } else {
+                DEFAULT_ALIGNMENT
+            }
         }
     }
 }

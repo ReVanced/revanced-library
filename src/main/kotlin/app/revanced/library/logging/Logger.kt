@@ -10,10 +10,11 @@ object Logger {
     /**
      * Rules for allowed loggers.
      */
-    private val allowedLoggersRules = arrayOf<String.() -> Boolean>(
-        { startsWith("app.revanced") }, //  ReVanced loggers.
-        { this == "" } // Logs warnings when compiling resources (Logger in class brut.util.OS).
-    )
+    private val allowedLoggersRules =
+        arrayOf<String.() -> Boolean>(
+            { startsWith("app.revanced") }, //  ReVanced loggers.
+            { this == "" }, // Logs warnings when compiling resources (Logger in class brut.util.OS).
+        )
 
     private val rootLogger = java.util.logging.Logger.getLogger("")
 
@@ -48,13 +49,14 @@ object Logger {
     fun addHandler(
         publishHandler: (log: String, level: Level, loggerName: String?) -> Unit,
         flushHandler: () -> Unit,
-        closeHandler: () -> Unit
+        closeHandler: () -> Unit,
     ) = object : Handler() {
-        override fun publish(record: LogRecord) = publishHandler(
-            formatter.format(record),
-            record.level,
-            record.loggerName
-        )
+        override fun publish(record: LogRecord) =
+            publishHandler(
+                formatter.format(record),
+                record.level,
+                record.loggerName,
+            )
 
         override fun flush() = flushHandler()
 
@@ -77,10 +79,11 @@ object Logger {
             }
 
             log.toByteArray().let {
-                if (level.intValue() > Level.WARNING.intValue())
+                if (level.intValue() > Level.WARNING.intValue()) {
                     System.err.write(it)
-                else
+                } else {
                     System.out.write(it)
+                }
             }
         }
 
