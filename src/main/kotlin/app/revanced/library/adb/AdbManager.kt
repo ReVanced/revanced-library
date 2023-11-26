@@ -24,16 +24,23 @@ import java.util.logging.Logger
 /**
  * Adb manager. Used to install and uninstall [Apk] files.
  *
- * @param deviceSerial The serial of the device.
+ * @param deviceSerial The serial of the device. If null, the first connected device will be used.
  */
-sealed class AdbManager private constructor(deviceSerial: String? = null) {
+sealed class AdbManager private constructor(deviceSerial: String?) {
     protected val logger: Logger = Logger.getLogger(AdbManager::class.java.name)
 
-    protected val device = JadbConnection().devices.find { device -> device.serial == deviceSerial }
-        ?: throw DeviceNotFoundException(deviceSerial)
+    protected val device = with(JadbConnection().devices) {
+        if (isEmpty()) throw DeviceNotFoundException()
+
+        deviceSerial?.let {
+            firstOrNull { it.serial == deviceSerial } ?: throw DeviceNotFoundException(deviceSerial)
+        } ?: first().also {
+            logger.warning("No device serial supplied. Using device with serial ${it.serial}")
+        }
+    }!!
 
     init {
-        logger.fine("Established connection to $deviceSerial")
+        logger.fine("Connected to ${device.serial}")
     }
 
     /**
@@ -58,18 +65,23 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
         /**
          * Gets an [AdbManager] for the supplied device serial.
          *
-         * @param deviceSerial The device serial.
+         * @param deviceSerial The device serial. If null, the first connected device will be used.
          * @param root Whether to use root or not.
          * @return The [AdbManager].
          * @throws DeviceNotFoundException If the device can not be found.
          */
-        fun getAdbManager(deviceSerial: String, root: Boolean = false): AdbManager =
+        fun getAdbManager(deviceSerial: String? = null, root: Boolean = false): AdbManager =
             if (root) RootAdbManager(deviceSerial) else UserAdbManager(deviceSerial)
     }
 
-    class RootAdbManager internal constructor(deviceSerial: String) : AdbManager(deviceSerial) {
+    /**
+     * Adb manager for rooted devices.
+     *
+     * @param deviceSerial The device serial. If null, the first connected device will be used.
+     */
+    class RootAdbManager internal constructor(deviceSerial: String?) : AdbManager(deviceSerial) {
         init {
-            if (!device.hasSu()) throw IllegalArgumentException("Root required on $deviceSerial. Task failed")
+            if (!device.hasSu()) throw IllegalArgumentException("Root required on ${device.serial}. Task failed")
         }
 
         override fun install(apk: Apk) {
@@ -116,7 +128,12 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
         }
     }
 
-    class UserAdbManager internal constructor(deviceSerial: String) : AdbManager(deviceSerial) {
+    /**
+     * Adb manager for non-rooted devices.
+     *
+     * @param deviceSerial The device serial. If null, the first connected device will be used.
+     */
+    class UserAdbManager internal constructor(deviceSerial: String?) : AdbManager(deviceSerial) {
         private val packageManager = PackageManager(device)
 
         override fun install(apk: Apk) {
@@ -144,7 +161,7 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
      */
     class Apk(val file: File, val packageName: String? = null)
 
-    class DeviceNotFoundException internal constructor(deviceSerial: String?) :
+    class DeviceNotFoundException internal constructor(deviceSerial: String? = null) :
         Exception(deviceSerial?.let {
             "The device with the ADB device serial \"$deviceSerial\" can not be found"
         } ?: "No ADB device found")
