@@ -14,7 +14,10 @@ object PatchUtils {
      * @param packageName The name of the compatible package.
      * @return The most common version of.
      */
-    fun getMostCommonCompatibleVersion(patches: PatchSet, packageName: String) = patches
+    fun getMostCommonCompatibleVersion(
+        patches: PatchSet,
+        packageName: String,
+    ) = patches
         .mapNotNull {
             // Map all patches to their compatible packages with version constraints.
             it.compatiblePackages?.firstOrNull { compatiblePackage ->

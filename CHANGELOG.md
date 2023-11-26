@@ -1,3 +1,23 @@
+# [1.3.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.2.1-dev.1...v1.3.0-dev.1) (2023-11-26)
+
+
+### Bug Fixes
+
+* Delete mount script ([4fe0fb0](https://github.com/ReVanced/revanced-library/commit/4fe0fb0a617082b24199331671193e4fa7f485e2))
+
+
+### Features
+
+* Increase certainty of the possibility to mount ([10f8cd1](https://github.com/ReVanced/revanced-library/commit/10f8cd1470fd29cfefe53bf00a4a014f71a3f706))
+* Select first Adb device, if none supplied automatically ([1a5f868](https://github.com/ReVanced/revanced-library/commit/1a5f868ecd0d278d574c12664ee95139c2423c17))
+
+## [1.2.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.2.0...v1.2.1-dev.1) (2023-11-13)
+
+
+### Bug Fixes
+
+* Add missing log when calling `UserAdbManager#install` ([90b612b](https://github.com/ReVanced/revanced-library/commit/90b612bee8591c01b8befabde4147c7de7a2a09f))
+
 # [1.2.0](https://github.com/ReVanced/revanced-library/compare/v1.1.5...v1.2.0) (2023-11-03)
 
 

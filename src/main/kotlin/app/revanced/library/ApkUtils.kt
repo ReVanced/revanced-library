@@ -22,7 +22,11 @@ object ApkUtils {
      * @param outputFile The apk to write the new entries to.
      * @param patchedEntriesSource The result of the patcher to add the patched dex files and resources.
      */
-    fun copyAligned(apkFile: File, outputFile: File, patchedEntriesSource: PatcherResult) {
+    fun copyAligned(
+        apkFile: File,
+        outputFile: File,
+        patchedEntriesSource: PatcherResult,
+    ) {
         logger.info("Aligning ${apkFile.name}")
 
         outputFile.toPath().deleteIfExists()
@@ -30,13 +34,15 @@ object ApkUtils {
         ZipFile(outputFile).use { file ->
             patchedEntriesSource.dexFiles.forEach {
                 file.addEntryCompressData(
-                    ZipEntry(it.name), it.stream.readBytes()
+                    ZipEntry(it.name),
+                    it.stream.readBytes(),
                 )
             }
 
             patchedEntriesSource.resourceFile?.let {
                 file.copyEntriesFromFileAligned(
-                    ZipFile(it), ZipFile.apkZipEntryAlignment
+                    ZipFile(it),
+                    ZipFile.apkZipEntryAlignment,
                 )
             }
 
@@ -44,7 +50,8 @@ object ApkUtils {
 
             // TODO: Fix copying resources that are not needed anymore.
             file.copyEntriesFromFileAligned(
-                ZipFile(apkFile), ZipFile.apkZipEntryAlignment
+                ZipFile(apkFile),
+                ZipFile.apkZipEntryAlignment,
             )
         }
     }
@@ -62,26 +69,27 @@ object ApkUtils {
         signingOptions: SigningOptions,
     ) {
         // Get the keystore from the file or create a new one.
-        val keyStore = if (signingOptions.keyStore.exists()) {
-            ApkSigner.readKeyStore(signingOptions.keyStore.inputStream(), signingOptions.keyStorePassword)
-        } else {
-            val entry = ApkSigner.KeyStoreEntry(signingOptions.alias, signingOptions.password)
+        val keyStore =
+            if (signingOptions.keyStore.exists()) {
+                ApkSigner.readKeyStore(signingOptions.keyStore.inputStream(), signingOptions.keyStorePassword)
+            } else {
+                val entry = ApkSigner.KeyStoreEntry(signingOptions.alias, signingOptions.password)
 
-            // Create a new keystore with a new keypair and saves it.
-            ApkSigner.newKeyStore(listOf(entry)).also { keyStore ->
-                keyStore.store(
-                    signingOptions.keyStore.outputStream(),
-                    signingOptions.keyStorePassword?.toCharArray()
-                )
+                // Create a new keystore with a new keypair and saves it.
+                ApkSigner.newKeyStore(listOf(entry)).also { keyStore ->
+                    keyStore.store(
+                        signingOptions.keyStore.outputStream(),
+                        signingOptions.keyStorePassword?.toCharArray(),
+                    )
+                }
             }
-        }
 
         ApkSigner.newApkSignerBuilder(
             keyStore,
             signingOptions.alias,
             signingOptions.password,
             signingOptions.signer,
-            signingOptions.signer
+            signingOptions.signer,
         ).signApk(apk, output)
     }
 

@@ -3,6 +3,7 @@ package app.revanced.library.adb
 import app.revanced.library.adb.AdbManager.Apk
 import app.revanced.library.adb.Constants.CREATE_DIR
 import app.revanced.library.adb.Constants.DELETE
+import app.revanced.library.adb.Constants.GET_INSTALLED_PATH
 import app.revanced.library.adb.Constants.INSTALLATION_PATH
 import app.revanced.library.adb.Constants.INSTALL_MOUNT
 import app.revanced.library.adb.Constants.INSTALL_PATCHED_APK
@@ -10,7 +11,6 @@ import app.revanced.library.adb.Constants.MOUNT_PATH
 import app.revanced.library.adb.Constants.MOUNT_SCRIPT
 import app.revanced.library.adb.Constants.PATCHED_APK_PATH
 import app.revanced.library.adb.Constants.PLACEHOLDER
-import app.revanced.library.adb.Constants.RESOLVE_ACTIVITY
 import app.revanced.library.adb.Constants.RESTART
 import app.revanced.library.adb.Constants.TMP_PATH
 import app.revanced.library.adb.Constants.UMOUNT
@@ -24,16 +24,24 @@ import java.util.logging.Logger
 /**
  * Adb manager. Used to install and uninstall [Apk] files.
  *
- * @param deviceSerial The serial of the device.
+ * @param deviceSerial The serial of the device. If null, the first connected device will be used.
  */
-sealed class AdbManager private constructor(deviceSerial: String? = null) {
+sealed class AdbManager private constructor(deviceSerial: String?) {
     protected val logger: Logger = Logger.getLogger(AdbManager::class.java.name)
 
-    protected val device = JadbConnection().devices.find { device -> device.serial == deviceSerial }
-        ?: throw DeviceNotFoundException(deviceSerial)
+    protected val device =
+        with(JadbConnection().devices) {
+            if (isEmpty()) throw DeviceNotFoundException()
+
+            deviceSerial?.let {
+                firstOrNull { it.serial == deviceSerial } ?: throw DeviceNotFoundException(deviceSerial)
+            } ?: first().also {
+                logger.warning("No device serial supplied. Using device with serial ${it.serial}")
+            }
+        }!!
 
     init {
-        logger.fine("Established connection to $deviceSerial")
+        logger.fine("Connected to ${device.serial}")
     }
 
     /**
@@ -58,18 +66,25 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
         /**
          * Gets an [AdbManager] for the supplied device serial.
          *
-         * @param deviceSerial The device serial.
+         * @param deviceSerial The device serial. If null, the first connected device will be used.
          * @param root Whether to use root or not.
          * @return The [AdbManager].
          * @throws DeviceNotFoundException If the device can not be found.
          */
-        fun getAdbManager(deviceSerial: String, root: Boolean = false): AdbManager =
-            if (root) RootAdbManager(deviceSerial) else UserAdbManager(deviceSerial)
+        fun getAdbManager(
+            deviceSerial: String? = null,
+            root: Boolean = false,
+        ): AdbManager = if (root) RootAdbManager(deviceSerial) else UserAdbManager(deviceSerial)
     }
 
-    class RootAdbManager internal constructor(deviceSerial: String) : AdbManager(deviceSerial) {
+    /**
+     * Adb manager for rooted devices.
+     *
+     * @param deviceSerial The device serial. If null, the first connected device will be used.
+     */
+    class RootAdbManager internal constructor(deviceSerial: String?) : AdbManager(deviceSerial) {
         init {
-            if (!device.hasSu()) throw IllegalArgumentException("Root required on $deviceSerial. Task failed")
+            if (!device.hasSu()) throw IllegalArgumentException("Root required on ${device.serial}. Task failed")
         }
 
         override fun install(apk: Apk) {
@@ -77,8 +92,8 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
 
             val packageName = apk.packageName ?: throw PackageNameRequiredException()
 
-            device.run(RESOLVE_ACTIVITY, packageName).inputStream.bufferedReader().readLine().let { line ->
-                if (line != "No activity found") return@let
+            device.run(GET_INSTALLED_PATH, packageName).inputStream.bufferedReader().readLine().let { line ->
+                if (line != null) return@let
                 throw throw FailedToFindInstalledPackageException(packageName)
             }
 
@@ -103,22 +118,34 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
 
             device.run(UMOUNT, packageName)
             device.run(DELETE.applyReplacement(PATCHED_APK_PATH), packageName)
-            device.run(DELETE, MOUNT_PATH)
+            device.run(DELETE, MOUNT_PATH.applyReplacement(packageName))
             device.run(DELETE, TMP_PATH)
+            device.run(RESTART, packageName)
 
             super.uninstall(packageName)
         }
 
         companion object Utils {
-            private fun JadbDevice.run(command: String, with: String) = run(command.applyReplacement(with))
+            private fun JadbDevice.run(
+                command: String,
+                with: String,
+            ) = run(command.applyReplacement(with))
+
             private fun String.applyReplacement(with: String) = replace(PLACEHOLDER, with)
         }
     }
 
-    class UserAdbManager internal constructor(deviceSerial: String) : AdbManager(deviceSerial) {
+    /**
+     * Adb manager for non-rooted devices.
+     *
+     * @param deviceSerial The device serial. If null, the first connected device will be used.
+     */
+    class UserAdbManager internal constructor(deviceSerial: String?) : AdbManager(deviceSerial) {
         private val packageManager = PackageManager(device)
 
         override fun install(apk: Apk) {
+            logger.info("Installing ${apk.file.name}")
+
             PackageManager(device).install(apk.file)
 
             super.install(apk)
@@ -141,10 +168,12 @@ sealed class AdbManager private constructor(deviceSerial: String? = null) {
      */
     class Apk(val file: File, val packageName: String? = null)
 
-    class DeviceNotFoundException internal constructor(deviceSerial: String?) :
-        Exception(deviceSerial?.let {
-            "The device with the ADB device serial \"$deviceSerial\" can not be found"
-        } ?: "No ADB device found")
+    class DeviceNotFoundException internal constructor(deviceSerial: String? = null) :
+        Exception(
+            deviceSerial?.let {
+                "The device with the ADB device serial \"$deviceSerial\" can not be found"
+            } ?: "No ADB device found",
+        )
 
     class FailedToFindInstalledPackageException internal constructor(packageName: String) :
         Exception("Failed to find installed package \"$packageName\" because no activity was found")

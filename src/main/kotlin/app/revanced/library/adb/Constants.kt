@@ -10,11 +10,11 @@ internal object Constants {
 
     internal const val DELETE = "rm -rf $PLACEHOLDER"
     internal const val CREATE_DIR = "mkdir -p"
-    internal const val RESOLVE_ACTIVITY = "pm resolve-activity --brief $PLACEHOLDER"
-    internal const val RESTART = "$RESOLVE_ACTIVITY | tail -n 1 | " +
-            "xargs am start -n && kill ${'$'}(pidof -s $PLACEHOLDER)"
+    internal const val RESTART = "am start -S $PLACEHOLDER"
+    internal const val GET_INSTALLED_PATH = "pm path $PLACEHOLDER"
 
-    internal const val INSTALL_PATCHED_APK = "base_path=\"$PATCHED_APK_PATH\" && " +
+    internal const val INSTALL_PATCHED_APK =
+        "base_path=\"$PATCHED_APK_PATH\" && " +
             "mv $TMP_PATH ${'$'}base_path && " +
             "chmod 644 ${'$'}base_path && " +
             "chown system:system ${'$'}base_path && " +
@@ -27,15 +27,17 @@ internal object Constants {
 
     internal val MOUNT_SCRIPT =
         """
-            #!/system/bin/sh
-            MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
-            MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-            while [ "${'$'}(getprop sys.boot_completed | tr -d '\r')" != "1" ]; do sleep 1; done
-            
-            base_path="$PATCHED_APK_PATH"
-            stock_path=${'$'}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+        #!/system/bin/sh
+        MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
+        MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
 
-            chcon u:object_r:apk_data_file:s0  ${'$'}base_path
-            mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
+        until [ "${'$'}(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
+        until [ -d "/sdcard/Android" ]; do sleep 1; done
+        
+        base_path="$PATCHED_APK_PATH"
+        stock_path=${'$'}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+
+        chcon u:object_r:apk_data_file:s0  ${'$'}base_path
+        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
         """.trimIndent()
 }

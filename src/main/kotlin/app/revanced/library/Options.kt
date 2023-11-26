@@ -2,7 +2,6 @@
 
 package app.revanced.library
 
-
 import app.revanced.library.Options.Patch.Option
 import app.revanced.patcher.PatchClass
 import app.revanced.patcher.PatchSet
@@ -25,31 +24,37 @@ object Options {
      * @param prettyPrint Whether to pretty print the JSON.
      * @return The JSON string containing the options.
      */
-    fun serialize(patches: PatchSet, prettyPrint: Boolean = false): String = patches
-        .filter { it.options.any() }
-        .map { patch ->
-            Patch(
-                patch.name!!,
-                patch.options.values.map { option ->
-                    val optionValue = try {
-                        option.value
-                    } catch (e: PatchOptionException) {
-                        logger.warning("Using default option value for the ${patch.name} patch: ${e.message}")
-                        option.default
-                    }
+    fun serialize(
+        patches: PatchSet,
+        prettyPrint: Boolean = false,
+    ): String =
+        patches
+            .filter { it.options.any() }
+            .map { patch ->
+                Patch(
+                    patch.name!!,
+                    patch.options.values.map { option ->
+                        val optionValue =
+                            try {
+                                option.value
+                            } catch (e: PatchOptionException) {
+                                logger.warning("Using default option value for the ${patch.name} patch: ${e.message}")
+                                option.default
+                            }
 
-                    Option(option.key, optionValue)
+                        Option(option.key, optionValue)
+                    },
+                )
+            }
+            // See https://github.com/revanced/revanced-patches/pull/2434/commits/60e550550b7641705e81aa72acfc4faaebb225e7.
+            .distinctBy { it.patchName }
+            .let {
+                if (prettyPrint) {
+                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(it)
+                } else {
+                    mapper.writeValueAsString(it)
                 }
-            )
-        }
-        // See https://github.com/revanced/revanced-patches/pull/2434/commits/60e550550b7641705e81aa72acfc4faaebb225e7.
-        .distinctBy { it.patchName }
-        .let {
-            if (prettyPrint)
-                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(it)
-            else
-                mapper.writeValueAsString(it)
-        }
+            }
 
     /**
      * Deserializes the options for the patches in the list.
@@ -70,9 +75,10 @@ object Options {
         filter { it.options.any() }.let { patches ->
             if (patches.isEmpty()) return
 
-            val jsonPatches = deserialize(json).associate {
-                it.patchName to it.options.associate { option -> option.key to option.value }
-            }
+            val jsonPatches =
+                deserialize(json).associate {
+                    it.patchName to it.options.associate { option -> option.key to option.value }
+                }
 
             patches.forEach { patch ->
                 jsonPatches[patch.name]?.let { jsonPatchOptions ->
@@ -104,9 +110,8 @@ object Options {
      */
     class Patch internal constructor(
         val patchName: String,
-        val options: List<Option>
+        val options: List<Option>,
     ) {
-
         /**
          * Data class for patch option.
          *

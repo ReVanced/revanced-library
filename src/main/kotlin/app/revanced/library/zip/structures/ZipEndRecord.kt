@@ -17,7 +17,6 @@ internal class ZipEndRecord(
     val centralDirectoryStartOffset: UInt,
     val fileComment: String,
 ) {
-
     companion object {
         const val ECD_HEADER_SIZE = 22
         const val ECD_SIGNATURE = 0x06054b50u
@@ -25,8 +24,9 @@ internal class ZipEndRecord(
         fun fromECD(input: DataInput): ZipEndRecord {
             val signature = input.readUIntLE()
 
-            if (signature != ECD_SIGNATURE)
+            if (signature != ECD_SIGNATURE) {
                 throw IllegalArgumentException("Input doesn't start with end record signature")
+            }
 
             val diskNumber = input.readUShortLE()
             val startingDiskNumber = input.readUShortLE()
@@ -50,7 +50,7 @@ internal class ZipEndRecord(
                 totalEntries,
                 centralDirectorySize,
                 centralDirectoryStartOffset,
-                fileComment
+                fileComment,
             )
         }
     }
