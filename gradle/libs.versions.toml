@@ -4,7 +4,7 @@ bcpkix-jdk18on = "1.76"
 jackson-module-kotlin = "2.14.3"
 jadb = "1.2.1"
 kotlin-reflect = "1.9.10"
-kotlin-test = "1.9.10"
+kotlin-test = "1.9.20"
 revanced-patcher = "19.0.0"
 binary-compatibility-validator = "0.13.2"
 
