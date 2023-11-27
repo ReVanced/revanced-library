@@ -63,6 +63,8 @@ public final class app/revanced/library/Options$Patch$Option {
 public final class app/revanced/library/PatchUtils {
 	public static final field INSTANCE Lapp/revanced/library/PatchUtils;
 	public final fun getMostCommonCompatibleVersion (Ljava/util/Set;Ljava/lang/String;)Ljava/lang/String;
+	public final fun getMostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
+	public static synthetic fun getMostCommonCompatibleVersions$default (Lapp/revanced/library/PatchUtils;Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
 }
 
 public abstract class app/revanced/library/adb/AdbManager {
@@ -87,6 +89,7 @@ public final class app/revanced/library/adb/AdbManager$Companion {
 }
 
 public final class app/revanced/library/adb/AdbManager$DeviceNotFoundException : java/lang/Exception {
+	public fun <init> ()V
 }
 
 public final class app/revanced/library/adb/AdbManager$FailedToFindInstalledPackageException : java/lang/Exception {
