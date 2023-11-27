@@ -1,14 +1,14 @@
 package app.revanced.library
 
 import app.revanced.patcher.PatchSet
-import java.util.*
+import app.revanced.patcher.patch.Patch
 
-private typealias PackageName = String
-private typealias Version = String
-private typealias Count = Int
+typealias PackageName = String
+typealias Version = String
+typealias Count = Int
 
-private typealias VersionMap = SortedMap<Version, Count>
-internal typealias PackageNameMap = Map<PackageName, VersionMap>
+typealias VersionMap = LinkedHashMap<Version, Count>
+typealias PackageNameMap = Map<PackageName, VersionMap>
 
 /**
  * Utility functions for working with patches.
@@ -26,7 +26,7 @@ object PatchUtils {
         "Use getMostCommonCompatibleVersions instead.",
         ReplaceWith(
             "getMostCommonCompatibleVersions(patches, setOf(packageName))" +
-                ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
+                    ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
         ),
     )
     fun getMostCommonCompatibleVersion(
@@ -48,30 +48,32 @@ object PatchUtils {
      * Get the count of versions for each compatible package from a supplied set of [patches] ordered by the most common version.
      *
      * @param patches The set of patches to check.
-     * @param packageNames The names of the compatible packages.
+     * @param packageNames The names of the compatible packages to include. If null, all packages will be included.
      * @param countUnusedPatches Whether to count patches that are not used.
      * @return A map of package names to a map of versions to their count.
      */
     fun getMostCommonCompatibleVersions(
         patches: PatchSet,
-        packageNames: Set<String>,
+        packageNames: Set<String>? = null,
         countUnusedPatches: Boolean = false,
-    ): PackageNameMap {
-        val wantedPackages = packageNames.toHashSet()
-        return buildMap {
-            patches
-                .filter { it.use || countUnusedPatches }
-                .flatMap { it.compatiblePackages ?: emptyList() }
-                .filter { it.name in wantedPackages }
-                .forEach { compatiblePackage ->
-                    compatiblePackage.versions?.let { versions ->
-                        val versionMap = getOrPut(compatiblePackage.name) { sortedMapOf() }
+    ): PackageNameMap = buildMap {
+        fun filterWantedPackages(compatiblePackages: Iterable<Patch.CompatiblePackage>): Iterable<Patch.CompatiblePackage> {
+            val wantedPackages = packageNames?.toHashSet() ?: return compatiblePackages
+            return compatiblePackages.filter { it.name in wantedPackages }
+        }
 
-                        versions.forEach { version ->
-                            versionMap[version] = versionMap.getOrDefault(version, 0) + 1
-                        }
+        patches
+            .filter { it.use || countUnusedPatches }
+            .flatMap { it.compatiblePackages ?: emptyList() }
+            .let(::filterWantedPackages)
+            .forEach { compatiblePackage ->
+                val versionMap = getOrPut(compatiblePackage.name) { linkedMapOf() }
+
+                compatiblePackage.versions?.let { versions ->
+                    versions.forEach { version ->
+                        versionMap[version] = versionMap.getOrDefault(version, 0) + 1
                     }
                 }
-        }
+            }
     }
 }
