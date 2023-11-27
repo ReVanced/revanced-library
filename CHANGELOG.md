@@ -1,3 +1,16 @@
+# [1.4.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.4.0-dev.1...v1.4.0-dev.2) (2023-11-27)
+
+
+### Bug Fixes
+
+* Differentiate no package compatibility to any version compatibility ([762b7e3](https://github.com/ReVanced/revanced-library/commit/762b7e3bc01e2ca33dfcdbb1b5028d60ef6e0a48))
+* Sort the version maps by the most common version ([e4be6db](https://github.com/ReVanced/revanced-library/commit/e4be6dbccd86700ffafe7cd8395e845bbd3d5138))
+
+
+### Features
+
+* Allow getting most common compatible versions for all packages ([96845ba](https://github.com/ReVanced/revanced-library/commit/96845ba265e6dc208c7ac96f5e58734209cd1720))
+
 # [1.4.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.3.0...v1.4.0-dev.1) (2023-11-27)
 
 
