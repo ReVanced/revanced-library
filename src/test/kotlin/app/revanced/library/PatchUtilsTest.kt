@@ -10,21 +10,49 @@ import kotlin.test.assertEquals
 internal object PatchUtilsTest {
     private val patches =
         arrayOf(
-            newPatch("some.package", "a"),
-            newPatch("some.package", "a", "b", use = false),
-            newPatch("some.package", "a", "b", "c", use = false),
-            newPatch("some.other.package", "b", use = false),
-            newPatch("some.other.package", "b", "c"),
-            newPatch("some.other.package", "b", "c", "d"),
+            newPatch("some.package", setOf("a")),
+            newPatch("some.package", setOf("a", "b"), use = false),
+            newPatch("some.package", setOf("a", "b", "c"), use = false),
+            newPatch("some.other.package", setOf("b"), use = false),
+            newPatch("some.other.package", setOf("b", "c")),
+            newPatch("some.other.package", setOf("b", "c", "d")),
             newPatch("some.other.other.package"),
-            newPatch("some.other.other.package", "a"),
-            newPatch("some.other.other.package", "b"),
+            newPatch("some.other.other.package", setOf("a")),
+            newPatch("some.other.other.package", setOf("b")),
             newPatch("some.other.other.other.package", use = false),
             newPatch("some.other.other.other.package", use = false),
         ).toSet()
 
     @Test
-    fun `return common versions correctly ordered for each package`() {
+    fun `empty because package is incompatible with any version`() {
+        assertEqualsVersions(
+            expected = emptyMap(),
+            patches = setOf(newPatch("some.package", emptySet(), use = true)),
+            compatiblePackageNames = setOf("some.package"),
+        )
+    }
+
+    @Test
+    fun `empty list of versions because package is unconstrained to any version`() {
+        assertEqualsVersions(
+            expected = mapOf("some.package" to linkedMapOf()),
+            patches = setOf(newPatch("some.package")),
+            compatiblePackageNames = setOf("some.package"),
+            countUnusedPatches = true,
+        )
+    }
+
+    @Test
+    fun `empty because no known package was supplied`() {
+        assertEqualsVersions(
+            expected = emptyMap(),
+            patches,
+            compatiblePackageNames = setOf("unknown.package"),
+        )
+    }
+
+    @Test
+    fun `common versions correctly ordered for each package`() {
         fun assertEqualsExpected(compatiblePackageNames: Set<String>?) = assertEqualsVersions(
             expected =
             mapOf(
@@ -53,7 +81,7 @@ internal object PatchUtilsTest {
     }
 
     @Test
-    fun `return common versions correctly ordered for each package without counting unused patches`() {
+    fun `common versions correctly ordered for each package without counting unused patches`() {
         assertEqualsVersions(
             expected =
             mapOf(
@@ -74,29 +102,10 @@ internal object PatchUtilsTest {
     }
 
     @Test
-    fun `return an empty map because no known package was supplied`() {
-        assertEqualsVersions(
-            expected = emptyMap(),
-            patches,
-            compatiblePackageNames = setOf("unknown.package"),
-        )
-    }
-
-    @Test
-    fun `return empty set of versions because no compatible package is constrained to a version`() {
-        assertEqualsVersions(
-            expected = mapOf("some.package" to linkedMapOf()),
-            patches = setOf(newPatch("some.package")),
-            compatiblePackageNames = setOf("some.package"),
-            countUnusedPatches = true,
-        )
-    }
-
-    @Test
     fun `return 'a' because it is the most common version`() {
         val patches =
             arrayOf("a", "a", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d")
-                .map { version -> newPatch("some.package", version) }
+                .map { version -> newPatch("some.package", setOf(version)) }
                 .toSet()
 
         assertEqualsVersion("a", patches, "some.package")
@@ -109,7 +118,7 @@ internal object PatchUtilsTest {
 
     @Test
     fun `return null because no patch is compatible with the supplied package name`() {
-        val patches = setOf(newPatch("some.package", "a"))
+        val patches = setOf(newPatch("some.package", setOf("a")))
 
         assertEqualsVersion(null, patches, "other.package")
     }
@@ -142,6 +151,7 @@ internal object PatchUtilsTest {
     ) {
         // Test both the deprecated and the new method.
 
+        @Suppress("DEPRECATION")
         assertEquals(
             expected,
             PatchUtils.getMostCommonCompatibleVersion(patches, compatiblePackageName),
@@ -156,7 +166,7 @@ internal object PatchUtilsTest {
 
     private fun newPatch(
         packageName: String,
-        vararg versions: String,
+        versions: Set<String>? = null,
         use: Boolean = true,
     ) = object : BytecodePatch() {
         init {
@@ -165,7 +175,7 @@ internal object PatchUtilsTest {
             val compatiblePackagesField = Patch::class.java.getDeclaredField("compatiblePackages")
 
             compatiblePackagesField.isAccessible = true
-            compatiblePackagesField.set(this, setOf(CompatiblePackage(packageName, versions.toSet())))
+            compatiblePackagesField.set(this, setOf(CompatiblePackage(packageName, versions?.toSet())))
 
             val useField = Patch::class.java.getDeclaredField("use")
 

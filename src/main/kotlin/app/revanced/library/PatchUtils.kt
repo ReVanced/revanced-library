@@ -67,6 +67,9 @@ object PatchUtils {
             .flatMap { it.compatiblePackages ?: emptyList() }
             .let(::filterWantedPackages)
             .forEach { compatiblePackage ->
+                if (compatiblePackage.versions?.isEmpty() == true)
+                    return@forEach
+
                 val versionMap = getOrPut(compatiblePackage.name) { linkedMapOf() }
 
                 compatiblePackage.versions?.let { versions ->
