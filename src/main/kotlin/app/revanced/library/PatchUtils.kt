@@ -75,5 +75,13 @@ object PatchUtils {
                     }
                 }
             }
+
+        // Sort the version maps by the most common version.
+        forEach { (packageName, versionMap) ->
+            this[packageName] = versionMap
+                .asIterable()
+                .sortedWith(compareByDescending { it.value })
+                .associate { it.key to it.value } as VersionMap
+        }
     }
 }
