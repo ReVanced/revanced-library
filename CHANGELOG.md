@@ -1,3 +1,10 @@
+# [1.4.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.3.0...v1.4.0-dev.1) (2023-11-27)
+
+
+### Features
+
+* Add `PatchUtils#getMostCommonCompatibleVersions` utility function ([c5f3536](https://github.com/ReVanced/revanced-library/commit/c5f3536cbb6997766076595dc0b2b5d2e861ca73))
+
 # [1.3.0](https://github.com/ReVanced/revanced-library/compare/v1.2.0...v1.3.0) (2023-11-26)
 
 
