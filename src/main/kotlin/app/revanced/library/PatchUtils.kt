@@ -26,7 +26,7 @@ object PatchUtils {
         "Use getMostCommonCompatibleVersions instead.",
         ReplaceWith(
             "getMostCommonCompatibleVersions(patches, setOf(packageName))" +
-                    ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
+                ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
         ),
     )
     fun getMostCommonCompatibleVersion(
@@ -56,35 +56,38 @@ object PatchUtils {
         patches: PatchSet,
         packageNames: Set<String>? = null,
         countUnusedPatches: Boolean = false,
-    ): PackageNameMap = buildMap {
-        fun filterWantedPackages(compatiblePackages: Iterable<Patch.CompatiblePackage>): Iterable<Patch.CompatiblePackage> {
-            val wantedPackages = packageNames?.toHashSet() ?: return compatiblePackages
-            return compatiblePackages.filter { it.name in wantedPackages }
-        }
-
-        patches
-            .filter { it.use || countUnusedPatches }
-            .flatMap { it.compatiblePackages ?: emptyList() }
-            .let(::filterWantedPackages)
-            .forEach { compatiblePackage ->
-                if (compatiblePackage.versions?.isEmpty() == true)
-                    return@forEach
-
-                val versionMap = getOrPut(compatiblePackage.name) { linkedMapOf() }
-
-                compatiblePackage.versions?.let { versions ->
-                    versions.forEach { version ->
-                        versionMap[version] = versionMap.getOrDefault(version, 0) + 1
-                    }
-                }
+    ): PackageNameMap =
+        buildMap {
+            fun filterWantedPackages(compatiblePackages: Iterable<Patch.CompatiblePackage>): Iterable<Patch.CompatiblePackage> {
+                val wantedPackages = packageNames?.toHashSet() ?: return compatiblePackages
+                return compatiblePackages.filter { it.name in wantedPackages }
             }
 
-        // Sort the version maps by the most common version.
-        forEach { (packageName, versionMap) ->
-            this[packageName] = versionMap
-                .asIterable()
-                .sortedWith(compareByDescending { it.value })
-                .associate { it.key to it.value } as VersionMap
+            patches
+                .filter { it.use || countUnusedPatches }
+                .flatMap { it.compatiblePackages ?: emptyList() }
+                .let(::filterWantedPackages)
+                .forEach { compatiblePackage ->
+                    if (compatiblePackage.versions?.isEmpty() == true) {
+                        return@forEach
+                    }
+
+                    val versionMap = getOrPut(compatiblePackage.name) { linkedMapOf() }
+
+                    compatiblePackage.versions?.let { versions ->
+                        versions.forEach { version ->
+                            versionMap[version] = versionMap.getOrDefault(version, 0) + 1
+                        }
+                    }
+                }
+
+            // Sort the version maps by the most common version.
+            forEach { (packageName, versionMap) ->
+                this[packageName] =
+                    versionMap
+                        .asIterable()
+                        .sortedWith(compareByDescending { it.value })
+                        .associate { it.key to it.value } as VersionMap
+            }
         }
-    }
 }

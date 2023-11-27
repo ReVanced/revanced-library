@@ -53,30 +53,32 @@ internal object PatchUtilsTest {
 
     @Test
     fun `common versions correctly ordered for each package`() {
-        fun assertEqualsExpected(compatiblePackageNames: Set<String>?) = assertEqualsVersions(
-            expected =
-            mapOf(
-                "some.package" to linkedMapOf("a" to 3, "b" to 2, "c" to 1),
-                "some.other.package" to linkedMapOf("b" to 3, "c" to 2, "d" to 1),
-                "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
-                "some.other.other.other.package" to linkedMapOf(),
-            ),
-            patches,
-            compatiblePackageNames,
-            countUnusedPatches = true,
+        fun assertEqualsExpected(compatiblePackageNames: Set<String>?) =
+            assertEqualsVersions(
+                expected =
+                    mapOf(
+                        "some.package" to linkedMapOf("a" to 3, "b" to 2, "c" to 1),
+                        "some.other.package" to linkedMapOf("b" to 3, "c" to 2, "d" to 1),
+                        "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
+                        "some.other.other.other.package" to linkedMapOf(),
+                    ),
+                patches,
+                compatiblePackageNames,
+                countUnusedPatches = true,
+            )
+
+        assertEqualsExpected(
+            compatiblePackageNames =
+                setOf(
+                    "some.package",
+                    "some.other.package",
+                    "some.other.other.package",
+                    "some.other.other.other.package",
+                ),
         )
 
         assertEqualsExpected(
-            compatiblePackageNames = setOf(
-                "some.package",
-                "some.other.package",
-                "some.other.other.package",
-                "some.other.other.other.package",
-            ),
-        )
-
-        assertEqualsExpected(
-            compatiblePackageNames = null
+            compatiblePackageNames = null,
         )
     }
 
@@ -84,19 +86,19 @@ internal object PatchUtilsTest {
     fun `common versions correctly ordered for each package without counting unused patches`() {
         assertEqualsVersions(
             expected =
-            mapOf(
-                "some.package" to linkedMapOf("a" to 1),
-                "some.other.package" to linkedMapOf("b" to 2, "c" to 2, "d" to 1),
-                "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
-            ),
+                mapOf(
+                    "some.package" to linkedMapOf("a" to 1),
+                    "some.other.package" to linkedMapOf("b" to 2, "c" to 2, "d" to 1),
+                    "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
+                ),
             patches,
             compatiblePackageNames =
-            setOf(
-                "some.package",
-                "some.other.package",
-                "some.other.other.package",
-                "some.other.other.other.package",
-            ),
+                setOf(
+                    "some.package",
+                    "some.other.package",
+                    "some.other.other.package",
+                    "some.other.other.other.package",
+                ),
             countUnusedPatches = false,
         )
     }
