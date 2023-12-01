@@ -3,14 +3,11 @@
 package app.revanced.library
 
 import app.revanced.library.Options.Patch.Option
-import app.revanced.patcher.PatchClass
 import app.revanced.patcher.PatchSet
 import app.revanced.patcher.patch.options.PatchOptionException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import java.util.logging.Logger
-
-private typealias PatchList = List<PatchClass>
 
 object Options {
     private val logger = Logger.getLogger(Options::class.java.name)
@@ -62,7 +59,6 @@ object Options {
      * @param json The JSON string containing the options.
      * @return The list of [Patch]s.
      * @see Patch
-     * @see PatchList
      */
     fun deserialize(json: String): Array<Patch> = mapper.readValue(json, Array<Patch>::class.java)
 
