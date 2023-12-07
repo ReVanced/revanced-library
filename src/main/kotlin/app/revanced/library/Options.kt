@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import java.util.logging.Logger
 
+@Suppress("unused")
 object Options {
     private val logger = Logger.getLogger(Options::class.java.name)
 
