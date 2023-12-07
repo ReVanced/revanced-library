@@ -12,7 +12,7 @@ import java.util.logging.Logger
 object Options {
     private val logger = Logger.getLogger(Options::class.java.name)
 
-    private var mapper = jacksonObjectMapper()
+    private val mapper = jacksonObjectMapper()
 
     /**
      * Serializes the options for a set of patches.
