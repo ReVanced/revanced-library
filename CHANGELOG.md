@@ -1,3 +1,10 @@
+# [1.5.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.4.0...v1.5.0-dev.1) (2023-12-07)
+
+
+### Features
+
+* Add JSON de- and serialization of patches ([ecff6fe](https://github.com/ReVanced/revanced-library/commit/ecff6fe0d3889d729a0badcfa28b89610bd27d48))
+
 # [1.4.0](https://github.com/ReVanced/revanced-library/compare/v1.3.0...v1.4.0) (2023-11-27)
 
 
