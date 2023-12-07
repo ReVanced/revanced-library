@@ -3,7 +3,6 @@ package app.revanced.library
 import app.revanced.patcher.PatchSet
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
-import app.revanced.patcher.patch.Patch
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -170,21 +169,10 @@ internal object PatchUtilsTest {
         packageName: String,
         versions: Set<String>? = null,
         use: Boolean = true,
-    ) = object : BytecodePatch() {
-        init {
-            // Set the compatible packages field to the supplied package name and versions reflectively,
-            // because the setter is private but needed for testing.
-            val compatiblePackagesField = Patch::class.java.getDeclaredField("compatiblePackages")
-
-            compatiblePackagesField.isAccessible = true
-            compatiblePackagesField.set(this, setOf(CompatiblePackage(packageName, versions?.toSet())))
-
-            val useField = Patch::class.java.getDeclaredField("use")
-
-            useField.isAccessible = true
-            useField.set(this, use)
-        }
-
+    ) = object : BytecodePatch(
+        compatiblePackages = setOf(CompatiblePackage(packageName, versions?.toSet())),
+        use = use,
+    ) {
         override fun execute(context: BytecodeContext) {}
 
         // Needed to make the patches unique.
