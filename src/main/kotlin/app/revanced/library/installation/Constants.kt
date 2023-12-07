@@ -40,6 +40,11 @@ internal object Constants {
 
         base_path="$PATCHED_APK_PATH"
         stock_path=$( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+        
+        # Check if the app is installed
+        if [ -z "${'$'}stock_path" ]; then
+            exit 1
+        fi
 
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
