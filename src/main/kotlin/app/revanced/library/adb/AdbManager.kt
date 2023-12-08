@@ -1,67 +1,38 @@
 package app.revanced.library.adb
 
 import app.revanced.library.adb.AdbManager.Apk
-import app.revanced.library.adb.Constants.CREATE_DIR
-import app.revanced.library.adb.Constants.DELETE
-import app.revanced.library.adb.Constants.GET_INSTALLED_PATH
-import app.revanced.library.adb.Constants.INSTALLATION_PATH
-import app.revanced.library.adb.Constants.INSTALL_MOUNT_SCRIPT
-import app.revanced.library.adb.Constants.INSTALL_PATCHED_APK
-import app.revanced.library.adb.Constants.KILL
-import app.revanced.library.adb.Constants.MOUNT_SCRIPT
-import app.revanced.library.adb.Constants.MOUNT_SCRIPT_PATH
-import app.revanced.library.adb.Constants.PATCHED_APK_PATH
-import app.revanced.library.adb.Constants.PLACEHOLDER
-import app.revanced.library.adb.Constants.RESTART
-import app.revanced.library.adb.Constants.TMP_PATH
-import app.revanced.library.adb.Constants.UMOUNT
-import se.vidstige.jadb.JadbConnection
+import app.revanced.library.installation.installer.Constants.PLACEHOLDER
+import app.revanced.library.installation.installer.AdbInstaller
+import app.revanced.library.installation.installer.AdbRootInstaller
+import app.revanced.library.installation.installer.Installer
 import se.vidstige.jadb.JadbDevice
-import se.vidstige.jadb.managers.Package
-import se.vidstige.jadb.managers.PackageManager
 import java.io.File
-import java.util.logging.Logger
 
 /**
  * Adb manager. Used to install and uninstall [Apk] files.
  *
  * @param deviceSerial The serial of the device. If null, the first connected device will be used.
  */
-sealed class AdbManager private constructor(deviceSerial: String?) {
-    protected val logger: Logger = Logger.getLogger(AdbManager::class.java.name)
-
-    protected val device =
-        with(JadbConnection().devices) {
-            if (isEmpty()) throw DeviceNotFoundException()
-
-            deviceSerial?.let {
-                firstOrNull { it.serial == deviceSerial } ?: throw DeviceNotFoundException(deviceSerial)
-            } ?: first().also {
-                logger.warning("No device serial supplied. Using device with serial ${it.serial}")
-            }
-        }!!
-
-    init {
-        logger.fine("Connected to ${device.serial}")
-    }
+@Deprecated("Use an implementation of Installer<*> instead.")
+@Suppress("unused")
+sealed class AdbManager private constructor(
+    @Suppress("UNUSED_PARAMETER") deviceSerial: String?,
+) {
+    protected abstract val installer: Installer<*>
 
     /**
      * Installs the [Apk] file.
      *
      * @param apk The [Apk] file.
      */
-    open fun install(apk: Apk) {
-        logger.info("Finished installing ${apk.file.name}")
-    }
+    open fun install(apk: Apk) = installer.install(Installer.Apk(apk.file, apk.packageName))
 
     /**
      * Uninstalls the package.
      *
      * @param packageName The package name.
      */
-    open fun uninstall(packageName: String) {
-        logger.info("Finished uninstalling $packageName")
-    }
+    open fun uninstall(packageName: String) = installer.uninstall(packageName)
 
     companion object {
         /**
@@ -72,6 +43,7 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
          * @return The [AdbManager].
          * @throws DeviceNotFoundException If the device can not be found.
          */
+        @Deprecated("Use an implementation of Installer<*> instead.")
         fun getAdbManager(
             deviceSerial: String? = null,
             root: Boolean = false,
@@ -83,47 +55,13 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
      *
      * @param deviceSerial The device serial. If null, the first connected device will be used.
      */
+    @Deprecated("Use Installer.RootInstaller.AdbRootInstaller instead.")
     class RootAdbManager internal constructor(deviceSerial: String?) : AdbManager(deviceSerial) {
-        init {
-            if (!device.hasSu()) throw IllegalArgumentException("Root required on ${device.serial}. Task failed")
-        }
+        override val installer = AdbRootInstaller(deviceSerial)
 
-        override fun install(apk: Apk) {
-            logger.info("Installing by mounting")
+        override fun install(apk: Apk) = installer.install(Installer.Apk(apk.file, apk.packageName))
 
-            val packageName = apk.packageName ?: throw PackageNameRequiredException()
-
-            device.run(GET_INSTALLED_PATH, packageName).inputStream.bufferedReader().readLine().let { line ->
-                if (line != null) return@let
-                throw throw FailedToFindInstalledPackageException(packageName)
-            }
-
-            device.push(apk.file, TMP_PATH)
-
-            device.run("$CREATE_DIR $INSTALLATION_PATH").waitFor()
-            device.run(INSTALL_PATCHED_APK, packageName).waitFor()
-
-            device.createFile(TMP_PATH, MOUNT_SCRIPT.applyReplacement(packageName))
-
-            device.run(INSTALL_MOUNT_SCRIPT, packageName).waitFor()
-            device.run(MOUNT_SCRIPT_PATH, packageName).waitFor()
-            device.run(RESTART, packageName)
-            device.run(DELETE, TMP_PATH)
-
-            super.install(apk)
-        }
-
-        override fun uninstall(packageName: String) {
-            logger.info("Uninstalling $packageName by unmounting")
-
-            device.run(UMOUNT, packageName)
-            device.run(DELETE.applyReplacement(PATCHED_APK_PATH), packageName)
-            device.run(DELETE, MOUNT_SCRIPT_PATH.applyReplacement(packageName))
-            device.run(DELETE, TMP_PATH)
-            device.run(KILL, packageName)
-
-            super.uninstall(packageName)
-        }
+        override fun uninstall(packageName: String) = installer.uninstall(packageName)
 
         companion object Utils {
             private fun JadbDevice.run(
@@ -140,24 +78,13 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
      *
      * @param deviceSerial The device serial. If null, the first connected device will be used.
      */
+    @Deprecated("Use Installer.AdbInstaller instead.")
     class UserAdbManager internal constructor(deviceSerial: String?) : AdbManager(deviceSerial) {
-        private val packageManager = PackageManager(device)
+        override val installer = AdbInstaller(deviceSerial)
 
-        override fun install(apk: Apk) {
-            logger.info("Installing ${apk.file.name}")
+        override fun install(apk: Apk) = installer.install(Installer.Apk(apk.file, apk.packageName))
 
-            PackageManager(device).install(apk.file)
-
-            super.install(apk)
-        }
-
-        override fun uninstall(packageName: String) {
-            logger.info("Uninstalling $packageName")
-
-            packageManager.uninstall(Package(packageName))
-
-            super.uninstall(packageName)
-        }
+        override fun uninstall(packageName: String) = installer.uninstall(packageName)
     }
 
     /**
@@ -166,8 +93,10 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
      * @param file The [Apk] file.
      * @param packageName The package name of the [Apk] file.
      */
+    @Deprecated("Use Installer.Apk instead.")
     class Apk(val file: File, val packageName: String? = null)
 
+    @Deprecated("Use CommandRunner.DeviceNotFoundException instead.")
     class DeviceNotFoundException internal constructor(deviceSerial: String? = null) :
         Exception(
             deviceSerial?.let {
@@ -175,9 +104,11 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
             } ?: "No ADB device found",
         )
 
+    @Deprecated("Use Installer.FailedToFindInstalledPackageException instead.")
     class FailedToFindInstalledPackageException internal constructor(packageName: String) :
         Exception("Failed to find installed package \"$packageName\" because no activity was found")
 
+    @Deprecated("Use Installer.PackageNameRequiredException instead.")
     class PackageNameRequiredException internal constructor() :
         Exception("Package name is required")
 }

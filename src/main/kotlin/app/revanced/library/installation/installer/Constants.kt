@@ -1,4 +1,4 @@
-package app.revanced.library.adb
+package app.revanced.library.installation.installer
 
 object Constants {
     const val PLACEHOLDER = "PLACEHOLDER"

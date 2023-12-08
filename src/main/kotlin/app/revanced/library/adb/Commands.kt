@@ -1,10 +1,13 @@
+@file:Suppress("DeprecatedCallableAddReplaceWith")
+
 package app.revanced.library.adb
 
+import app.revanced.library.installation.command.AdbCommandRunner
 import se.vidstige.jadb.JadbDevice
-import se.vidstige.jadb.RemoteFile
 import se.vidstige.jadb.ShellProcessBuilder
 import java.io.File
 
+@Deprecated("Do not use this anymore. Instead use CommandRunner.AdbCommandRunner.")
 internal fun JadbDevice.buildCommand(
     command: String,
     su: Boolean = true,
@@ -17,19 +20,23 @@ internal fun JadbDevice.buildCommand(
     return shellProcessBuilder(cmd, *args.toTypedArray())
 }
 
+@Deprecated("Use CommandRunner.AdbCommandRunner instead.")
 internal fun JadbDevice.run(
     command: String,
     su: Boolean = true,
-) = this.buildCommand(command, su).start()
+) = buildCommand(command, su).start()
 
-internal fun JadbDevice.hasSu() = this.run("whoami", true).waitFor() == 0
+@Deprecated("Use CommandRunner.AdbCommandRunner instead.")
+internal fun JadbDevice.hasSu() = AdbCommandRunner(this).hasRootPermission()
 
+@Deprecated("Use CommandRunner.AdbCommandRunner instead.")
 internal fun JadbDevice.push(
     file: File,
     targetFilePath: String,
-) = push(file, RemoteFile(targetFilePath))
+) = AdbCommandRunner(this).push(file, targetFilePath)
 
+@Deprecated("Use CommandRunner.AdbCommandRunner instead.")
 internal fun JadbDevice.createFile(
     targetFile: String,
     content: String,
-) = push(content.byteInputStream(), System.currentTimeMillis(), 644, RemoteFile(targetFile))
+) = AdbCommandRunner(this).createFile(targetFile, content.byteInputStream())

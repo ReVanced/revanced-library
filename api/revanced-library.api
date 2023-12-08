@@ -108,11 +108,15 @@ public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPa
 public abstract interface class app/revanced/library/PatchUtils$Json$JsonPatch {
 }
 
+public final class app/revanced/library/Utils {
+	public static final field INSTANCE Lapp/revanced/library/Utils;
+	public final fun isAndroidEnvironment ()Z
+}
+
 public abstract class app/revanced/library/adb/AdbManager {
 	public static final field Companion Lapp/revanced/library/adb/AdbManager$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected final fun getDevice ()Lse/vidstige/jadb/JadbDevice;
-	protected final fun getLogger ()Ljava/util/logging/Logger;
+	protected abstract fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
 	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)V
 	public fun uninstall (Ljava/lang/String;)V
 }
@@ -141,6 +145,7 @@ public final class app/revanced/library/adb/AdbManager$PackageNameRequiredExcept
 
 public final class app/revanced/library/adb/AdbManager$RootAdbManager : app/revanced/library/adb/AdbManager {
 	public static final field Utils Lapp/revanced/library/adb/AdbManager$RootAdbManager$Utils;
+	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
 	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)V
 	public fun uninstall (Ljava/lang/String;)V
 }
@@ -149,8 +154,121 @@ public final class app/revanced/library/adb/AdbManager$RootAdbManager$Utils {
 }
 
 public final class app/revanced/library/adb/AdbManager$UserAdbManager : app/revanced/library/adb/AdbManager {
+	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
 	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)V
 	public fun uninstall (Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/command/AdbCommandRunner : app/revanced/library/installation/command/CommandRunner {
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lse/vidstige/jadb/JadbDevice;)V
+	public fun createFile (Ljava/lang/String;Ljava/io/InputStream;)V
+	public final fun getDevice ()Lse/vidstige/jadb/JadbDevice;
+	public fun hasRootPermission ()Z
+	public final fun push (Ljava/io/File;Ljava/lang/String;)V
+	public fun run (Ljava/lang/String;Z)Lapp/revanced/library/installation/command/CommandRunner$RunResult;
+}
+
+public final class app/revanced/library/installation/command/AdbCommandRunner$DeviceNotFoundException : java/lang/Exception {
+	public fun <init> ()V
+}
+
+public abstract interface class app/revanced/library/installation/command/CommandRunner {
+	public abstract fun createFile (Ljava/lang/String;Ljava/io/InputStream;)V
+	public abstract fun hasRootPermission ()Z
+	public abstract fun run (Ljava/lang/String;Z)Lapp/revanced/library/installation/command/CommandRunner$RunResult;
+}
+
+public final class app/revanced/library/installation/command/CommandRunner$DefaultImpls {
+	public static synthetic fun run$default (Lapp/revanced/library/installation/command/CommandRunner;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/installation/command/CommandRunner$RunResult;
+}
+
+public abstract interface class app/revanced/library/installation/command/CommandRunner$RunResult {
+	public abstract fun getErrorStream ()Ljava/io/InputStream;
+	public abstract fun getExitCode ()Ljava/lang/Integer;
+	public abstract fun getInputStream ()Ljava/io/InputStream;
+	public abstract fun getOutputStream ()Ljava/io/OutputStream;
+	public abstract fun waitFor ()Ljava/lang/Integer;
+}
+
+public abstract class app/revanced/library/installation/command/LocalCommandRunner : app/revanced/library/installation/command/CommandRunner {
+	public fun <init> ()V
+}
+
+public final class app/revanced/library/installation/installer/AdbInstaller : app/revanced/library/installation/installer/Installer {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
+	public fun uninstall (Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/installer/AdbRootInstaller : app/revanced/library/installation/installer/RootInstaller {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class app/revanced/library/installation/installer/Constants {
+	public static final field CREATE_DIR Ljava/lang/String;
+	public static final field DELETE Ljava/lang/String;
+	public static final field GET_INSTALLED_PATH Ljava/lang/String;
+	public static final field INSTALLATION_PATH Ljava/lang/String;
+	public static final field INSTALL_MOUNT_SCRIPT Ljava/lang/String;
+	public static final field INSTALL_PATCHED_APK Ljava/lang/String;
+	public static final field INSTANCE Lapp/revanced/library/installation/installer/Constants;
+	public static final field KILL Ljava/lang/String;
+	public static final field MOUNT_SCRIPT_PATH Ljava/lang/String;
+	public static final field PATCHED_APK_PATH Ljava/lang/String;
+	public static final field PLACEHOLDER Ljava/lang/String;
+	public static final field RESTART Ljava/lang/String;
+	public static final field TMP_PATH Ljava/lang/String;
+	public static final field UMOUNT Ljava/lang/String;
+	public final fun getMOUNT_SCRIPT ()Ljava/lang/String;
+}
+
+public abstract class app/revanced/library/installation/installer/Installer {
+	public static final field Companion Lapp/revanced/library/installation/installer/Installer$Companion;
+	public fun <init> (Lapp/revanced/library/installation/command/CommandRunner;)V
+	protected final fun getCommandRunner ()Lapp/revanced/library/installation/command/CommandRunner;
+	protected final fun getLogger ()Ljava/util/logging/Logger;
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
+	public fun uninstall (Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/installer/Installer$Apk {
+	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getFile ()Ljava/io/File;
+	public final fun getPackageName ()Ljava/lang/String;
+}
+
+public final class app/revanced/library/installation/installer/Installer$Companion {
+	public final fun getAdbInstaller (Ljava/lang/String;Z)Lapp/revanced/library/installation/installer/Installer;
+	public static synthetic fun getAdbInstaller$default (Lapp/revanced/library/installation/installer/Installer$Companion;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/installation/installer/Installer;
+}
+
+public abstract class app/revanced/library/installation/installer/LocalInstaller : app/revanced/library/installation/installer/Installer {
+	public fun <init> (Lapp/revanced/library/installation/command/LocalCommandRunner;)V
+}
+
+public final class app/revanced/library/installation/installer/LocalRootInstaller : app/revanced/library/installation/installer/RootInstaller {
+	public fun <init> (Lapp/revanced/library/installation/command/LocalCommandRunner;)V
+}
+
+public abstract class app/revanced/library/installation/installer/RootInstaller : app/revanced/library/installation/installer/Installer {
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
+	public fun uninstall (Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/installer/RootInstaller$FailedToFindInstalledPackageException : java/lang/Exception {
+}
+
+public final class app/revanced/library/installation/installer/RootInstaller$NoRootPermissionException : java/lang/Exception {
+}
+
+public final class app/revanced/library/installation/installer/RootInstaller$PackageNameRequiredException : java/lang/Exception {
 }
 
 public final class app/revanced/library/logging/Logger {
