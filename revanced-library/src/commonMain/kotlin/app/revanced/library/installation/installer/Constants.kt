@@ -38,10 +38,6 @@ object Constants {
         until [ "$( getprop sys.boot_completed )" = 1 ]; do sleep 3; done
         until [ -d "/sdcard/Android" ]; do sleep 1; done
 
-        # Unmount any existing installation to prevent multiple unnecessary mounts.
-        $UMOUNT
-
-        base_path="$PATCHED_APK_PATH"
         stock_path=$( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
 
         # Make sure the app is installed.
@@ -49,14 +45,18 @@ object Constants {
             exit 1
         fi
 
+        # Unmount any existing installations to prevent multiple unnecessary mounts.
+        $UMOUNT
+
+        base_path="$PATCHED_APK_PATH"
+
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
 
         MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
         MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
-        # Kill the app to force it to restart the mounted APK in case it's already running.
+        # Kill the app to make use of the mount in case it's currently running
         $KILL
         """.trimIndent()
 
