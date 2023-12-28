@@ -1,3 +1,17 @@
+# [1.5.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.0-dev.1...v1.5.0-dev.2) (2023-12-07)
+
+
+### Features
+
+* Improve mount reliability by unmounting existing mounts and killing running apps ([9fda407](https://github.com/ReVanced/revanced-library/commit/9fda40744173669c84b0c2599ae5ac5d39591798))
+
+# [1.5.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.4.0...v1.5.0-dev.1) (2023-12-07)
+
+
+### Features
+
+* Add JSON de- and serialization of patches ([ecff6fe](https://github.com/ReVanced/revanced-library/commit/ecff6fe0d3889d729a0badcfa28b89610bd27d48))
+
 # [1.4.0](https://github.com/ReVanced/revanced-library/compare/v1.3.0...v1.4.0) (2023-11-27)
 
 

@@ -3,24 +3,22 @@
 package app.revanced.library
 
 import app.revanced.library.Options.Patch.Option
-import app.revanced.patcher.PatchClass
 import app.revanced.patcher.PatchSet
 import app.revanced.patcher.patch.options.PatchOptionException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import java.util.logging.Logger
 
-private typealias PatchList = List<PatchClass>
-
+@Suppress("unused")
 object Options {
     private val logger = Logger.getLogger(Options::class.java.name)
 
-    private var mapper = jacksonObjectMapper()
+    private val mapper = jacksonObjectMapper()
 
     /**
-     * Serializes the options for the patches in the list.
+     * Serializes the options for a set of patches.
      *
-     * @param patches The list of patches to serialize.
+     * @param patches The set of patches to serialize.
      * @param prettyPrint Whether to pretty print the JSON.
      * @return The JSON string containing the options.
      */
@@ -57,17 +55,16 @@ object Options {
             }
 
     /**
-     * Deserializes the options for the patches in the list.
+     * Deserializes the options to a set of patches.
      *
      * @param json The JSON string containing the options.
-     * @return The list of [Patch]s.
+     * @return A set of [Patch]s.
      * @see Patch
-     * @see PatchList
      */
     fun deserialize(json: String): Array<Patch> = mapper.readValue(json, Array<Patch>::class.java)
 
     /**
-     * Sets the options for the patches in the list.
+     * Sets the options for a set of patches.
      *
      * @param json The JSON string containing the options.
      */
@@ -95,7 +92,7 @@ object Options {
     }
 
     /**
-     * Sets the options for the patches in the list.
+     * Sets the options for a set of patches.
      *
      * @param file The file containing the JSON string containing the options.
      * @see setOptions

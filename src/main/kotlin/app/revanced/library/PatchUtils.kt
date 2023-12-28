@@ -1,7 +1,12 @@
 package app.revanced.library
 
+import app.revanced.patcher.PatchClass
 import app.revanced.patcher.PatchSet
 import app.revanced.patcher.patch.Patch
+import app.revanced.patcher.patch.options.PatchOption
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.io.InputStream
+import java.io.OutputStream
 
 typealias PackageName = String
 typealias Version = String
@@ -90,4 +95,104 @@ object PatchUtils {
                         .associate { it.key to it.value } as VersionMap
             }
         }
+
+    object Json {
+        private val mapper = jacksonObjectMapper()
+
+        /**
+         * Serializes a set of [Patch]es to a JSON string and writes it to an output stream.
+         *
+         * @param patches The set of [Patch]es to serialize.
+         * @param transform A function to transform the [Patch]es to [JsonPatch]es.
+         * @param prettyPrint Whether to pretty print the JSON.
+         * @param outputStream The output stream to write the JSON to.
+         */
+        fun serialize(
+            patches: PatchSet,
+            transform: (Patch<*>) -> JsonPatch = { patch -> FullJsonPatch.fromPatch(patch) },
+            prettyPrint: Boolean = false,
+            outputStream: OutputStream,
+        ) {
+            patches.map(transform).let { transformed ->
+                if (prettyPrint) {
+                    mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, transformed)
+                } else {
+                    mapper.writeValue(outputStream, transformed)
+                }
+            }
+        }
+
+        /**
+         * Deserializes a JSON string to a set of [FullJsonPatch]es from an input stream.
+         *
+         * @param inputStream The input stream to read the JSON from.
+         * @param jsonPatchElementClass The class of the [JsonPatch]es to deserialize.
+         * @return A set of [JsonPatch]es.
+         * @see FullJsonPatch
+         */
+        fun <T : JsonPatch> deserialize(
+            inputStream: InputStream,
+            jsonPatchElementClass: Class<T>,
+        ): Set<T> =
+            mapper.readValue(
+                inputStream,
+                mapper.typeFactory.constructCollectionType(Set::class.java, jsonPatchElementClass),
+            )
+
+        interface JsonPatch
+
+        /**
+         * A JSON representation of a [Patch].
+         * @see Patch
+         */
+        class FullJsonPatch internal constructor(
+            val name: String?,
+            val description: String?,
+            val compatiblePackages: Set<Patch.CompatiblePackage>?,
+            val dependencies: Set<PatchClass>?,
+            val use: Boolean,
+            var requiresIntegrations: Boolean,
+            val options: Map<String, FullJsonPatchOption<*>>,
+        ) : JsonPatch {
+            companion object {
+                fun fromPatch(patch: Patch<*>) =
+                    FullJsonPatch(
+                        patch.name,
+                        patch.description,
+                        patch.compatiblePackages,
+                        patch.dependencies,
+                        patch.use,
+                        patch.requiresIntegrations,
+                        patch.options.mapValues { FullJsonPatchOption.fromPatchOption(it.value) },
+                    )
+            }
+
+            /**
+             * A JSON representation of a [PatchOption].
+             * @see PatchOption
+             */
+            class FullJsonPatchOption<T> internal constructor(
+                val key: String,
+                val default: T?,
+                val values: Map<String, T?>?,
+                val title: String?,
+                val description: String?,
+                val required: Boolean,
+                val valueType: String,
+            ) {
+                companion object {
+                    fun fromPatchOption(option: PatchOption<*>) =
+                        FullJsonPatchOption(
+                            option.key,
+                            option.default,
+                            option.values,
+                            option.title,
+                            option.description,
+                            option.required,
+                            option.valueType,
+                        )
+                }
+            }
+        }
+    }
 }

@@ -67,6 +67,47 @@ public final class app/revanced/library/PatchUtils {
 	public static synthetic fun getMostCommonCompatibleVersions$default (Lapp/revanced/library/PatchUtils;Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
 }
 
+public final class app/revanced/library/PatchUtils$Json {
+	public static final field INSTANCE Lapp/revanced/library/PatchUtils$Json;
+	public final fun deserialize (Ljava/io/InputStream;Ljava/lang/Class;)Ljava/util/Set;
+	public final fun serialize (Ljava/util/Set;Lkotlin/jvm/functions/Function1;ZLjava/io/OutputStream;)V
+	public static synthetic fun serialize$default (Lapp/revanced/library/PatchUtils$Json;Ljava/util/Set;Lkotlin/jvm/functions/Function1;ZLjava/io/OutputStream;ILjava/lang/Object;)V
+}
+
+public final class app/revanced/library/PatchUtils$Json$FullJsonPatch : app/revanced/library/PatchUtils$Json$JsonPatch {
+	public static final field Companion Lapp/revanced/library/PatchUtils$Json$FullJsonPatch$Companion;
+	public final fun getCompatiblePackages ()Ljava/util/Set;
+	public final fun getDependencies ()Ljava/util/Set;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOptions ()Ljava/util/Map;
+	public final fun getRequiresIntegrations ()Z
+	public final fun getUse ()Z
+	public final fun setRequiresIntegrations (Z)V
+}
+
+public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$Companion {
+	public final fun fromPatch (Lapp/revanced/patcher/patch/Patch;)Lapp/revanced/library/PatchUtils$Json$FullJsonPatch;
+}
+
+public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption {
+	public static final field Companion Lapp/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption$Companion;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getRequired ()Z
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getValueType ()Ljava/lang/String;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption$Companion {
+	public final fun fromPatchOption (Lapp/revanced/patcher/patch/options/PatchOption;)Lapp/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption;
+}
+
+public abstract interface class app/revanced/library/PatchUtils$Json$JsonPatch {
+}
+
 public abstract class app/revanced/library/adb/AdbManager {
 	public static final field Companion Lapp/revanced/library/adb/AdbManager$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V

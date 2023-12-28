@@ -4,19 +4,24 @@ import app.revanced.patcher.PatchSet
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.Patch
+import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.booleanPatchOption
+import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.intArrayPatchOption
+import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.stringPatchOption
 import org.junit.jupiter.api.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
 
 internal object PatchUtilsTest {
     private val patches =
         arrayOf(
-            newPatch("some.package", setOf("a")),
+            newPatch("some.package", setOf("a")) { stringPatchOption("string", "value") },
             newPatch("some.package", setOf("a", "b"), use = false),
             newPatch("some.package", setOf("a", "b", "c"), use = false),
             newPatch("some.other.package", setOf("b"), use = false),
-            newPatch("some.other.package", setOf("b", "c")),
+            newPatch("some.other.package", setOf("b", "c")) { booleanPatchOption("bool", true) },
             newPatch("some.other.package", setOf("b", "c", "d")),
-            newPatch("some.other.other.package"),
+            newPatch("some.other.other.package") { intArrayPatchOption("intArray", arrayOf(1, 2, 3)) },
             newPatch("some.other.other.package", setOf("a")),
             newPatch("some.other.other.package", setOf("b")),
             newPatch("some.other.other.other.package", use = false),
@@ -136,6 +141,20 @@ internal object PatchUtilsTest {
         assertEqualsVersion(null, patches, "other.package")
     }
 
+    @Test
+    fun `serializes to and deserializes from JSON string correctly`() {
+        val out = ByteArrayOutputStream()
+        PatchUtils.Json.serialize(patches, outputStream = out)
+
+        val deserialized =
+            PatchUtils.Json.deserialize(
+                ByteArrayInputStream(out.toByteArray()),
+                PatchUtils.Json.FullJsonPatch::class.java,
+            )
+
+        assert(patches.size == deserialized.size)
+    }
+
     private fun assertEqualsVersions(
         expected: PackageNameMap,
         patches: PatchSet,
@@ -170,19 +189,14 @@ internal object PatchUtilsTest {
         packageName: String,
         versions: Set<String>? = null,
         use: Boolean = true,
-    ) = object : BytecodePatch() {
+        options: Patch<*>.() -> Unit = {},
+    ) = object : BytecodePatch(
+        name = "test",
+        compatiblePackages = setOf(CompatiblePackage(packageName, versions?.toSet())),
+        use = use,
+    ) {
         init {
-            // Set the compatible packages field to the supplied package name and versions reflectively,
-            // because the setter is private but needed for testing.
-            val compatiblePackagesField = Patch::class.java.getDeclaredField("compatiblePackages")
-
-            compatiblePackagesField.isAccessible = true
-            compatiblePackagesField.set(this, setOf(CompatiblePackage(packageName, versions?.toSet())))
-
-            val useField = Patch::class.java.getDeclaredField("use")
-
-            useField.isAccessible = true
-            useField.set(this, use)
+            options()
         }
 
         override fun execute(context: BytecodeContext) {}

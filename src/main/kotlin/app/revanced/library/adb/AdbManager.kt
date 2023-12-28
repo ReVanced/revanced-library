@@ -5,10 +5,11 @@ import app.revanced.library.adb.Constants.CREATE_DIR
 import app.revanced.library.adb.Constants.DELETE
 import app.revanced.library.adb.Constants.GET_INSTALLED_PATH
 import app.revanced.library.adb.Constants.INSTALLATION_PATH
-import app.revanced.library.adb.Constants.INSTALL_MOUNT
+import app.revanced.library.adb.Constants.INSTALL_MOUNT_SCRIPT
 import app.revanced.library.adb.Constants.INSTALL_PATCHED_APK
-import app.revanced.library.adb.Constants.MOUNT_PATH
+import app.revanced.library.adb.Constants.KILL
 import app.revanced.library.adb.Constants.MOUNT_SCRIPT
+import app.revanced.library.adb.Constants.MOUNT_SCRIPT_PATH
 import app.revanced.library.adb.Constants.PATCHED_APK_PATH
 import app.revanced.library.adb.Constants.PLACEHOLDER
 import app.revanced.library.adb.Constants.RESTART
@@ -104,9 +105,8 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
 
             device.createFile(TMP_PATH, MOUNT_SCRIPT.applyReplacement(packageName))
 
-            device.run(INSTALL_MOUNT, packageName).waitFor()
-            device.run(UMOUNT, packageName).waitFor() // Sanity check.
-            device.run(MOUNT_PATH, packageName).waitFor()
+            device.run(INSTALL_MOUNT_SCRIPT, packageName).waitFor()
+            device.run(MOUNT_SCRIPT_PATH, packageName).waitFor()
             device.run(RESTART, packageName)
             device.run(DELETE, TMP_PATH)
 
@@ -118,9 +118,9 @@ sealed class AdbManager private constructor(deviceSerial: String?) {
 
             device.run(UMOUNT, packageName)
             device.run(DELETE.applyReplacement(PATCHED_APK_PATH), packageName)
-            device.run(DELETE, MOUNT_PATH.applyReplacement(packageName))
+            device.run(DELETE, MOUNT_SCRIPT_PATH.applyReplacement(packageName))
             device.run(DELETE, TMP_PATH)
-            device.run(RESTART, packageName)
+            device.run(KILL, packageName)
 
             super.uninstall(packageName)
         }
