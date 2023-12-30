@@ -52,8 +52,13 @@ object Constants {
 
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
 
+        # Mount using Magisk mirror, if available.
         MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
         MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
+        if [ ! -f ${'$'}MIRROR ]; then
+            MIRROR=""
+        fi
+
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
         # Kill the app to make use of the mount in case it's currently running
