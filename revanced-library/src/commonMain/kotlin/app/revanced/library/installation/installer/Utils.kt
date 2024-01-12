@@ -17,7 +17,7 @@ internal object Utils {
      * @return The device.
      * @throws DeviceNotFoundException If no device with the given serial is found.
      */
-    fun getDevice(
+    internal fun getDevice(
         deviceSerial: String? = null,
         logger: Logger,
     ) = with(JadbConnection().devices) {

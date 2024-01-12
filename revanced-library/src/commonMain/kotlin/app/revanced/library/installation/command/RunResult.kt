@@ -12,15 +12,15 @@ interface RunResult {
     /**
      * The output of the command.
      */
-    val output: List<String>
+    val output: String
 
     /**
-     * The error output of the command.
+     * The error of the command.
      */
-    val error: List<String>
+    val error: String
 
     /**
      * Waits for the command to finish.
      */
-    fun waitFor(): Int
+    fun waitFor() {}
 }

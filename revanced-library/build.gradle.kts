@@ -23,6 +23,12 @@ kotlin {
     }
 
     sourceSets {
+        androidMain.dependencies {
+            implementation(libs.libsu.nio)
+            implementation(libs.libsu.service)
+            implementation(libs.core.ktx)
+        }
+
         commonMain.dependencies {
             implementation(libs.revanced.patcher)
             implementation(libs.kotlin.reflect)
@@ -30,10 +36,9 @@ kotlin {
             implementation(libs.apksig)
             implementation(libs.bcpkix.jdk18on)
             implementation(libs.jackson.module.kotlin)
-            implementation(libs.libsu.core)
-            implementation(libs.libsu.nio)
-            implementation(libs.libsu.service)
+
         }
+
         commonTest.dependencies {
             implementation(libs.revanced.patcher)
             implementation(libs.kotlin.test.junit)
@@ -45,7 +50,7 @@ android {
     namespace = "app.revanced.library"
     compileSdk = 34
     defaultConfig {
-        minSdk = 21
+        minSdk = 26
     }
 
     buildFeatures {

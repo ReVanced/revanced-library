@@ -25,6 +25,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "revanced-library"
+// TODO: Figure out why this causes problems: rootProject.name = "revanced-library"
 
 include(":revanced-library")

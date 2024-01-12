@@ -1,6 +1,6 @@
 package app.revanced.library.installation.installer
 
-import app.revanced.library.installation.command.CommandRunner
+import app.revanced.library.installation.command.ShellCommandRunner
 import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION_PATH
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.GET_INSTALLED_PATH
@@ -15,29 +15,39 @@ import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
 import app.revanced.library.installation.installer.Constants.invoke
 import app.revanced.library.installation.installer.Installer.Apk
+import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import java.io.File
 
 /**
  * [RootInstaller] for installing and uninstalling [Apk] files using root by mounting.
  *
- * @param T The [CommandRunner] to use.
- * @param commandRunner The [CommandRunner] to use.
+ * @param shellCommandRunnerSupplier A supplier for the [ShellCommandRunner] to use.
+ * @throws NoRootPermissionException If the device does not have root permission.
  */
-@Suppress("SameParameterValue", "MemberVisibilityCanBePrivate")
-abstract class RootInstaller<T : CommandRunner>(
-    @Suppress("MemberVisibilityCanBePrivate") protected val commandRunner: T,
+@Suppress("MemberVisibilityCanBePrivate")
+abstract class RootInstaller(
+    shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
 ) : Installer() {
+    @Suppress("LeakingThis")
+    protected val shellCommandRunner = shellCommandRunnerSupplier(this)
+
     init {
-        if (!commandRunner.hasRootPermission()) throw NoRootPermissionException()
+        if (!shellCommandRunner.hasRootPermission()) throw NoRootPermissionException()
     }
 
+    /**
+     * Installs the given [apk] by mounting.
+     *
+     * @param apk The [Apk] to install.
+     * @throws PackageNameRequiredException If the [Apk] does not have a package name.
+     */
     override fun install(apk: Apk) {
         logger.info("Installing ${apk.packageName} by mounting")
 
         val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
 
         // Setup files.
-        TMP_FILE_PATH.write(apk.file)
+        apk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH().waitFor()
         INSTALL_PATCHED_APK(packageName)().waitFor()
 
@@ -69,21 +79,21 @@ abstract class RootInstaller<T : CommandRunner>(
     /**
      * Runs a command on the device.
      */
-    protected operator fun String.invoke(root: Boolean = true) = commandRunner(this, root)
+    protected operator fun String.invoke() = shellCommandRunner(this)
 
     /**
-     * Writes the given [file] to the file.
+     * Moves the given file to the given [targetFilePath].
      *
-     * @param file The file to create.
+     * @param targetFilePath The target file path.
      */
-    protected fun String.write(file: File) = commandRunner.write(this, file.inputStream())
+    protected fun File.move(targetFilePath: String) = shellCommandRunner.move(this, targetFilePath)
 
     /**
      * Writes the given [content] to the file.
      *
      * @param content The content of the file.
      */
-    protected fun String.write(content: String) = commandRunner.write(this, content.byteInputStream())
+    protected fun String.write(content: String) = shellCommandRunner.write(content.byteInputStream(), this)
 
     /**
      * Asserts that the package is installed.
@@ -96,9 +106,9 @@ abstract class RootInstaller<T : CommandRunner>(
         }
     }
 
-    class FailedToFindInstalledPackageException internal constructor(packageName: String) :
+    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) :
         Exception("Failed to find installed package \"$packageName\" because no activity was found")
 
-    class PackageNameRequiredException internal constructor() : Exception("Package name is required")
-
+    internal class PackageNameRequiredException internal constructor() : Exception("Package name is required")
+    internal class NoRootPermissionException internal constructor() : Exception("No root permission")
 }

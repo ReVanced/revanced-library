@@ -1,28 +1,92 @@
 package app.revanced.library.installation.installer
 
-import android.content.Context
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.content.*
+import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import app.revanced.library.installation.installer.Installer.Apk
+import java.io.Closeable
+import java.io.File
 
 /**
  * [LocalInstaller] for installing and uninstalling [Apk] files locally.
  *
+ * @param context The [Context] to use for installing and uninstalling.
+ * @param packageInstallerHandler The handler to use for installing and uninstalling.
+ *
  * @see Installer
  */
 @Suppress("unused")
-class LocalInstaller(private val context: Context) : Installer() {
+class LocalInstaller(
+    private val context: Context,
+    private val packageInstallerHandler: (packageInstallerFlags: Int, extraStatusMessage: String, packageName: String) -> Unit,
+) : Installer(), Closeable {
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val pmStatus = intent.getIntExtra(LocalInstallerService.EXTRA_STATUS, -999)
+            val extra = intent.getStringExtra(LocalInstallerService.EXTRA_STATUS_MESSAGE)!!
+            val packageName = intent.getStringExtra(LocalInstallerService.EXTRA_PACKAGE_NAME)!!
+
+            packageInstallerHandler(pmStatus, extra, packageName)
+        }
+    }
+
+    private val intentSender
+        get() = PendingIntent.getService(
+            context,
+            0,
+            Intent(context, LocalInstallerService::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT
+        ).intentSender
+
+    init {
+        ContextCompat.registerReceiver(context, broadcastReceiver, IntentFilter().apply {
+            addAction(LocalInstallerService.ACTION)
+        }, ContextCompat.RECEIVER_NOT_EXPORTED)
+    }
+
     override fun install(apk: Apk) {
         logger.info("Installing ${apk.file.name}")
 
-        // TODO: Implement
+        val packageInstaller = context.packageManager.packageInstaller
+
+        packageInstaller.openSession(packageInstaller.createSession(sessionParams)).use { session ->
+            session.writeApk(apk.file)
+            session.commit(intentSender)
+        }
 
         super.install(apk)
     }
 
+    @SuppressLint("MissingPermission")
     override fun uninstall(packageName: String) {
         logger.info("Uninstalling $packageName")
 
-        // TODO: Implement
+        val packageInstaller = context.packageManager.packageInstaller
+
+        packageInstaller.uninstall(packageName, intentSender)
 
         super.uninstall(packageName)
+    }
+
+    override fun close() = context.unregisterReceiver(broadcastReceiver)
+
+    companion object {
+        private val sessionParams = PackageInstaller.SessionParams(
+            PackageInstaller.SessionParams.MODE_FULL_INSTALL
+        ).apply {
+            setInstallReason(PackageManager.INSTALL_REASON_USER)
+        }
+
+        private fun PackageInstaller.Session.writeApk(apk: File) {
+            apk.inputStream().use { inputStream ->
+                openWrite(apk.name, 0, apk.length()).use { outputStream ->
+                    inputStream.copyTo(outputStream, 1024 * 1024)
+                    fsync(outputStream)
+                }
+            }
+        }
     }
 }

@@ -177,43 +177,42 @@ public final class app/revanced/library/Utils {
 	public final fun isAndroidEnvironment ()Z
 }
 
-public final class app/revanced/library/installation/command/AdbCommandRunner : app/revanced/library/installation/command/CommandRunner {
+public final class app/revanced/library/installation/command/AdbShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner {
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Lse/vidstige/jadb/JadbDevice;)V
 	public fun hasRootPermission ()Z
-	public fun invoke (Ljava/lang/String;Z)Lapp/revanced/library/installation/command/RunResult;
-	public final fun push (Ljava/io/File;Ljava/lang/String;)V
-	public fun write (Ljava/lang/String;Ljava/io/InputStream;)V
-	public fun write (Ljava/lang/String;Ljava/lang/String;)V
+	public fun move (Ljava/io/File;Ljava/lang/String;)V
+	public fun write (Ljava/io/InputStream;Ljava/lang/String;)V
 }
 
-public abstract interface class app/revanced/library/installation/command/CommandRunner {
-	public abstract fun hasRootPermission ()Z
-	public abstract fun invoke (Ljava/lang/String;Z)Lapp/revanced/library/installation/command/RunResult;
-	public abstract fun write (Ljava/lang/String;Ljava/io/InputStream;)V
-	public abstract fun write (Ljava/lang/String;Ljava/lang/String;)V
-}
-
-public final class app/revanced/library/installation/command/CommandRunner$DefaultImpls {
-	public static synthetic fun invoke$default (Lapp/revanced/library/installation/command/CommandRunner;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/installation/command/RunResult;
-	public static fun write (Lapp/revanced/library/installation/command/CommandRunner;Ljava/lang/String;Ljava/lang/String;)V
-}
-
-public final class app/revanced/library/installation/command/LocalCommandRunner : android/content/ServiceConnection, app/revanced/library/installation/command/CommandRunner {
-	public fun <init> (Landroid/content/Context;)V
+public final class app/revanced/library/installation/command/LocalShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner, android/content/ServiceConnection {
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function0;)V
 	public fun hasRootPermission ()Z
-	public fun invoke (Ljava/lang/String;Z)Lapp/revanced/library/installation/command/RunResult;
+	public fun move (Ljava/io/File;Ljava/lang/String;)V
 	public fun onServiceConnected (Landroid/content/ComponentName;Landroid/os/IBinder;)V
 	public fun onServiceDisconnected (Landroid/content/ComponentName;)V
-	public fun write (Ljava/lang/String;Ljava/io/InputStream;)V
-	public fun write (Ljava/lang/String;Ljava/lang/String;)V
+	public fun write (Ljava/io/InputStream;Ljava/lang/String;)V
 }
 
 public abstract interface class app/revanced/library/installation/command/RunResult {
-	public abstract fun getError ()Ljava/util/List;
+	public abstract fun getError ()Ljava/lang/String;
 	public abstract fun getExitCode ()I
-	public abstract fun getOutput ()Ljava/util/List;
-	public abstract fun waitFor ()I
+	public abstract fun getOutput ()Ljava/lang/String;
+	public abstract fun waitFor ()V
+}
+
+public final class app/revanced/library/installation/command/RunResult$DefaultImpls {
+	public static fun waitFor (Lapp/revanced/library/installation/command/RunResult;)V
+}
+
+public abstract class app/revanced/library/installation/command/ShellCommandRunner {
+	public fun <init> ()V
+	protected final fun getLogger ()Ljava/util/logging/Logger;
+	public abstract fun hasRootPermission ()Z
+	public final fun invoke (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
+	public abstract fun move (Ljava/io/File;Ljava/lang/String;)V
+	protected abstract fun runCommand (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
+	public abstract fun write (Ljava/io/InputStream;Ljava/lang/String;)V
 }
 
 public final class app/revanced/library/installation/installer/AdbInstaller : app/revanced/library/installation/installer/Installer {
@@ -264,34 +263,36 @@ public final class app/revanced/library/installation/installer/Installer$Apk {
 	public final fun getPackageName ()Ljava/lang/String;
 }
 
-public final class app/revanced/library/installation/installer/LocalInstaller : app/revanced/library/installation/installer/Installer {
-	public fun <init> (Landroid/content/Context;)V
+public final class app/revanced/library/installation/installer/LocalInstaller : app/revanced/library/installation/installer/Installer, java/io/Closeable {
+	public static final field Companion Lapp/revanced/library/installation/installer/LocalInstaller$Companion;
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function3;)V
+	public fun close ()V
 	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
 	public fun uninstall (Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/installer/LocalInstaller$Companion {
+}
+
+public final class app/revanced/library/installation/installer/LocalInstallerService : android/app/Service {
+	public fun <init> ()V
+	public fun onBind (Landroid/content/Intent;)Landroid/os/IBinder;
+	public fun onStartCommand (Landroid/content/Intent;II)I
 }
 
 public final class app/revanced/library/installation/installer/LocalRootInstaller : app/revanced/library/installation/installer/RootInstaller {
-	public fun <init> (Landroid/content/Context;)V
-}
-
-public final class app/revanced/library/installation/installer/NoRootPermissionException : java/lang/Exception {
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public abstract class app/revanced/library/installation/installer/RootInstaller : app/revanced/library/installation/installer/Installer {
-	public fun <init> (Lapp/revanced/library/installation/command/CommandRunner;)V
-	protected final fun getCommandRunner ()Lapp/revanced/library/installation/command/CommandRunner;
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	protected final fun getShellCommandRunner ()Lapp/revanced/library/installation/command/ShellCommandRunner;
 	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
-	protected final fun invoke (Ljava/lang/String;Z)Lapp/revanced/library/installation/command/RunResult;
-	public static synthetic fun invoke$default (Lapp/revanced/library/installation/installer/RootInstaller;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/installation/command/RunResult;
+	protected final fun invoke (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
+	protected final fun move (Ljava/io/File;Ljava/lang/String;)V
 	public fun uninstall (Ljava/lang/String;)V
-	protected final fun write (Ljava/lang/String;Ljava/io/File;)V
 	protected final fun write (Ljava/lang/String;Ljava/lang/String;)V
-}
-
-public final class app/revanced/library/installation/installer/RootInstaller$FailedToFindInstalledPackageException : java/lang/Exception {
-}
-
-public final class app/revanced/library/installation/installer/RootInstaller$PackageNameRequiredException : java/lang/Exception {
 }
 
 public final class app/revanced/library/logging/Logger {
