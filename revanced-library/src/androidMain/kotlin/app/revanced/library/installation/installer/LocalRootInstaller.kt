@@ -5,6 +5,7 @@ import app.revanced.library.installation.command.LocalShellCommandRunner
 import app.revanced.library.installation.installer.Installer.Apk
 import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import com.topjohnwu.superuser.ipc.RootService
+import java.io.Closeable
 
 /**
  * [LocalRootInstaller] for installing and uninstalling [Apk] files locally with using root permissions by mounting.
@@ -17,6 +18,8 @@ import com.topjohnwu.superuser.ipc.RootService
  * @see LocalShellCommandRunner
  */
 @Suppress("unused")
-class LocalRootInstaller(context: Context, onReady: RootInstaller.() -> Unit = {}) : RootInstaller(
-    { installer -> LocalShellCommandRunner(context) { installer.onReady() } }
-)
+class LocalRootInstaller(context: Context, onReady: LocalRootInstaller.() -> Unit = {}) : RootInstaller(
+    { installer -> LocalShellCommandRunner(context) { (installer as LocalRootInstaller).onReady() } }
+), Closeable {
+    override fun close() = (shellCommandRunner as LocalShellCommandRunner).close()
+}

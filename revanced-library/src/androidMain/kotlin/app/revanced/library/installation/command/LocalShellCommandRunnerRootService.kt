@@ -1,7 +1,7 @@
 package app.revanced.library.installation.command
 
-import aidl.app.revanced.library.IRootService
 import android.content.Intent
+import app.revanced.library.IRootService
 import com.topjohnwu.superuser.ipc.RootService
 import com.topjohnwu.superuser.nio.FileSystemManager
 

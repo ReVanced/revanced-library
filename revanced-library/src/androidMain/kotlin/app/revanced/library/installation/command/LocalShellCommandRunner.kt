@@ -1,15 +1,16 @@
 package app.revanced.library.installation.command
 
-import aidl.app.revanced.library.IRootService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import app.revanced.library.IRootService
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.internal.BuilderImpl
 import com.topjohnwu.superuser.ipc.RootService
 import com.topjohnwu.superuser.nio.FileSystemManager
+import java.io.Closeable
 import java.io.File
 import java.io.InputStream
 
@@ -25,9 +26,8 @@ import java.io.InputStream
 class LocalShellCommandRunner(
     private val context: Context,
     private val onReady: () -> Unit
-) : ShellCommandRunner(), ServiceConnection {
+) : ShellCommandRunner(), ServiceConnection, Closeable {
     private var fileSystemManager: FileSystemManager? = null
-    private val shell = BuilderImpl.create().setFlags(Shell.FLAG_MOUNT_MASTER).build()
 
     init {
         logger.info("Binding to RootService")
@@ -79,6 +79,12 @@ class LocalShellCommandRunner(
         fileSystemManager = null
 
         logger.info("LocalShellCommandRunner service is disconnected")
+    }
+
+    override fun close() = RootService.unbind(this)
+
+    private companion object {
+        private val shell = BuilderImpl.create().setFlags(Shell.FLAG_MOUNT_MASTER).build()
     }
 
     internal class NotReadyException internal constructor(message: String) : Exception(message)
