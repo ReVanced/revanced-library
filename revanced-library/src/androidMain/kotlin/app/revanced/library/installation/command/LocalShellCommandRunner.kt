@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import app.revanced.library.IRootService
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.internal.BuilderImpl
 import com.topjohnwu.superuser.ipc.RootService
@@ -65,10 +64,8 @@ class LocalShellCommandRunner(
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val ipc = IRootService.Stub.asInterface(service)
-        val binder = ipc.fileSystemService
-
-        fileSystemManager = FileSystemManager.getRemote(binder)
+        val ipc = ILocalShellCommandRunnerRootService.Stub.asInterface(service)
+        fileSystemManager = FileSystemManager.getRemote(ipc.fileSystemService)
 
         logger.info("LocalShellCommandRunner service is ready")
 
