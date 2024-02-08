@@ -1,3 +1,10 @@
+## [1.5.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.0...v1.5.1-dev.1) (2024-02-08)
+
+
+### Bug Fixes
+
+* Map dependencies from `KClass` into `String` to fix serialization ([57e36ab](https://github.com/ReVanced/revanced-library/commit/57e36ab5c15a5fa7c50fb689ee43ad4eb9a4a515))
+
 # [1.5.0](https://github.com/ReVanced/revanced-library/compare/v1.4.0...v1.5.0) (2023-12-28)
 
 
