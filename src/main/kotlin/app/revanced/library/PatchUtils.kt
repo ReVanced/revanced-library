@@ -1,6 +1,5 @@
 package app.revanced.library
 
-import app.revanced.patcher.PatchClass
 import app.revanced.patcher.PatchSet
 import app.revanced.patcher.patch.Patch
 import app.revanced.patcher.patch.options.PatchOption
@@ -31,7 +30,7 @@ object PatchUtils {
         "Use getMostCommonCompatibleVersions instead.",
         ReplaceWith(
             "getMostCommonCompatibleVersions(patches, setOf(packageName))" +
-                ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
+                    ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
         ),
     )
     fun getMostCommonCompatibleVersion(
@@ -149,7 +148,7 @@ object PatchUtils {
             val name: String?,
             val description: String?,
             val compatiblePackages: Set<Patch.CompatiblePackage>?,
-            val dependencies: Set<PatchClass>?,
+            val dependencies: Set<String>?,
             val use: Boolean,
             var requiresIntegrations: Boolean,
             val options: Map<String, FullJsonPatchOption<*>>,
@@ -160,7 +159,7 @@ object PatchUtils {
                         patch.name,
                         patch.description,
                         patch.compatiblePackages,
-                        patch.dependencies,
+                        buildSet { patch.dependencies?.forEach { add(it.toString()) } },
                         patch.use,
                         patch.requiresIntegrations,
                         patch.options.mapValues { FullJsonPatchOption.fromPatchOption(it.value) },
