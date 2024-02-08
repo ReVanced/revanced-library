@@ -1,3 +1,25 @@
+## [1.5.1-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.1...v1.5.1-dev.2) (2024-02-08)
+
+
+### Bug Fixes
+
+* Use the JVM name instead of the value from `KClass#toString` ([d18e436](https://github.com/ReVanced/revanced-library/commit/d18e436de1df14452ecaa7d827be5e6596ba8a2d))
+
+## [1.5.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.0...v1.5.1-dev.1) (2024-02-08)
+
+
+### Bug Fixes
+
+* Map dependencies from `KClass` into `String` to fix serialization ([57e36ab](https://github.com/ReVanced/revanced-library/commit/57e36ab5c15a5fa7c50fb689ee43ad4eb9a4a515))
+
+# [1.5.0](https://github.com/ReVanced/revanced-library/compare/v1.4.0...v1.5.0) (2023-12-28)
+
+
+### Features
+
+* Add JSON de- and serialization of patches ([ecff6fe](https://github.com/ReVanced/revanced-library/commit/ecff6fe0d3889d729a0badcfa28b89610bd27d48))
+* Improve mount reliability by unmounting existing mounts and killing running apps ([9fda407](https://github.com/ReVanced/revanced-library/commit/9fda40744173669c84b0c2599ae5ac5d39591798))
+
 # [1.5.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.0-dev.1...v1.5.0-dev.2) (2023-12-07)
 
 
