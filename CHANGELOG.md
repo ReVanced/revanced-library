@@ -1,3 +1,10 @@
+## [1.5.1-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.1...v1.5.1-dev.2) (2024-02-08)
+
+
+### Bug Fixes
+
+* Use the JVM name instead of the value from `KClass#toString` ([d18e436](https://github.com/ReVanced/revanced-library/commit/d18e436de1df14452ecaa7d827be5e6596ba8a2d))
+
 ## [1.5.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.0...v1.5.1-dev.1) (2024-02-08)
 
 
