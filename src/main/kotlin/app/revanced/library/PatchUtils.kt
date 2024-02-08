@@ -6,6 +6,7 @@ import app.revanced.patcher.patch.options.PatchOption
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.InputStream
 import java.io.OutputStream
+import kotlin.reflect.jvm.jvmName
 
 typealias PackageName = String
 typealias Version = String
@@ -159,7 +160,7 @@ object PatchUtils {
                         patch.name,
                         patch.description,
                         patch.compatiblePackages,
-                        buildSet { patch.dependencies?.forEach { add(it.toString()) } },
+                        buildSet { patch.dependencies?.forEach { add(it.jvmName) } },
                         patch.use,
                         patch.requiresIntegrations,
                         patch.options.mapValues { FullJsonPatchOption.fromPatchOption(it.value) },
