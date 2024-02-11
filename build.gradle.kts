@@ -16,10 +16,11 @@ repositories {
 dependencies {
     implementation(libs.revanced.patcher)
     implementation(libs.kotlin.reflect)
-    implementation(libs.jadb) // Updated fork
-    implementation(libs.apksig)
-    implementation(libs.bcpkix.jdk18on)
+    implementation(libs.jadb) // Fork with Shell v2 support.
     implementation(libs.jackson.module.kotlin)
+    implementation(libs.apkzlib)
+    implementation(libs.bcpkix.jdk15on)
+    implementation(libs.guava)
 
     testImplementation(libs.revanced.patcher)
     testImplementation(libs.kotlin.test)

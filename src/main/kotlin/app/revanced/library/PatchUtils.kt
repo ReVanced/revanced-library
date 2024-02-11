@@ -21,35 +21,6 @@ typealias PackageNameMap = Map<PackageName, VersionMap>
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object PatchUtils {
     /**
-     * Get the version that is most common for [packageName] in the supplied set of [patches].
-     *
-     * @param patches The set of patches to check.
-     * @param packageName The name of the compatible package.
-     * @return The most common version of.
-     */
-    @Deprecated(
-        "Use getMostCommonCompatibleVersions instead.",
-        ReplaceWith(
-            "getMostCommonCompatibleVersions(patches, setOf(packageName))" +
-                    ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
-        ),
-    )
-    fun getMostCommonCompatibleVersion(
-        patches: PatchSet,
-        packageName: String,
-    ) = patches
-        .mapNotNull {
-            // Map all patches to their compatible packages with version constraints.
-            it.compatiblePackages?.firstOrNull { compatiblePackage ->
-                compatiblePackage.name == packageName && compatiblePackage.versions?.isNotEmpty() == true
-            }
-        }
-        .flatMap { it.versions!! }
-        .groupingBy { it }
-        .eachCount()
-        .maxByOrNull { it.value }?.key
-
-    /**
      * Get the count of versions for each compatible package from a supplied set of [patches] ordered by the most common version.
      *
      * @param patches The set of patches to check.
