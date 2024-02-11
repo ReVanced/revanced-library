@@ -1,21 +1,23 @@
 [versions]
-apksig = "8.1.4"
-bcpkix-jdk18on = "1.76"
-jackson-module-kotlin = "2.14.3"
+jackson-module-kotlin = "2.15.0"
 jadb = "1.2.1"
-kotlin-reflect = "1.9.20"
-kotlin-test = "1.9.20"
-revanced-patcher = "19.2.0"
-binary-compatibility-validator = "0.13.2"
+kotlin-reflect = "1.9.22"
+kotlin-test = "1.9.22"
+revanced-patcher = "19.3.1"
+binary-compatibility-validator = "0.14.0"
+apkzlib = "8.2.2"
+bcpkix-jdk15on = "1.70"
+guava = "33.0.0-jre"
 
 [libraries]
-apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
-bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-jdk18on" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }
 jadb = { module = "app.revanced:jadb", version.ref = "jadb" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-reflect" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-test" }
 revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
+apkzlib = { module = "com.android.tools.build:apkzlib", version.ref = "apkzlib" }
+bcpkix-jdk15on = { module = "org.bouncycastle:bcpkix-jdk15on", version.ref = "bcpkix-jdk15on" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
 [plugins]
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }

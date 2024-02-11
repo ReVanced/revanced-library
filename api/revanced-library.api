@@ -1,14 +1,13 @@
 public final class app/revanced/library/ApkSigner {
 	public static final field INSTANCE Lapp/revanced/library/ApkSigner;
-	public final fun newApkSignerBuilder (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;Ljava/lang/String;Ljava/lang/String;)Lcom/android/apksig/ApkSigner$Builder;
-	public final fun newApkSignerBuilder (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/android/apksig/ApkSigner$Builder;
-	public final fun newKeyStore (Ljava/io/OutputStream;Ljava/lang/String;Ljava/util/List;)V
-	public final fun newKeyStore (Ljava/util/List;)Ljava/security/KeyStore;
+	public final fun newApkSigner (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newApkSigner (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newKeyStore (Ljava/io/OutputStream;Ljava/lang/String;Ljava/util/Set;)V
+	public final fun newKeyStore (Ljava/util/Set;)Ljava/security/KeyStore;
 	public final fun newPrivateKeyCertificatePair (Ljava/lang/String;Ljava/util/Date;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public static synthetic fun newPrivateKeyCertificatePair$default (Lapp/revanced/library/ApkSigner;Ljava/lang/String;Ljava/util/Date;ILjava/lang/Object;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public final fun readKeyCertificatePair (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public final fun readKeyStore (Ljava/io/InputStream;Ljava/lang/String;)Ljava/security/KeyStore;
-	public final fun signApk (Lcom/android/apksig/ApkSigner$Builder;Ljava/io/File;Ljava/io/File;)V
 }
 
 public final class app/revanced/library/ApkSigner$KeyStoreEntry {
@@ -25,10 +24,16 @@ public final class app/revanced/library/ApkSigner$PrivateKeyCertificatePair {
 	public final fun getPrivateKey ()Ljava/security/PrivateKey;
 }
 
+public final class app/revanced/library/ApkSigner$Signer {
+	public final fun getSigningExtension ()Lcom/android/tools/build/apkzlib/sign/SigningExtension;
+	public final fun signApk (Lcom/android/tools/build/apkzlib/zip/ZFile;)V
+	public final fun signApk (Ljava/io/File;)V
+}
+
 public final class app/revanced/library/ApkUtils {
 	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
-	public final fun copyAligned (Ljava/io/File;Ljava/io/File;Lapp/revanced/patcher/PatcherResult;)V
-	public final fun sign (Ljava/io/File;Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
+	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
+	public final fun writePatcherResult (Ljava/io/File;Lapp/revanced/patcher/PatcherResult;)V
 }
 
 public final class app/revanced/library/ApkUtils$SigningOptions {
@@ -160,25 +165,5 @@ public final class app/revanced/library/logging/Logger {
 	public final fun setDefault ()V
 	public final fun setFormat (Ljava/lang/String;)V
 	public static synthetic fun setFormat$default (Lapp/revanced/library/logging/Logger;Ljava/lang/String;ILjava/lang/Object;)V
-}
-
-public final class app/revanced/library/zip/ZipFile : java/io/Closeable {
-	public static final field ApkZipFile Lapp/revanced/library/zip/ZipFile$ApkZipFile;
-	public fun <init> (Ljava/io/File;)V
-	public final fun addEntryCompressData (Lapp/revanced/library/zip/structures/ZipEntry;[B)V
-	public fun close ()V
-	public final fun copyEntriesFromFileAligned (Lapp/revanced/library/zip/ZipFile;Lkotlin/jvm/functions/Function1;)V
-}
-
-public final class app/revanced/library/zip/ZipFile$ApkZipFile {
-	public final fun getApkZipEntryAlignment ()Lkotlin/jvm/functions/Function1;
-}
-
-public final class app/revanced/library/zip/structures/ZipEntry {
-	public static final field Companion Lapp/revanced/library/zip/structures/ZipEntry$Companion;
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class app/revanced/library/zip/structures/ZipEntry$Companion {
 }
 
