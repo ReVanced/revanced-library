@@ -10,8 +10,15 @@ group = "app.revanced"
 repositories {
     mavenCentral()
     mavenLocal()
-    maven { url = uri("https://jitpack.io") }
     google()
+    maven {
+        // A repository must be speficied for some reason. "registry" is a dummy.
+        url = uri("https://maven.pkg.github.com/revanced/registry")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
@@ -43,6 +50,17 @@ java {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/revanced/revanced-library")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+
     publications {
         create<MavenPublication>("revanced-library-publication") {
             from(components["java"])
