@@ -1,3 +1,15 @@
+# [2.0.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.2...v2.0.0-dev.1) (2024-02-14)
+
+
+### Features
+
+* Use `apkzlib` instead of own implementations and bump ReVanced Patcher ([3aa6dc2](https://github.com/ReVanced/revanced-library/commit/3aa6dc223a9a1a2f735eda407917548ecbd366aa))
+
+
+### BREAKING CHANGES
+
+* This commit removes deprecated APIs and bumps ReVanced Patcher. Because of it's changes, `apkzlib` is now used instead of own implementations of `ZipFile`
+
 ## [1.5.1-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.1...v1.5.1-dev.2) (2024-02-08)
 
 
