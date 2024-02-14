@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package app.revanced.library
 
 import app.revanced.library.AdbManager.Apk

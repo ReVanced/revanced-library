@@ -13,5 +13,3 @@ pluginManagement {
         mavenCentral()
     }
 }
-
-include(":revanced-library")
