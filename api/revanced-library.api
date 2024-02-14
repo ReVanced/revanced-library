@@ -32,8 +32,8 @@ public final class app/revanced/library/ApkSigner$Signer {
 
 public final class app/revanced/library/ApkUtils {
 	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
+	public final fun applyTo (Lapp/revanced/patcher/PatcherResult;Ljava/io/File;)V
 	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
-	public final fun writePatcherResult (Ljava/io/File;Lapp/revanced/patcher/PatcherResult;)V
 }
 
 public final class app/revanced/library/ApkUtils$SigningOptions {
@@ -67,7 +67,6 @@ public final class app/revanced/library/Options$Patch$Option {
 
 public final class app/revanced/library/PatchUtils {
 	public static final field INSTANCE Lapp/revanced/library/PatchUtils;
-	public final fun getMostCommonCompatibleVersion (Ljava/util/Set;Ljava/lang/String;)Ljava/lang/String;
 	public final fun getMostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
 	public static synthetic fun getMostCommonCompatibleVersions$default (Lapp/revanced/library/PatchUtils;Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
 }
