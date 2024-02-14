@@ -1,7 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.9.10"
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.binary.compatibility.validator)
     `maven-publish`
+    signing
 }
 
 group = "app.revanced"
@@ -43,7 +44,7 @@ java {
 
 publishing {
     publications {
-        create<MavenPublication>("gpr") {
+        create<MavenPublication>("revanced-library-publication") {
             from(components["java"])
 
             version = project.version.toString()
@@ -76,4 +77,9 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["revanced-library-publication"])
 }
