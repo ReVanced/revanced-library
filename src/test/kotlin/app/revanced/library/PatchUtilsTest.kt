@@ -61,12 +61,12 @@ internal object PatchUtilsTest {
         fun assertEqualsExpected(compatiblePackageNames: Set<String>?) =
             assertEqualsVersions(
                 expected =
-                    mapOf(
-                        "some.package" to linkedMapOf("a" to 3, "b" to 2, "c" to 1),
-                        "some.other.package" to linkedMapOf("b" to 3, "c" to 2, "d" to 1),
-                        "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
-                        "some.other.other.other.package" to linkedMapOf(),
-                    ),
+                mapOf(
+                    "some.package" to linkedMapOf("a" to 3, "b" to 2, "c" to 1),
+                    "some.other.package" to linkedMapOf("b" to 3, "c" to 2, "d" to 1),
+                    "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
+                    "some.other.other.other.package" to linkedMapOf(),
+                ),
                 patches,
                 compatiblePackageNames,
                 countUnusedPatches = true,
@@ -74,12 +74,12 @@ internal object PatchUtilsTest {
 
         assertEqualsExpected(
             compatiblePackageNames =
-                setOf(
-                    "some.package",
-                    "some.other.package",
-                    "some.other.other.package",
-                    "some.other.other.other.package",
-                ),
+            setOf(
+                "some.package",
+                "some.other.package",
+                "some.other.other.package",
+                "some.other.other.other.package",
+            ),
         )
 
         assertEqualsExpected(
@@ -91,19 +91,19 @@ internal object PatchUtilsTest {
     fun `common versions correctly ordered for each package without counting unused patches`() {
         assertEqualsVersions(
             expected =
-                mapOf(
-                    "some.package" to linkedMapOf("a" to 1),
-                    "some.other.package" to linkedMapOf("b" to 2, "c" to 2, "d" to 1),
-                    "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
-                ),
+            mapOf(
+                "some.package" to linkedMapOf("a" to 1),
+                "some.other.package" to linkedMapOf("b" to 2, "c" to 2, "d" to 1),
+                "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
+            ),
             patches,
             compatiblePackageNames =
-                setOf(
-                    "some.package",
-                    "some.other.package",
-                    "some.other.other.package",
-                    "some.other.other.other.package",
-                ),
+            setOf(
+                "some.package",
+                "some.other.package",
+                "some.other.other.package",
+                "some.other.other.other.package",
+            ),
             countUnusedPatches = false,
         )
     }
@@ -170,14 +170,6 @@ internal object PatchUtilsTest {
         patches: PatchSet,
         compatiblePackageName: String,
     ) {
-        // Test both the deprecated and the new method.
-
-        @Suppress("DEPRECATION")
-        assertEquals(
-            expected,
-            PatchUtils.getMostCommonCompatibleVersion(patches, compatiblePackageName),
-        )
-
         assertEquals(
             expected,
             PatchUtils.getMostCommonCompatibleVersions(patches, setOf(compatiblePackageName))
