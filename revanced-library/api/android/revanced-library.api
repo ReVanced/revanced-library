@@ -1,21 +1,3 @@
-public abstract interface class aidl/app/revanced/library/IRootService : android/os/IInterface {
-	public static final field DESCRIPTOR Ljava/lang/String;
-	public abstract fun getFileSystemService ()Landroid/os/IBinder;
-}
-
-public class aidl/app/revanced/library/IRootService$Default : aidl/app/revanced/library/IRootService {
-	public fun <init> ()V
-	public fun asBinder ()Landroid/os/IBinder;
-	public fun getFileSystemService ()Landroid/os/IBinder;
-}
-
-public abstract class aidl/app/revanced/library/IRootService$Stub : android/os/Binder, aidl/app/revanced/library/IRootService {
-	public fun <init> ()V
-	public fun asBinder ()Landroid/os/IBinder;
-	public static fun asInterface (Landroid/os/IBinder;)Laidl/app/revanced/library/IRootService;
-	public fun onTransact (ILandroid/os/Parcel;Landroid/os/Parcel;I)Z
-}
-
 public abstract class app/revanced/library/AdbManager {
 	public static final field Companion Lapp/revanced/library/AdbManager$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -64,15 +46,14 @@ public final class app/revanced/library/AdbManager$UserAdbManager : app/revanced
 
 public final class app/revanced/library/ApkSigner {
 	public static final field INSTANCE Lapp/revanced/library/ApkSigner;
-	public final fun newApkSignerBuilder (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;Ljava/lang/String;Ljava/lang/String;)Lcom/android/apksig/ApkSigner$Builder;
-	public final fun newApkSignerBuilder (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/android/apksig/ApkSigner$Builder;
-	public final fun newKeyStore (Ljava/io/OutputStream;Ljava/lang/String;Ljava/util/List;)V
-	public final fun newKeyStore (Ljava/util/List;)Ljava/security/KeyStore;
+	public final fun newApkSigner (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newApkSigner (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newKeyStore (Ljava/io/OutputStream;Ljava/lang/String;Ljava/util/Set;)V
+	public final fun newKeyStore (Ljava/util/Set;)Ljava/security/KeyStore;
 	public final fun newPrivateKeyCertificatePair (Ljava/lang/String;Ljava/util/Date;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public static synthetic fun newPrivateKeyCertificatePair$default (Lapp/revanced/library/ApkSigner;Ljava/lang/String;Ljava/util/Date;ILjava/lang/Object;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public final fun readKeyCertificatePair (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public final fun readKeyStore (Ljava/io/InputStream;Ljava/lang/String;)Ljava/security/KeyStore;
-	public final fun signApk (Lcom/android/apksig/ApkSigner$Builder;Ljava/io/File;Ljava/io/File;)V
 }
 
 public final class app/revanced/library/ApkSigner$KeyStoreEntry {
@@ -89,10 +70,16 @@ public final class app/revanced/library/ApkSigner$PrivateKeyCertificatePair {
 	public final fun getPrivateKey ()Ljava/security/PrivateKey;
 }
 
+public final class app/revanced/library/ApkSigner$Signer {
+	public final fun getSigningExtension ()Lcom/android/tools/build/apkzlib/sign/SigningExtension;
+	public final fun signApk (Lcom/android/tools/build/apkzlib/zip/ZFile;)V
+	public final fun signApk (Ljava/io/File;)V
+}
+
 public final class app/revanced/library/ApkUtils {
 	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
-	public final fun copyAligned (Ljava/io/File;Ljava/io/File;Lapp/revanced/patcher/PatcherResult;)V
-	public final fun sign (Ljava/io/File;Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
+	public final fun applyTo (Lapp/revanced/patcher/PatcherResult;Ljava/io/File;)V
+	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
 }
 
 public final class app/revanced/library/ApkUtils$SigningOptions {
@@ -126,7 +113,6 @@ public final class app/revanced/library/Options$Patch$Option {
 
 public final class app/revanced/library/PatchUtils {
 	public static final field INSTANCE Lapp/revanced/library/PatchUtils;
-	public final fun getMostCommonCompatibleVersion (Ljava/util/Set;Ljava/lang/String;)Ljava/lang/String;
 	public final fun getMostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
 	public static synthetic fun getMostCommonCompatibleVersions$default (Lapp/revanced/library/PatchUtils;Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
 }
@@ -185,8 +171,27 @@ public final class app/revanced/library/installation/command/AdbShellCommandRunn
 	public fun write (Ljava/io/InputStream;Ljava/lang/String;)V
 }
 
-public final class app/revanced/library/installation/command/LocalShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner, android/content/ServiceConnection {
+public abstract interface class app/revanced/library/installation/command/ILocalShellCommandRunnerRootService : android/os/IInterface {
+	public static final field DESCRIPTOR Ljava/lang/String;
+	public abstract fun getFileSystemService ()Landroid/os/IBinder;
+}
+
+public class app/revanced/library/installation/command/ILocalShellCommandRunnerRootService$Default : app/revanced/library/installation/command/ILocalShellCommandRunnerRootService {
+	public fun <init> ()V
+	public fun asBinder ()Landroid/os/IBinder;
+	public fun getFileSystemService ()Landroid/os/IBinder;
+}
+
+public abstract class app/revanced/library/installation/command/ILocalShellCommandRunnerRootService$Stub : android/os/Binder, app/revanced/library/installation/command/ILocalShellCommandRunnerRootService {
+	public fun <init> ()V
+	public fun asBinder ()Landroid/os/IBinder;
+	public static fun asInterface (Landroid/os/IBinder;)Lapp/revanced/library/installation/command/ILocalShellCommandRunnerRootService;
+	public fun onTransact (ILandroid/os/Parcel;Landroid/os/Parcel;I)Z
+}
+
+public final class app/revanced/library/installation/command/LocalShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner, android/content/ServiceConnection, java/io/Closeable {
 	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function0;)V
+	public fun close ()V
 	public fun hasRootPermission ()Z
 	public fun move (Ljava/io/File;Ljava/lang/String;)V
 	public fun onServiceConnected (Landroid/content/ComponentName;Landroid/os/IBinder;)V
@@ -280,9 +285,10 @@ public final class app/revanced/library/installation/installer/LocalInstallerSer
 	public fun onStartCommand (Landroid/content/Intent;II)I
 }
 
-public final class app/revanced/library/installation/installer/LocalRootInstaller : app/revanced/library/installation/installer/RootInstaller {
+public final class app/revanced/library/installation/installer/LocalRootInstaller : app/revanced/library/installation/installer/RootInstaller, java/io/Closeable {
 	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close ()V
 }
 
 public abstract class app/revanced/library/installation/installer/RootInstaller : app/revanced/library/installation/installer/Installer {
@@ -302,25 +308,5 @@ public final class app/revanced/library/logging/Logger {
 	public final fun setDefault ()V
 	public final fun setFormat (Ljava/lang/String;)V
 	public static synthetic fun setFormat$default (Lapp/revanced/library/logging/Logger;Ljava/lang/String;ILjava/lang/Object;)V
-}
-
-public final class app/revanced/library/zip/ZipFile : java/io/Closeable {
-	public static final field ApkZipFile Lapp/revanced/library/zip/ZipFile$ApkZipFile;
-	public fun <init> (Ljava/io/File;)V
-	public final fun addEntryCompressData (Lapp/revanced/library/zip/structures/ZipEntry;[B)V
-	public fun close ()V
-	public final fun copyEntriesFromFileAligned (Lapp/revanced/library/zip/ZipFile;Lkotlin/jvm/functions/Function1;)V
-}
-
-public final class app/revanced/library/zip/ZipFile$ApkZipFile {
-	public final fun getApkZipEntryAlignment ()Lkotlin/jvm/functions/Function1;
-}
-
-public final class app/revanced/library/zip/structures/ZipEntry {
-	public static final field Companion Lapp/revanced/library/zip/structures/ZipEntry$Companion;
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class app/revanced/library/zip/structures/ZipEntry$Companion {
 }
 

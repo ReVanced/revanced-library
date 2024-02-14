@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.binary.compatibility.validator)
-    alias(libs.plugins.ktlint)
     `maven-publish`
     signing
 }
@@ -33,10 +32,10 @@ kotlin {
             implementation(libs.revanced.patcher)
             implementation(libs.kotlin.reflect)
             implementation(libs.jadb) // Updated fork
-            implementation(libs.apksig)
-            implementation(libs.bcpkix.jdk18on)
+            implementation(libs.bcpkix.jdk15on)
             implementation(libs.jackson.module.kotlin)
-
+            implementation(libs.apkzlib)
+            implementation(libs.guava)
         }
 
         commonTest.dependencies {
@@ -59,8 +58,19 @@ android {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/revanced/revanced-patcher")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+
     publications {
-        create<MavenPublication>("gpr") {
+        create<MavenPublication>("revanced-library-publication") {
             version = project.version.toString()
 
             pom {
@@ -91,4 +101,9 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["revanced-library-publication"])
 }
