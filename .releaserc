@@ -32,6 +32,12 @@
         backmergeBranches: [{"from": "main", "to": "dev"}],
         clearWorkspace: true
       }
+    ],
+    [
+        "@semantic-release/github",
+        {
+            successComment: false
+        }
     ]
   ]
 }
