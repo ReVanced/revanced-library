@@ -37,7 +37,7 @@ internal object PatchOptionsTest {
         "[{\"patchName\":\"PatchOptionsTestPatch\",\"options\":[{\"key\":\"key1\",\"value\":\"test\"},{\"key\":\"key2\",\"value\":false}]}]"
 
     @Patch("PatchOptionsTestPatch")
-    object PatchOptionsTestPatch : BytecodePatch() {
+    object PatchOptionsTestPatch : BytecodePatch(emptySet()) {
         var option1 by stringPatchOption("key1", null, null, "title1", "description1")
         var option2 by booleanPatchOption("key2", true, null, "title2", "description2")
 

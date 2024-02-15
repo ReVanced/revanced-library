@@ -1,3 +1,29 @@
+# [2.0.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.2...v2.0.0-dev.1) (2024-02-14)
+
+
+### Features
+
+* Use `apkzlib` instead of own implementations and bump ReVanced Patcher ([3aa6dc2](https://github.com/ReVanced/revanced-library/commit/3aa6dc223a9a1a2f735eda407917548ecbd366aa))
+
+
+### BREAKING CHANGES
+
+* This commit removes deprecated APIs and bumps ReVanced Patcher. Because of it's changes, `apkzlib` is now used instead of own implementations of `ZipFile`
+
+## [1.5.1-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.1...v1.5.1-dev.2) (2024-02-08)
+
+
+### Bug Fixes
+
+* Use the JVM name instead of the value from `KClass#toString` ([d18e436](https://github.com/ReVanced/revanced-library/commit/d18e436de1df14452ecaa7d827be5e6596ba8a2d))
+
+## [1.5.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.0...v1.5.1-dev.1) (2024-02-08)
+
+
+### Bug Fixes
+
+* Map dependencies from `KClass` into `String` to fix serialization ([57e36ab](https://github.com/ReVanced/revanced-library/commit/57e36ab5c15a5fa7c50fb689ee43ad4eb9a4a515))
+
 # [1.5.0](https://github.com/ReVanced/revanced-library/compare/v1.4.0...v1.5.0) (2023-12-28)
 
 

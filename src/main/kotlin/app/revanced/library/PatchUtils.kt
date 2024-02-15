@@ -1,12 +1,12 @@
 package app.revanced.library
 
-import app.revanced.patcher.PatchClass
 import app.revanced.patcher.PatchSet
 import app.revanced.patcher.patch.Patch
 import app.revanced.patcher.patch.options.PatchOption
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.InputStream
 import java.io.OutputStream
+import kotlin.reflect.jvm.jvmName
 
 typealias PackageName = String
 typealias Version = String
@@ -20,35 +20,6 @@ typealias PackageNameMap = Map<PackageName, VersionMap>
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object PatchUtils {
-    /**
-     * Get the version that is most common for [packageName] in the supplied set of [patches].
-     *
-     * @param patches The set of patches to check.
-     * @param packageName The name of the compatible package.
-     * @return The most common version of.
-     */
-    @Deprecated(
-        "Use getMostCommonCompatibleVersions instead.",
-        ReplaceWith(
-            "getMostCommonCompatibleVersions(patches, setOf(packageName))" +
-                ".entries.firstOrNull()?.value?.keys?.firstOrNull()",
-        ),
-    )
-    fun getMostCommonCompatibleVersion(
-        patches: PatchSet,
-        packageName: String,
-    ) = patches
-        .mapNotNull {
-            // Map all patches to their compatible packages with version constraints.
-            it.compatiblePackages?.firstOrNull { compatiblePackage ->
-                compatiblePackage.name == packageName && compatiblePackage.versions?.isNotEmpty() == true
-            }
-        }
-        .flatMap { it.versions!! }
-        .groupingBy { it }
-        .eachCount()
-        .maxByOrNull { it.value }?.key
-
     /**
      * Get the count of versions for each compatible package from a supplied set of [patches] ordered by the most common version.
      *
@@ -149,7 +120,7 @@ object PatchUtils {
             val name: String?,
             val description: String?,
             val compatiblePackages: Set<Patch.CompatiblePackage>?,
-            val dependencies: Set<PatchClass>?,
+            val dependencies: Set<String>?,
             val use: Boolean,
             var requiresIntegrations: Boolean,
             val options: Map<String, FullJsonPatchOption<*>>,
@@ -160,7 +131,7 @@ object PatchUtils {
                         patch.name,
                         patch.description,
                         patch.compatiblePackages,
-                        patch.dependencies,
+                        buildSet { patch.dependencies?.forEach { add(it.jvmName) } },
                         patch.use,
                         patch.requiresIntegrations,
                         patch.options.mapValues { FullJsonPatchOption.fromPatchOption(it.value) },

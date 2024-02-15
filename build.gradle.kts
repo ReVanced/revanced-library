@@ -1,7 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.9.10"
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.binary.compatibility.validator)
     `maven-publish`
+    signing
 }
 
 group = "app.revanced"
@@ -9,17 +10,25 @@ group = "app.revanced"
 repositories {
     mavenCentral()
     mavenLocal()
-    maven { url = uri("https://jitpack.io") }
     google()
+    maven {
+        // A repository must be speficied for some reason. "registry" is a dummy.
+        url = uri("https://maven.pkg.github.com/revanced/registry")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
     implementation(libs.revanced.patcher)
     implementation(libs.kotlin.reflect)
-    implementation(libs.jadb) // Updated fork
-    implementation(libs.apksig)
-    implementation(libs.bcpkix.jdk18on)
+    implementation(libs.jadb) // Fork with Shell v2 support.
     implementation(libs.jackson.module.kotlin)
+    implementation(libs.apkzlib)
+    implementation(libs.bcpkix.jdk15on)
+    implementation(libs.guava)
 
     testImplementation(libs.revanced.patcher)
     testImplementation(libs.kotlin.test)
@@ -41,8 +50,19 @@ java {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/revanced/revanced-library")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+
     publications {
-        create<MavenPublication>("gpr") {
+        create<MavenPublication>("revanced-library-publication") {
             from(components["java"])
 
             version = project.version.toString()
@@ -75,4 +95,9 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["revanced-library-publication"])
 }
