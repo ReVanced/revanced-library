@@ -1,3 +1,10 @@
+# [2.1.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.0.0...v2.1.0-dev.1) (2024-02-15)
+
+
+### Features
+
+* Mention APK file name when logging aligning ([244ebc2](https://github.com/ReVanced/revanced-library/commit/244ebc21868c07d1852857f6858c1a53a5561155))
+
 # [2.0.0](https://github.com/ReVanced/revanced-library/compare/v1.5.0...v2.0.0) (2024-02-15)
 
 
