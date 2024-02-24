@@ -43,6 +43,7 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           fingerprint: ${{ env.GPG_FINGERPRINT }}
+          git_tag_gpgsign: true
 
       - name: Release
         env:
