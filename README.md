@@ -78,8 +78,8 @@ Some of the features the ReVanced Library provides are:
 - 📝 **Signing APKs**: Read and write keystores, and sign APK files
 - 🧩 **Common utility functions**: Various APIs for ReVanced patches such as JSON serialization,
   reading and setting patch options, calculating the most common compatible version for a set of patches and more
-- 💾 **Install and uninstall APKs**: Install and uninstall APK files using ADB locally,
-  using the Android package manager, or by mounting using root permissions
+- 💾 **Install and uninstall APKs**: Install and uninstall APK files via ADB or locally,
+  the Android package manager, or by mounting using root permissions
 - 📦 **Repackage patched files to an APK**: Apply patched files from
   [ReVanced Patcher](https://github.com/revanced/revanced-patcher) to an APK file, and align & sign the APK file automatically
 
