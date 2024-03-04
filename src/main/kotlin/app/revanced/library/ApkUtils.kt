@@ -84,7 +84,7 @@ object ApkUtils {
                 }
             }
 
-            logger.info("Aligning APK")
+            logger.info("Aligning ${apkFile.name}")
 
             targetApkZFile.realign()
 

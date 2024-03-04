@@ -58,42 +58,60 @@
    Continuing the legacy of Vanced
 </p>
 
-# 📙 ReVanced Library contribution guidelines
+# 📚 ReVanced Library
 
-This document describes how to contribute to ReVanced Library.
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/ReVanced/revanced-library/release.yml)
+![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
 
-## 📖 Resources to help you get started
+Library containing common utilities for ReVanced.
 
-<!-- * The [documentation](/docs) explains how to use ReVanced Library -->
+## ❓ About
 
-- [Our backlog](https://github.com/orgs/ReVanced/projects/12) is where we keep track of what we're working on
-- [Issues](https://github.com/ReVanced/revanced-cli/issues) are where we keep track of bugs and feature requests
+ReVanced Library powers projects such as [ReVanced Manager](https://github.com/ReVanced/revanced-manager),
+[ReVanced CLI](https://github.com/ReVanced/revanced-cli) with common utilities and functionalities
+by providing shared code.
 
-## 🙏 Submitting a feature request
+## 💪 Features
 
-Features can be requested by opening an issue using the
-[Feature request issue template](https://github.com/ReVanced/revanced-cli/issues/new?assignees=&labels=Feature+request&projects=&template=feature_request.yml&title=feat%3A+).
+Some of the features the ReVanced Library provides are:
 
-> [!NOTE]
-> Requests can be accepted or rejected at the discretion of maintainers of ReVanced Library.
-> Good motivation has to be provided for a request to be accepted.
+- 📝 **Signing APKs**: Read and write keystores, and sign APK files
+- 🧩 **Common utility functions**: Various APIs for ReVanced patches such as JSON serialization,
+  reading and setting patch options, calculating the most common compatible version for a set of patches and more
+- 💾 **Install and uninstall APKs**: Install and uninstall APK files via ADB or locally,
+  the Android package manager, or by mounting using root permissions
+- 📦 **Repackage patched files to an APK**: Apply patched files from
+  [ReVanced Patcher](https://github.com/revanced/revanced-patcher) to an APK file, and align & sign the APK file automatically
 
-## 🐞 Submitting a bug report
+## 🚀 How to get started
 
-If you encounter a bug while using ReVanced Library, open an issue using the
-[Bug report issue template](https://github.com/ReVanced/revanced-cli/issues/new?assignees=&labels=Bug+report&projects=&template=bug_report.yml&title=bug%3A+).
+To use ReVanced Library in your project, follow these steps:
 
-## 📝 How to contribute
+1. [Add the repository](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#using-a-published-package)
+   to your project
+2. Add the dependency to your project:
 
-1. Before contributing, it is recommended to open an issue to discuss your change
-   with the maintainers of ReVanced Library. This will help you determine whether your change is acceptable
-   and whether it is worth your time to implement it
-2. Development happens on the `dev` branch. Fork the repository and create your branch from `dev`
-3. Commit your changes
-4. Submit a pull request to the `dev` branch of the repository and reference issues
-   that your pull request closes in the description of your pull request
-5. Our team will review your pull request and provide feedback. Once your pull request is approved,
-   it will be merged into the `dev` branch and will be included in the next release of ReVanced Library
+   ```kt
+    dependencies {
+        implementation("app.revanced:revanced-library:{$version}")
+    }
+   ```
 
-❤️ Thank you for considering contributing to ReVanced Library,  
-ReVanced
+## 📚 Everything else
+
+### 📙 Contributing
+
+Thank you for considering contributing to ReVanced Library.
+You can find the contribution guidelines [here](CONTRIBUTING.md).
+
+### 🛠️ Building
+
+To build ReVanced Library,
+you can follow the [ReVanced documentation](https://github.com/ReVanced/revanced-documentation).
+
+## 📜 Licence
+
+ReVanced Library is licensed under the GPLv3 license. Please see the [licence file](LICENSE) for more information.
+[tl;dr](https://www.tldrlegal.com/license/gnu-general-public-license-v3-gpl-3) you may copy, distribute and modify ReVanced Library as long as you track changes/dates in source files.
+Any modifications to ReVanced Library must also be made available under the GPL,
+along with build & install instructions.
