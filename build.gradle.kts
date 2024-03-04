@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.binary.compatibility.validator)
@@ -43,10 +45,14 @@ tasks {
     }
 }
 
-kotlin { jvmToolchain(11) }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+    }
+}
 
 java {
-    withSourcesJar()
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 publishing {
