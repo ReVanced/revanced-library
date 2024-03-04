@@ -1,3 +1,15 @@
+# [2.1.0](https://github.com/ReVanced/revanced-library/compare/v2.0.0...v2.1.0) (2024-03-04)
+
+
+### Bug Fixes
+
+* Use `BKS` instead of default signing provider to fix backwards compatibility ([41805fc](https://github.com/ReVanced/revanced-library/commit/41805fcb0bdc778fe0870427a0a1caa6d4369cee))
+
+
+### Features
+
+* Mention APK file name when logging aligning ([244ebc2](https://github.com/ReVanced/revanced-library/commit/244ebc21868c07d1852857f6858c1a53a5561155))
+
 # [2.1.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v2.1.0-dev.1...v2.1.0-dev.2) (2024-03-04)
 
 
