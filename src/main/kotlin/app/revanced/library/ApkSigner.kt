@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.cert.X509v3CertificateBuilder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import java.io.File
 import java.io.IOException
@@ -24,7 +25,13 @@ import kotlin.time.Duration.Companion.days
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object ApkSigner {
-    private val logger = Logger.getLogger(Signer::class.java.name)
+    private val logger = Logger.getLogger(ApkSigner::class.java.name)
+
+    init {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(BouncyCastleProvider())
+        }
+    }
 
     /**
      * Create a new [PrivateKeyCertificatePair].
@@ -117,7 +124,7 @@ object ApkSigner {
     fun newKeyStore(entries: Set<KeyStoreEntry>): KeyStore {
         logger.fine("Creating keystore")
 
-        return KeyStore.getInstance(KeyStore.getDefaultType()).apply {
+        return newKeyStoreInstance().apply {
             load(null)
 
             entries.forEach { entry ->
@@ -131,6 +138,8 @@ object ApkSigner {
             }
         }
     }
+
+    private fun newKeyStoreInstance() = KeyStore.getInstance("BKS", BouncyCastleProvider.PROVIDER_NAME)
 
     /**
      * Create a new keystore with a new keypair and saves it to the given [keyStoreOutputStream].
@@ -164,7 +173,7 @@ object ApkSigner {
     ): KeyStore {
         logger.fine("Reading keystore")
 
-        return KeyStore.getInstance(KeyStore.getDefaultType()).apply {
+        return newKeyStoreInstance().apply {
             try {
                 load(keyStoreInputStream, keyStorePassword?.toCharArray())
             } catch (exception: IOException) {
