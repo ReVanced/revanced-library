@@ -48,30 +48,23 @@ object ApkSigner {
         logger.fine("Creating certificate for $commonName")
 
         // Generate a new key pair.
-        val keyPair =
-            KeyPairGenerator.getInstance("RSA").apply {
-                initialize(4096)
-            }.generateKeyPair()
+        val keyPair = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME).apply {
+            initialize(4096)
+        }.generateKeyPair()
 
-        var serialNumber: BigInteger
-        do serialNumber = BigInteger.valueOf(SecureRandom().nextLong())
-        while (serialNumber < BigInteger.ZERO)
+        val contentSigner = JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private)
 
         val name = X500Name("CN=$commonName")
-
-        // Create a new certificate.
-        val certificate =
-            JcaX509CertificateConverter().getCertificate(
-                X509v3CertificateBuilder(
-                    name,
-                    serialNumber,
-                    Date(System.currentTimeMillis()),
-                    validUntil,
-                    Locale.ENGLISH,
-                    name,
-                    SubjectPublicKeyInfo.getInstance(keyPair.public.encoded),
-                ).build(JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private)),
-            )
+        val certificateHolder = X509v3CertificateBuilder(
+            name,
+            BigInteger.valueOf(SecureRandom().nextLong()),
+            Date(System.currentTimeMillis()),
+            validUntil,
+            Locale.ENGLISH,
+            name,
+            SubjectPublicKeyInfo.getInstance(keyPair.public.encoded),
+        ).build(contentSigner)
+        val certificate = JcaX509CertificateConverter().getCertificate(certificateHolder)
 
         return PrivateKeyCertificatePair(keyPair.private, certificate)
     }
