@@ -43,7 +43,7 @@ object ApkSigner {
      */
     fun newPrivateKeyCertificatePair(
         commonName: String = "ReVanced",
-        validUntil: Date = Date(System.currentTimeMillis() + 356.days.inWholeMilliseconds * 24),
+        validUntil: Date = Date(System.currentTimeMillis() + (365.days * 8).inWholeMilliseconds * 24),
     ): PrivateKeyCertificatePair {
         logger.fine("Creating certificate for $commonName")
 
