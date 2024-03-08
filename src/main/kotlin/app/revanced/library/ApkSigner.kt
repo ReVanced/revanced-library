@@ -253,7 +253,7 @@ object ApkSigner {
         val certificate: X509Certificate,
     )
 
-    class Signer internal constructor(val signingExtension: SigningExtension) {
+    class Signer internal constructor(private val signingExtension: SigningExtension) {
         /**
          * Sign an APK file.
          *
