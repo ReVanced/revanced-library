@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.jadb) // Fork with Shell v2 support.
     implementation(libs.jackson.module.kotlin)
     implementation(libs.apkzlib)
+    implementation(libs.apksig)
     implementation(libs.bcpkix.jdk15on)
     implementation(libs.guava)
 

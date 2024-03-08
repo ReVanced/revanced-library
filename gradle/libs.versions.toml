@@ -7,6 +7,7 @@ binary-compatibility-validator = "0.14.0"
 apkzlib = "8.3.0"
 bcpkix-jdk15on = "1.70"
 guava = "33.0.0-jre"
+apksig = "8.3.0"
 
 [libraries]
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }
@@ -17,6 +18,7 @@ revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "re
 apkzlib = { module = "com.android.tools.build:apkzlib", version.ref = "apkzlib" }
 bcpkix-jdk15on = { module = "org.bouncycastle:bcpkix-jdk15on", version.ref = "bcpkix-jdk15on" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
+apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 
 [plugins]
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
