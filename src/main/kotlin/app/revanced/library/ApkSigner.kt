@@ -1,5 +1,6 @@
 package app.revanced.library
 
+import com.android.apksig.ApkSigner.SignerConfig
 import com.android.tools.build.apkzlib.sign.SigningExtension
 import com.android.tools.build.apkzlib.sign.SigningOptions
 import com.android.tools.build.apkzlib.zip.ZFile
@@ -43,35 +44,28 @@ object ApkSigner {
      */
     fun newPrivateKeyCertificatePair(
         commonName: String = "ReVanced",
-        validUntil: Date = Date(System.currentTimeMillis() + 356.days.inWholeMilliseconds * 24),
+        validUntil: Date = Date(System.currentTimeMillis() + (365.days * 8).inWholeMilliseconds * 24),
     ): PrivateKeyCertificatePair {
         logger.fine("Creating certificate for $commonName")
 
         // Generate a new key pair.
-        val keyPair =
-            KeyPairGenerator.getInstance("RSA").apply {
-                initialize(4096)
-            }.generateKeyPair()
+        val keyPair = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME).apply {
+            initialize(4096)
+        }.generateKeyPair()
 
-        var serialNumber: BigInteger
-        do serialNumber = BigInteger.valueOf(SecureRandom().nextLong())
-        while (serialNumber < BigInteger.ZERO)
+        val contentSigner = JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private)
 
         val name = X500Name("CN=$commonName")
-
-        // Create a new certificate.
-        val certificate =
-            JcaX509CertificateConverter().getCertificate(
-                X509v3CertificateBuilder(
-                    name,
-                    serialNumber,
-                    Date(System.currentTimeMillis()),
-                    validUntil,
-                    Locale.ENGLISH,
-                    name,
-                    SubjectPublicKeyInfo.getInstance(keyPair.public.encoded),
-                ).build(JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private)),
-            )
+        val certificateHolder = X509v3CertificateBuilder(
+            name,
+            BigInteger.valueOf(SecureRandom().nextLong()),
+            Date(System.currentTimeMillis()),
+            validUntil,
+            Locale.ENGLISH,
+            name,
+            SubjectPublicKeyInfo.getInstance(keyPair.public.encoded),
+        ).build(contentSigner)
+        val certificate = JcaX509CertificateConverter().getCertificate(certificateHolder)
 
         return PrivateKeyCertificatePair(keyPair.private, certificate)
     }
@@ -189,6 +183,7 @@ object ApkSigner {
     /**
      * Create a new [Signer].
      *
+     * @param signer The name of the signer.
      * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
      *
      * @return The new [Signer].
@@ -196,6 +191,38 @@ object ApkSigner {
      * @see PrivateKeyCertificatePair
      * @see Signer
      */
+    fun newApkSigner(
+        signer: String,
+        privateKeyCertificatePair: PrivateKeyCertificatePair,
+    ) = Signer(
+        com.android.apksig.ApkSigner.Builder(
+            listOf(
+                SignerConfig.Builder(
+                    signer,
+                    privateKeyCertificatePair.privateKey,
+                    listOf(privateKeyCertificatePair.certificate),
+                ).build(),
+            ),
+        ),
+    )
+
+    /**
+     * Create a new [Signer].
+     *
+     * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
+     *
+     * @return The new [Signer].
+     *
+     * @see PrivateKeyCertificatePair
+     * @see Signer
+     */
+    @Suppress("DEPRECATION")
+    @Deprecated(
+        "This method will be removed in the future.",
+        ReplaceWith(
+            "newApkSigner(\"ReVanced\", privateKeyCertificatePair)",
+        ),
+    )
     fun newApkSigner(privateKeyCertificatePair: PrivateKeyCertificatePair) =
         Signer(
             SigningExtension(
@@ -212,6 +239,7 @@ object ApkSigner {
     /**
      * Create a new [Signer].
      *
+     * @param signer The name of the signer.
      * @param keyStore The keystore to use for signing.
      * @param keyStoreEntryAlias The alias of the key store entry to use for signing.
      * @param keyStoreEntryPassword The password for recovering the signing key.
@@ -222,10 +250,36 @@ object ApkSigner {
      * @see Signer
      */
     fun newApkSigner(
+        signer: String,
         keyStore: KeyStore,
         keyStoreEntryAlias: String,
         keyStoreEntryPassword: String,
-    ) = newApkSigner(readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))
+    ) = newApkSigner(signer, readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))
+
+    /**
+     * Create a new [Signer].
+     *
+     * @param keyStore The keystore to use for signing.
+     * @param keyStoreEntryAlias The alias of the key store entry to use for signing.
+     * @param keyStoreEntryPassword The password for recovering the signing key.
+     *
+     * @return The new [Signer].
+     *
+     * @see KeyStore
+     * @see Signer
+     */
+    @Deprecated(
+        "This method will be removed in the future.",
+        ReplaceWith(
+            "newApkSigner(\"ReVanced\", readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))",
+            "app.revanced.library.ApkSigner.newApkSigner",
+        ),
+    )
+    fun newApkSigner(
+        keyStore: KeyStore,
+        keyStoreEntryAlias: String,
+        keyStoreEntryPassword: String,
+    ) = newApkSigner("ReVanced", readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))
 
     /**
      * An entry in a keystore.
@@ -253,23 +307,48 @@ object ApkSigner {
         val certificate: X509Certificate,
     )
 
-    class Signer internal constructor(val signingExtension: SigningExtension) {
+    class Signer {
+        private val signerBuilder: com.android.apksig.ApkSigner.Builder?
+        private val signingExtension: SigningExtension?
+
+        internal constructor(signerBuilder: com.android.apksig.ApkSigner.Builder) {
+            this.signerBuilder = signerBuilder
+            signingExtension = null
+        }
+
+        @Deprecated("This constructor will be removed in the future.")
+        internal constructor(signingExtension: SigningExtension) {
+            signerBuilder = null
+            this.signingExtension = signingExtension
+        }
+
         /**
          * Sign an APK file.
          *
          * @param apkFile The APK file to sign.
          */
-        fun signApk(apkFile: File) = ZFile.openReadWrite(apkFile).use { signApk(it) }
+        @Deprecated("This method will be removed in the future.")
+        fun signApk(apkFile: File) = ZFile.openReadWrite(apkFile).use {
+            @Suppress("DEPRECATION")
+            signApk(it)
+        }
 
         /**
          * Sign an APK file.
          *
          * @param apkZFile The APK [ZFile] to sign.
          */
+        @Deprecated("This method will be removed in the future.")
         fun signApk(apkZFile: ZFile) {
             logger.info("Signing ${apkZFile.file.name}")
 
-            signingExtension.register(apkZFile)
+            signingExtension?.register(apkZFile)
+        }
+
+        fun signApk(inputApkFile: File, outputApkFile: File) {
+            logger.info("Signing APK")
+
+            signerBuilder?.setInputApk(inputApkFile)?.setOutputApk(outputApkFile)?.build()?.sign()
         }
     }
 }

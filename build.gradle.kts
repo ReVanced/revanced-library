@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.binary.compatibility.validator)
@@ -27,6 +29,7 @@ dependencies {
     implementation(libs.jadb) // Fork with Shell v2 support.
     implementation(libs.jackson.module.kotlin)
     implementation(libs.apkzlib)
+    implementation(libs.apksig)
     implementation(libs.bcpkix.jdk15on)
     implementation(libs.guava)
 
@@ -43,10 +46,14 @@ tasks {
     }
 }
 
-kotlin { jvmToolchain(11) }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+    }
+}
 
 java {
-    withSourcesJar()
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 publishing {

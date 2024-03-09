@@ -1,6 +1,8 @@
 public final class app/revanced/library/ApkSigner {
 	public static final field INSTANCE Lapp/revanced/library/ApkSigner;
 	public final fun newApkSigner (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newApkSigner (Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newApkSigner (Ljava/lang/String;Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$Signer;
 	public final fun newApkSigner (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$Signer;
 	public final fun newKeyStore (Ljava/io/OutputStream;Ljava/lang/String;Ljava/util/Set;)V
 	public final fun newKeyStore (Ljava/util/Set;)Ljava/security/KeyStore;
@@ -25,15 +27,16 @@ public final class app/revanced/library/ApkSigner$PrivateKeyCertificatePair {
 }
 
 public final class app/revanced/library/ApkSigner$Signer {
-	public final fun getSigningExtension ()Lcom/android/tools/build/apkzlib/sign/SigningExtension;
 	public final fun signApk (Lcom/android/tools/build/apkzlib/zip/ZFile;)V
 	public final fun signApk (Ljava/io/File;)V
+	public final fun signApk (Ljava/io/File;Ljava/io/File;)V
 }
 
 public final class app/revanced/library/ApkUtils {
 	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
 	public final fun applyTo (Lapp/revanced/patcher/PatcherResult;Ljava/io/File;)V
 	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
+	public final fun sign (Ljava/io/File;Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
 }
 
 public final class app/revanced/library/ApkUtils$SigningOptions {

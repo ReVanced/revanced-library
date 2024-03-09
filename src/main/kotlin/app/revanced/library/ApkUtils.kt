@@ -84,7 +84,7 @@ object ApkUtils {
                 }
             }
 
-            logger.info("Aligning ${apkFile.name}")
+            logger.info("Aligning APK")
 
             targetApkZFile.realign()
 
@@ -93,32 +93,60 @@ object ApkUtils {
     }
 
     /**
+     * Reads an existing or creates a new keystore.
+     *
+     * @param signingOptions The options to use for signing.
+     */
+    private fun readOrNewKeyStore(signingOptions: SigningOptions) = if (signingOptions.keyStore.exists()) {
+        ApkSigner.readKeyStore(
+            signingOptions.keyStore.inputStream(),
+            signingOptions.keyStorePassword ?: "",
+        )
+    } else {
+        val entry = ApkSigner.KeyStoreEntry(signingOptions.alias, signingOptions.password)
+
+        // Create a new keystore with a new keypair and saves it.
+        ApkSigner.newKeyStore(setOf(entry)).apply {
+            store(
+                signingOptions.keyStore.outputStream(),
+                signingOptions.keyStorePassword?.toCharArray(),
+            )
+        }
+    }
+
+    /**
      * Signs the apk file with the given options.
      *
      * @param signingOptions The options to use for signing.
      */
+    @Deprecated("Use sign(File, File, SigningOptions) instead.")
     fun File.sign(signingOptions: SigningOptions) {
-        // Get the keystore from the file or create a new one.
-        val keyStore =
-            if (signingOptions.keyStore.exists()) {
-                ApkSigner.readKeyStore(signingOptions.keyStore.inputStream(), signingOptions.keyStorePassword ?: "")
-            } else {
-                val entries = setOf(ApkSigner.KeyStoreEntry(signingOptions.alias, signingOptions.password))
+        val keyStore = readOrNewKeyStore(signingOptions)
 
-                // Create a new keystore with a new keypair and saves it.
-                ApkSigner.newKeyStore(entries).apply {
-                    store(
-                        signingOptions.keyStore.outputStream(),
-                        signingOptions.keyStorePassword?.toCharArray(),
-                    )
-                }
-            }
-
+        @Suppress("DEPRECATION")
         ApkSigner.newApkSigner(
             keyStore,
             signingOptions.alias,
             signingOptions.password,
         ).signApk(this)
+    }
+
+    /**
+     * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
+     *
+     * @param inputApkFile The apk file to sign.
+     * @param outputApkFile The file to save the signed apk to.
+     * @param signingOptions The options to use for signing.
+     */
+    fun sign(inputApkFile: File, outputApkFile: File, signingOptions: SigningOptions) {
+        val keyStore = readOrNewKeyStore(signingOptions)
+
+        ApkSigner.newApkSigner(
+            signingOptions.signer,
+            keyStore,
+            signingOptions.alias,
+            signingOptions.password,
+        ).signApk(inputApkFile, outputApkFile)
     }
 
     /**
