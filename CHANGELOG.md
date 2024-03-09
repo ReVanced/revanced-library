@@ -1,3 +1,16 @@
+# [2.2.0](https://github.com/ReVanced/revanced-library/compare/v2.1.0...v2.2.0) (2024-03-09)
+
+
+### Bug Fixes
+
+* Make property private ([51109c4](https://github.com/ReVanced/revanced-library/commit/51109c476837828535dcd395a5222d2fcf7fc22c))
+* Sign APKs using `apksig` ([f59ecbc](https://github.com/ReVanced/revanced-library/commit/f59ecbccd14a08d87d4f18c3c0cc47a884088b99))
+
+
+### Features
+
+* Increase default expiration date of certificate ([f2bd3f5](https://github.com/ReVanced/revanced-library/commit/f2bd3f5eeee14ca32094be0d41c32b231a16bcc3))
+
 # [2.2.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.1.0...v2.2.0-dev.1) (2024-03-09)
 
 
