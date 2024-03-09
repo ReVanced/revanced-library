@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/ReVanced/revanced-library/compare/v2.2.0...v2.2.1) (2024-03-09)
+
+
+### Bug Fixes
+
+* Do not specify a provider to automatically select an available one ([249372c](https://github.com/ReVanced/revanced-library/commit/249372c31f7e7975fc9eacb5361bd07dbc5dfb92))
+
 ## [2.2.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.0...v2.2.1-dev.1) (2024-03-09)
 
 
