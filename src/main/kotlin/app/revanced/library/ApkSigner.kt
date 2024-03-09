@@ -49,7 +49,7 @@ object ApkSigner {
         logger.fine("Creating certificate for $commonName")
 
         // Generate a new key pair.
-        val keyPair = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME).apply {
+        val keyPair = KeyPairGenerator.getInstance("RSA").apply {
             initialize(4096)
         }.generateKeyPair()
 
