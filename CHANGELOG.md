@@ -1,3 +1,10 @@
+## [2.2.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.1...v2.2.2-dev.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* Support mounting even when Magisk is not installed ([2a30845](https://github.com/ReVanced/revanced-library/commit/2a30845f61d5f77ded7a72ee3d6ab55b4c512d52))
+
 ## [2.2.1](https://github.com/ReVanced/revanced-library/compare/v2.2.0...v2.2.1) (2024-03-09)
 
 
