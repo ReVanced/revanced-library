@@ -29,13 +29,17 @@ internal object Constants {
     internal val MOUNT_SCRIPT =
         """
         #!/system/bin/sh
-        MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
-        MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
+        
+        # Use Magisk mirror, if possible.
+        if command -v magisk &> /dev/null; then
+            MIRROR="${'$'}(magisk --path)/.magisk/mirror"
+        fi
 
+        # Wait for the system to boot.
         until [ "$( getprop sys.boot_completed )" = 1 ]; do sleep 3; done
         until [ -d "/sdcard/Android" ]; do sleep 1; done
 
-        # Unmount any existing mount as a safety measure
+        # Unmount any existing mount as a safety measure.
         $UMOUNT
 
         base_path="$PATCHED_APK_PATH"
@@ -44,7 +48,7 @@ internal object Constants {
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
-        # Kill the app to force it to restart the mounted APK in case it's already running
+        # Kill the app to force it to restart the mounted APK in case it's currently running.
         $KILL
         """.trimIndent()
 }
