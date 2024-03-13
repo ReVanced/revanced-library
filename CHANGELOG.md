@@ -1,3 +1,10 @@
+# [2.3.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.2-dev.1...v2.3.0-dev.1) (2024-03-13)
+
+
+### Features
+
+* Add utility function around key certificate pairs ([2df3484](https://github.com/ReVanced/revanced-library/commit/2df3484b68ed72338a52e76fb4b7ceb9c9c644ed))
+
 ## [2.2.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.1...v2.2.2-dev.1) (2024-03-12)
 
 
