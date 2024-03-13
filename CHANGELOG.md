@@ -1,3 +1,106 @@
+## [2.2.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.1...v2.2.2-dev.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* Support mounting even when Magisk is not installed ([2a30845](https://github.com/ReVanced/revanced-library/commit/2a30845f61d5f77ded7a72ee3d6ab55b4c512d52))
+
+## [2.2.1](https://github.com/ReVanced/revanced-library/compare/v2.2.0...v2.2.1) (2024-03-09)
+
+
+### Bug Fixes
+
+* Do not specify a provider to automatically select an available one ([249372c](https://github.com/ReVanced/revanced-library/commit/249372c31f7e7975fc9eacb5361bd07dbc5dfb92))
+
+## [2.2.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.0...v2.2.1-dev.1) (2024-03-09)
+
+
+### Bug Fixes
+
+* Do not specify a provider to automatically select an available one ([249372c](https://github.com/ReVanced/revanced-library/commit/249372c31f7e7975fc9eacb5361bd07dbc5dfb92))
+
+# [2.2.0](https://github.com/ReVanced/revanced-library/compare/v2.1.0...v2.2.0) (2024-03-09)
+
+
+### Bug Fixes
+
+* Make property private ([51109c4](https://github.com/ReVanced/revanced-library/commit/51109c476837828535dcd395a5222d2fcf7fc22c))
+* Sign APKs using `apksig` ([f59ecbc](https://github.com/ReVanced/revanced-library/commit/f59ecbccd14a08d87d4f18c3c0cc47a884088b99))
+
+
+### Features
+
+* Increase default expiration date of certificate ([f2bd3f5](https://github.com/ReVanced/revanced-library/commit/f2bd3f5eeee14ca32094be0d41c32b231a16bcc3))
+
+# [2.2.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.1.0...v2.2.0-dev.1) (2024-03-09)
+
+
+### Bug Fixes
+
+* Make property private ([51109c4](https://github.com/ReVanced/revanced-library/commit/51109c476837828535dcd395a5222d2fcf7fc22c))
+* Sign APKs using `apksig` ([f59ecbc](https://github.com/ReVanced/revanced-library/commit/f59ecbccd14a08d87d4f18c3c0cc47a884088b99))
+
+
+### Features
+
+* Increase default expiration date of certificate ([f2bd3f5](https://github.com/ReVanced/revanced-library/commit/f2bd3f5eeee14ca32094be0d41c32b231a16bcc3))
+
+# [2.1.0](https://github.com/ReVanced/revanced-library/compare/v2.0.0...v2.1.0) (2024-03-04)
+
+
+### Bug Fixes
+
+* Use `BKS` instead of default signing provider to fix backwards compatibility ([41805fc](https://github.com/ReVanced/revanced-library/commit/41805fcb0bdc778fe0870427a0a1caa6d4369cee))
+
+
+### Features
+
+* Mention APK file name when logging aligning ([244ebc2](https://github.com/ReVanced/revanced-library/commit/244ebc21868c07d1852857f6858c1a53a5561155))
+
+# [2.1.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v2.1.0-dev.1...v2.1.0-dev.2) (2024-03-04)
+
+
+### Bug Fixes
+
+* Use `BKS` instead of default signing provider to fix backwards compatibility ([41805fc](https://github.com/ReVanced/revanced-library/commit/41805fcb0bdc778fe0870427a0a1caa6d4369cee))
+
+# [2.1.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.0.0...v2.1.0-dev.1) (2024-02-15)
+
+
+### Features
+
+* Mention APK file name when logging aligning ([244ebc2](https://github.com/ReVanced/revanced-library/commit/244ebc21868c07d1852857f6858c1a53a5561155))
+
+# [2.0.0](https://github.com/ReVanced/revanced-library/compare/v1.5.0...v2.0.0) (2024-02-15)
+
+
+### Bug Fixes
+
+* Map dependencies from `KClass` into `String` to fix serialization ([57e36ab](https://github.com/ReVanced/revanced-library/commit/57e36ab5c15a5fa7c50fb689ee43ad4eb9a4a515))
+* Use the JVM name instead of the value from `KClass#toString` ([d18e436](https://github.com/ReVanced/revanced-library/commit/d18e436de1df14452ecaa7d827be5e6596ba8a2d))
+
+
+### Features
+
+* Use `apkzlib` instead of own implementations and bump ReVanced Patcher ([3aa6dc2](https://github.com/ReVanced/revanced-library/commit/3aa6dc223a9a1a2f735eda407917548ecbd366aa))
+
+
+### BREAKING CHANGES
+
+* This commit removes deprecated APIs and bumps ReVanced Patcher. Because of it's changes, `apkzlib` is now used instead of own implementations of `ZipFile`
+
+# [2.0.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.2...v2.0.0-dev.1) (2024-02-14)
+
+
+### Features
+
+* Use `apkzlib` instead of own implementations and bump ReVanced Patcher ([3aa6dc2](https://github.com/ReVanced/revanced-library/commit/3aa6dc223a9a1a2f735eda407917548ecbd366aa))
+
+
+### BREAKING CHANGES
+
+* This commit removes deprecated APIs and bumps ReVanced Patcher. Because of it's changes, `apkzlib` is now used instead of own implementations of `ZipFile`
+
 ## [1.5.1-dev.2](https://github.com/ReVanced/revanced-library/compare/v1.5.1-dev.1...v1.5.1-dev.2) (2024-02-08)
 
 

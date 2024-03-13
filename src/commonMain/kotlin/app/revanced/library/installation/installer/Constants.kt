@@ -18,17 +18,17 @@ object Constants {
 
     const val INSTALL_PATCHED_APK =
         "base_path=\"$PATCHED_APK_PATH\" && " +
-                "mv $TMP_FILE_PATH \$base_path && " +
-                "chmod 644 \$base_path && " +
-                "chown system:system \$base_path && " +
-                "chcon u:object_r:apk_data_file:s0  \$base_path"
+            "mv $TMP_FILE_PATH \$base_path && " +
+            "chmod 644 \$base_path && " +
+            "chown system:system \$base_path && " +
+            "chcon u:object_r:apk_data_file:s0  \$base_path"
 
     const val UMOUNT =
         "grep $PLACEHOLDER /proc/mounts | " +
-                "while read -r line; do echo \$line | " +
-                "cut -d ' ' -f 2 | " +
-                "sed 's/apk.*/apk/' | " +
-                "xargs -r umount -l; done"
+            "while read -r line; do echo \$line | " +
+            "cut -d ' ' -f 2 | " +
+            "sed 's/apk.*/apk/' | " +
+            "xargs -r umount -l; done"
 
     const val INSTALL_MOUNT_SCRIPT = "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
 
@@ -52,16 +52,14 @@ object Constants {
 
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
 
-        # Mount using Magisk mirror, if available.
-        MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
-        MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-        if [ ! -f ${'$'}MIRROR ]; then
-            MIRROR=""
+        # Use Magisk mirror, if possible.
+        if command -v magisk &> /dev/null; then
+            MIRROR="${'$'}(magisk --path)/.magisk/mirror"
         fi
 
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
-        # Kill the app to make use of the mount in case it's currently running
+        # Kill the app to force it to restart the mounted APK in case it's currently running.
         $KILL
         """.trimIndent()
 

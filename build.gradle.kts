@@ -27,12 +27,18 @@ repositories {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_11.toString()
+            }
+        }
+    }
 
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "1.8"
+                jvmTarget = JavaVersion.VERSION_11.toString()
             }
         }
 
@@ -49,10 +55,11 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.revanced.patcher)
             implementation(libs.kotlin.reflect)
-            implementation(libs.jadb) // Updated fork
+            implementation(libs.jadb) // Fork with Shell v2 support.
             implementation(libs.bcpkix.jdk15on)
             implementation(libs.jackson.module.kotlin)
             implementation(libs.apkzlib)
+            implementation(libs.apksig)
             implementation(libs.guava)
         }
 
@@ -73,13 +80,22 @@ android {
     buildFeatures {
         aidl = true
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+java {
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/revanced/revanced-patcher")
+            url = uri("https://maven.pkg.github.com/revanced/revanced-library")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
