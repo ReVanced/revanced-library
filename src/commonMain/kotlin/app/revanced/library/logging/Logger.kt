@@ -5,15 +5,17 @@ import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.SimpleFormatter
 
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 object Logger {
     /**
      * Rules for allowed loggers.
      */
     private val allowedLoggersRules =
         arrayOf<String.() -> Boolean>(
-            { startsWith("app.revanced") }, //  ReVanced loggers.
-            { this == "" }, // Logs warnings when compiling resources (Logger in class brut.util.OS).
+            //  ReVanced loggers.
+            { startsWith("app.revanced") },
+            // Logs warnings when compiling resources (Logger in class brut.util.OS).
+            { this == "" },
         )
 
     private val rootLogger = java.util.logging.Logger.getLogger("")

@@ -7,12 +7,12 @@ import app.revanced.patcher.patch.Patch
 import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.booleanPatchOption
 import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.intArrayPatchOption
 import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.stringPatchOption
-import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal object PatchUtilsTest {
+internal class PatchUtilsTest {
     private val patches =
         arrayOf(
             newPatch("some.package", setOf("a")) { stringPatchOption("string", "value") },

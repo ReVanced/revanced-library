@@ -6,35 +6,28 @@ import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.booleanPatchOption
 import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.stringPatchOption
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
+import kotlin.test.Test
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal object PatchOptionsTest {
+class PatchOptionsTest {
     private var patches = setOf(PatchOptionsTestPatch)
 
-    @Test
-    @Order(1)
-    fun serializeTest() {
-        assert(SERIALIZED_JSON == Options.serialize(patches))
-    }
+    private val serializedJson =
+        "[{\"patchName\":\"PatchOptionsTestPatch\",\"options\":[{\"key\":\"key1\",\"value\":null},{\"key\":\"key2\"," +
+            "\"value\":true}]}]"
+
+    private val changedJson =
+        "[{\"patchName\":\"PatchOptionsTestPatch\",\"options\":[{\"key\":\"key1\",\"value\":\"test\"},{\"key\":\"key2" +
+            "\",\"value\":false}]}]"
 
     @Test
-    @Order(2)
-    fun loadOptionsTest() {
-        patches.setOptions(CHANGED_JSON)
+    fun `serializes and deserializes`() {
+        assert(serializedJson == Options.serialize(patches))
+
+        patches.setOptions(changedJson)
 
         assert(PatchOptionsTestPatch.option1 == "test")
         assert(PatchOptionsTestPatch.option2 == false)
     }
-
-    private const val SERIALIZED_JSON =
-        "[{\"patchName\":\"PatchOptionsTestPatch\",\"options\":[{\"key\":\"key1\",\"value\":null},{\"key\":\"key2\",\"value\":true}]}]"
-
-    private const val CHANGED_JSON =
-        "[{\"patchName\":\"PatchOptionsTestPatch\",\"options\":[{\"key\":\"key1\",\"value\":\"test\"},{\"key\":\"key2\",\"value\":false}]}]"
 
     @Patch("PatchOptionsTestPatch")
     object PatchOptionsTestPatch : BytecodePatch(emptySet()) {
