@@ -1,12 +1,15 @@
 package app.revanced.library
 
+import app.revanced.library.ApkSigner.newPrivateKeyCertificatePair
 import app.revanced.patcher.PatcherResult
 import com.android.tools.build.apkzlib.zip.AlignmentRules
 import com.android.tools.build.apkzlib.zip.StoredEntry
 import com.android.tools.build.apkzlib.zip.ZFile
 import com.android.tools.build.apkzlib.zip.ZFileOptions
 import java.io.File
+import java.util.*
 import java.util.logging.Logger
+import kotlin.time.Duration.Companion.days
 
 /**
  * Utility functions to work with APK files.
@@ -93,43 +96,129 @@ object ApkUtils {
     }
 
     /**
-     * Reads an existing or creates a new keystore.
+     * Creates a new private key and certificate pair and saves it to the keystore in [keyStoreDetails].
      *
-     * @param signingOptions The options to use for signing.
+     * @param privateKeyCertificatePairDetails The details for the private key and certificate pair.
+     * @param keyStoreDetails The details for the keystore.
+     *
+     * @return The newly created private key and certificate pair.
      */
-    private fun readOrNewKeyStore(signingOptions: SigningOptions) = if (signingOptions.keyStore.exists()) {
-        ApkSigner.readKeyStore(
-            signingOptions.keyStore.inputStream(),
-            signingOptions.keyStorePassword ?: "",
+    @Deprecated("This method will be removed in the future.")
+    fun newPrivateKeyCertificatePair(
+        privateKeyCertificatePairDetails: PrivateKeyCertificatePairDetails,
+        keyStoreDetails: KeyStoreDetails,
+    ) = newPrivateKeyCertificatePair(
+        privateKeyCertificatePairDetails.commonName,
+        privateKeyCertificatePairDetails.validUntil,
+    ).also { privateKeyCertificatePair ->
+        ApkSigner.newKeyStore(
+            setOf(
+                ApkSigner.KeyStoreEntry(
+                    keyStoreDetails.alias,
+                    keyStoreDetails.password,
+                    privateKeyCertificatePair,
+                ),
+            ),
+        ).store(
+            keyStoreDetails.keyStore.outputStream(),
+            keyStoreDetails.keyStorePassword?.toCharArray(),
         )
-    } else {
-        val entry = ApkSigner.KeyStoreEntry(signingOptions.alias, signingOptions.password)
+    }
 
-        // Create a new keystore with a new keypair and saves it.
-        ApkSigner.newKeyStore(setOf(entry)).apply {
-            store(
-                signingOptions.keyStore.outputStream(),
-                signingOptions.keyStorePassword?.toCharArray(),
-            )
+    /**
+     * Reads the private key and certificate pair from an existing keystore.
+     *
+     * @param keyStoreDetails The details for the keystore.
+     *
+     * @return The private key and certificate pair.
+     */
+    @Deprecated("This method will be removed in the future.")
+    fun readPrivateKeyCertificatePairFromKeyStore(
+        keyStoreDetails: KeyStoreDetails,
+    ) = ApkSigner.readPrivateKeyCertificatePair(
+        ApkSigner.readKeyStore(
+            keyStoreDetails.keyStore.inputStream(),
+            keyStoreDetails.keyStorePassword,
+        ),
+        keyStoreDetails.alias,
+        keyStoreDetails.password,
+    )
+
+    /**
+     * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
+     * If [KeyStoreDetails.keyStore] does not exist,
+     * a new private key and certificate pair will be created and saved to the keystore.
+     *
+     * @param inputApkFile The apk file to sign.
+     * @param outputApkFile The file to save the signed apk to.
+     * @param signer The name of the signer.
+     * @param keyStoreDetails The details for the keystore.
+     */
+    fun signApk(
+        inputApkFile: File,
+        outputApkFile: File,
+        signer: String,
+        keyStoreDetails: KeyStoreDetails,
+    ) = ApkSigner.newApkSigner(
+        signer,
+        if (keyStoreDetails.keyStore.exists()) {
+            readPrivateKeyCertificatePairFromKeyStore(keyStoreDetails)
+        } else {
+            newPrivateKeyCertificatePair(PrivateKeyCertificatePairDetails(), keyStoreDetails)
+        },
+    ).signApk(inputApkFile, outputApkFile)
+
+    @Deprecated("This method will be removed in the future.")
+    private fun readOrNewPrivateKeyCertificatePair(
+        signingOptions: SigningOptions,
+    ): ApkSigner.PrivateKeyCertificatePair {
+        val privateKeyCertificatePairDetails = PrivateKeyCertificatePairDetails(
+            signingOptions.alias,
+            PrivateKeyCertificatePairDetails().validUntil,
+        )
+        val keyStoreDetails = KeyStoreDetails(
+            signingOptions.keyStore,
+            signingOptions.keyStorePassword,
+            signingOptions.alias,
+            signingOptions.password,
+        )
+
+        return if (keyStoreDetails.keyStore.exists()) {
+            readPrivateKeyCertificatePairFromKeyStore(keyStoreDetails)
+        } else {
+            newPrivateKeyCertificatePair(privateKeyCertificatePairDetails, keyStoreDetails)
         }
     }
+
+    /**
+     * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
+     *
+     * @param inputApkFile The apk file to sign.
+     * @param outputApkFile The file to save the signed apk to.
+     * @param signer The name of the signer.
+     * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
+     */
+    @Deprecated("This method will be removed in the future.")
+    fun sign(
+        inputApkFile: File,
+        outputApkFile: File,
+        signer: String,
+        privateKeyCertificatePair: ApkSigner.PrivateKeyCertificatePair,
+    ) = ApkSigner.newApkSigner(
+        signer,
+        privateKeyCertificatePair,
+    ).signApk(inputApkFile, outputApkFile)
 
     /**
      * Signs the apk file with the given options.
      *
      * @param signingOptions The options to use for signing.
      */
-    @Deprecated("Use sign(File, File, SigningOptions) instead.")
-    fun File.sign(signingOptions: SigningOptions) {
-        val keyStore = readOrNewKeyStore(signingOptions)
-
-        @Suppress("DEPRECATION")
-        ApkSigner.newApkSigner(
-            keyStore,
-            signingOptions.alias,
-            signingOptions.password,
-        ).signApk(this)
-    }
+    @Deprecated("This method will be removed in the future.")
+    fun File.sign(signingOptions: SigningOptions) = ApkSigner.newApkSigner(
+        signingOptions.signer,
+        readOrNewPrivateKeyCertificatePair(signingOptions),
+    ).signApk(this)
 
     /**
      * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
@@ -138,16 +227,13 @@ object ApkUtils {
      * @param outputApkFile The file to save the signed apk to.
      * @param signingOptions The options to use for signing.
      */
-    fun sign(inputApkFile: File, outputApkFile: File, signingOptions: SigningOptions) {
-        val keyStore = readOrNewKeyStore(signingOptions)
-
-        ApkSigner.newApkSigner(
-            signingOptions.signer,
-            keyStore,
-            signingOptions.alias,
-            signingOptions.password,
-        ).signApk(inputApkFile, outputApkFile)
-    }
+    @Deprecated("This method will be removed in the future.")
+    fun sign(inputApkFile: File, outputApkFile: File, signingOptions: SigningOptions) = sign(
+        inputApkFile,
+        outputApkFile,
+        signingOptions.signer,
+        readOrNewPrivateKeyCertificatePair(signingOptions),
+    )
 
     /**
      * Options for signing an apk.
@@ -158,11 +244,38 @@ object ApkUtils {
      * @param password The password for recovering the signing key.
      * @param signer The name of the signer.
      */
+    @Deprecated("This class will be removed in the future.")
     class SigningOptions(
         val keyStore: File,
         val keyStorePassword: String?,
         val alias: String = "ReVanced Key",
         val password: String = "",
         val signer: String = "ReVanced",
+    )
+
+    /**
+     * Details for a keystore.
+     *
+     * @param keyStore The file to save the keystore to.
+     * @param keyStorePassword The password for the keystore.
+     * @param alias The alias of the key store entry to use for signing.
+     * @param password The password for recovering the signing key.
+     */
+    class KeyStoreDetails(
+        val keyStore: File,
+        val keyStorePassword: String? = null,
+        val alias: String = "ReVanced Key",
+        val password: String = "",
+    )
+
+    /**
+     * Details for a private key and certificate pair.
+     *
+     * @param commonName The common name for the certificate saved in the keystore.
+     * @param validUntil The date until which the certificate is valid.
+     */
+    class PrivateKeyCertificatePairDetails(
+        val commonName: String = "ReVanced",
+        val validUntil: Date = Date(System.currentTimeMillis() + (365.days * 8).inWholeMilliseconds * 24),
     )
 }

@@ -19,7 +19,6 @@ import java.security.*
 import java.security.cert.X509Certificate
 import java.util.*
 import java.util.logging.Logger
-import kotlin.time.Duration.Companion.days
 
 /**
  * Utility class for reading or writing keystore files and entries as well as signing APK files.
@@ -34,17 +33,80 @@ object ApkSigner {
         }
     }
 
+    private fun newKeyStoreInstance() = KeyStore.getInstance("BKS", BouncyCastleProvider.PROVIDER_NAME)
+
     /**
-     * Create a new [PrivateKeyCertificatePair].
+     * Create a new keystore with a new keypair.
+     *
+     * @param entries The entries to add to the keystore.
+     *
+     * @return The created keystore.
+     *
+     * @see KeyStoreEntry
+     * @see KeyStore
+     */
+    fun newKeyStore(entries: Set<KeyStoreEntry>): KeyStore {
+        logger.fine("Creating keystore")
+
+        return newKeyStoreInstance().apply {
+            load(null)
+
+            entries.forEach { entry ->
+                // Add all entries to the keystore.
+                setKeyEntry(
+                    entry.alias,
+                    entry.privateKeyCertificatePair.privateKey,
+                    entry.password.toCharArray(),
+                    arrayOf(entry.privateKeyCertificatePair.certificate),
+                )
+            }
+        }
+    }
+
+    /**
+     * Read a keystore from the given [keyStoreInputStream].
+     *
+     * @param keyStoreInputStream The stream to read the keystore from.
+     * @param keyStorePassword The password for the keystore.
+     *
+     * @return The keystore.
+     *
+     * @throws IllegalArgumentException If the keystore password is invalid.
+     *
+     * @see KeyStore
+     */
+    fun readKeyStore(
+        keyStoreInputStream: InputStream,
+        keyStorePassword: String?,
+    ): KeyStore {
+        logger.fine("Reading keystore")
+
+        return newKeyStoreInstance().apply {
+            try {
+                load(keyStoreInputStream, keyStorePassword?.toCharArray())
+            } catch (exception: IOException) {
+                if (exception.cause is UnrecoverableKeyException) {
+                    throw IllegalArgumentException("Invalid keystore password")
+                } else {
+                    throw exception
+                }
+            }
+        }
+    }
+
+    /**
+     * Create a new private key and certificate pair.
      *
      * @param commonName The common name of the certificate.
-     * @param validUntil The date until the certificate is valid.
+     * @param validUntil The date until which the certificate is valid.
      *
-     * @return The created [PrivateKeyCertificatePair].
+     * @return The newly created private key and certificate pair.
+     *
+     * @see PrivateKeyCertificatePair
      */
     fun newPrivateKeyCertificatePair(
-        commonName: String = "ReVanced",
-        validUntil: Date = Date(System.currentTimeMillis() + (365.days * 8).inWholeMilliseconds * 24),
+        commonName: String,
+        validUntil: Date,
     ): PrivateKeyCertificatePair {
         logger.fine("Creating certificate for $commonName")
 
@@ -80,8 +142,11 @@ object ApkSigner {
      * @return The read [PrivateKeyCertificatePair].
      *
      * @throws IllegalArgumentException If the keystore does not contain the given alias or the password is invalid.
+     *
+     * @see PrivateKeyCertificatePair
+     * @see KeyStore
      */
-    fun readKeyCertificatePair(
+    fun readPrivateKeyCertificatePair(
         keyStore: KeyStore,
         keyStoreEntryAlias: String,
         keyStoreEntryPassword: String,
@@ -89,7 +154,7 @@ object ApkSigner {
         logger.fine("Reading key and certificate pair from keystore entry $keyStoreEntryAlias")
 
         if (!keyStore.containsAlias(keyStoreEntryAlias)) {
-            throw IllegalArgumentException("Keystore does not contain alias $keyStoreEntryAlias")
+            throw IllegalArgumentException("Keystore does not contain entry with alias $keyStoreEntryAlias")
         }
 
         // Read the private key and certificate from the keystore.
@@ -104,80 +169,6 @@ object ApkSigner {
         val certificate = keyStore.getCertificate(keyStoreEntryAlias) as X509Certificate
 
         return PrivateKeyCertificatePair(privateKey, certificate)
-    }
-
-    /**
-     * Create a new keystore with a new keypair.
-     *
-     * @param entries The entries to add to the keystore.
-     *
-     * @return The created keystore.
-     *
-     * @see KeyStoreEntry
-     */
-    fun newKeyStore(entries: Set<KeyStoreEntry>): KeyStore {
-        logger.fine("Creating keystore")
-
-        return newKeyStoreInstance().apply {
-            load(null)
-
-            entries.forEach { entry ->
-                // Add all entries to the keystore.
-                setKeyEntry(
-                    entry.alias,
-                    entry.privateKeyCertificatePair.privateKey,
-                    entry.password.toCharArray(),
-                    arrayOf(entry.privateKeyCertificatePair.certificate),
-                )
-            }
-        }
-    }
-
-    private fun newKeyStoreInstance() = KeyStore.getInstance("BKS", BouncyCastleProvider.PROVIDER_NAME)
-
-    /**
-     * Create a new keystore with a new keypair and saves it to the given [keyStoreOutputStream].
-     *
-     * @param keyStoreOutputStream The stream to write the keystore to.
-     * @param keyStorePassword The password for the keystore.
-     * @param entries The entries to add to the keystore.
-     */
-    fun newKeyStore(
-        keyStoreOutputStream: OutputStream,
-        keyStorePassword: String,
-        entries: Set<KeyStoreEntry>,
-    ) = newKeyStore(entries).store(
-        keyStoreOutputStream,
-        keyStorePassword.toCharArray(),
-    )
-
-    /**
-     * Read a keystore from the given [keyStoreInputStream].
-     *
-     * @param keyStoreInputStream The stream to read the keystore from.
-     * @param keyStorePassword The password for the keystore.
-     *
-     * @return The keystore.
-     *
-     * @throws IllegalArgumentException If the keystore password is invalid.
-     */
-    fun readKeyStore(
-        keyStoreInputStream: InputStream,
-        keyStorePassword: String?,
-    ): KeyStore {
-        logger.fine("Reading keystore")
-
-        return newKeyStoreInstance().apply {
-            try {
-                load(keyStoreInputStream, keyStorePassword?.toCharArray())
-            } catch (exception: IOException) {
-                if (exception.cause is UnrecoverableKeyException) {
-                    throw IllegalArgumentException("Invalid keystore password")
-                } else {
-                    throw exception
-                }
-            }
-        }
     }
 
     /**
@@ -207,6 +198,41 @@ object ApkSigner {
     )
 
     /**
+     * Read a [PrivateKeyCertificatePair] from a keystore entry.
+     *
+     * @param keyStore The keystore to read the entry from.
+     * @param keyStoreEntryAlias The alias of the key store entry to read.
+     * @param keyStoreEntryPassword The password for recovering the signing key.
+     *
+     * @return The read [PrivateKeyCertificatePair].
+     *
+     * @throws IllegalArgumentException If the keystore does not contain the given alias or the password is invalid.
+     */
+    @Deprecated("This method will be removed in the future.")
+    fun readKeyCertificatePair(
+        keyStore: KeyStore,
+        keyStoreEntryAlias: String,
+        keyStoreEntryPassword: String,
+    ) = readPrivateKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword)
+
+    /**
+     * Create a new keystore with a new keypair and saves it to the given [keyStoreOutputStream].
+     *
+     * @param keyStoreOutputStream The stream to write the keystore to.
+     * @param keyStorePassword The password for the keystore.
+     * @param entries The entries to add to the keystore.
+     */
+    @Deprecated("This method will be removed in the future.")
+    fun newKeyStore(
+        keyStoreOutputStream: OutputStream,
+        keyStorePassword: String?,
+        entries: Set<KeyStoreEntry>,
+    ) = newKeyStore(entries).store(
+        keyStoreOutputStream,
+        keyStorePassword?.toCharArray(),
+    )
+
+    /**
      * Create a new [Signer].
      *
      * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
@@ -216,13 +242,7 @@ object ApkSigner {
      * @see PrivateKeyCertificatePair
      * @see Signer
      */
-    @Suppress("DEPRECATION")
-    @Deprecated(
-        "This method will be removed in the future.",
-        ReplaceWith(
-            "newApkSigner(\"ReVanced\", privateKeyCertificatePair)",
-        ),
-    )
+    @Deprecated("This method will be removed in the future.")
     fun newApkSigner(privateKeyCertificatePair: PrivateKeyCertificatePair) =
         Signer(
             SigningExtension(
@@ -249,6 +269,7 @@ object ApkSigner {
      * @see KeyStore
      * @see Signer
      */
+    @Deprecated("This method will be removed in the future.")
     fun newApkSigner(
         signer: String,
         keyStore: KeyStore,
@@ -268,13 +289,7 @@ object ApkSigner {
      * @see KeyStore
      * @see Signer
      */
-    @Deprecated(
-        "This method will be removed in the future.",
-        ReplaceWith(
-            "newApkSigner(\"ReVanced\", readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))",
-            "app.revanced.library.ApkSigner.newApkSigner",
-        ),
-    )
+    @Deprecated("This method will be removed in the future.")
     fun newApkSigner(
         keyStore: KeyStore,
         keyStoreEntryAlias: String,
@@ -293,7 +308,7 @@ object ApkSigner {
     class KeyStoreEntry(
         val alias: String,
         val password: String,
-        val privateKeyCertificatePair: PrivateKeyCertificatePair = newPrivateKeyCertificatePair(),
+        val privateKeyCertificatePair: PrivateKeyCertificatePair,
     )
 
     /**
@@ -314,6 +329,12 @@ object ApkSigner {
         internal constructor(signerBuilder: com.android.apksig.ApkSigner.Builder) {
             this.signerBuilder = signerBuilder
             signingExtension = null
+        }
+
+        fun signApk(inputApkFile: File, outputApkFile: File) {
+            logger.info("Signing APK")
+
+            signerBuilder?.setInputApk(inputApkFile)?.setOutputApk(outputApkFile)?.build()?.sign()
         }
 
         @Deprecated("This constructor will be removed in the future.")
@@ -343,12 +364,6 @@ object ApkSigner {
             logger.info("Signing ${apkZFile.file.name}")
 
             signingExtension?.register(apkZFile)
-        }
-
-        fun signApk(inputApkFile: File, outputApkFile: File) {
-            logger.info("Signing APK")
-
-            signerBuilder?.setInputApk(inputApkFile)?.setOutputApk(outputApkFile)?.build()?.sign()
         }
     }
 }

@@ -1,3 +1,31 @@
+# [2.3.0-dev.3](https://github.com/ReVanced/revanced-library/compare/v2.3.0-dev.2...v2.3.0-dev.3) (2024-03-14)
+
+
+### Features
+
+* Improve exception message ([b15efa4](https://github.com/ReVanced/revanced-library/commit/b15efa41f8dc7d73865d0eab15be274b9ee3d7a3))
+
+# [2.3.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v2.3.0-dev.1...v2.3.0-dev.2) (2024-03-14)
+
+
+### Features
+
+* Simplify signing utility API ([4c6a636](https://github.com/ReVanced/revanced-library/commit/4c6a6360cf83659d1f5c3a7c5710ac54426e9235))
+
+# [2.3.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.2-dev.1...v2.3.0-dev.1) (2024-03-13)
+
+
+### Features
+
+* Add utility function around key certificate pairs ([2df3484](https://github.com/ReVanced/revanced-library/commit/2df3484b68ed72338a52e76fb4b7ceb9c9c644ed))
+
+## [2.2.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.1...v2.2.2-dev.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* Support mounting even when Magisk is not installed ([2a30845](https://github.com/ReVanced/revanced-library/commit/2a30845f61d5f77ded7a72ee3d6ab55b4c512d52))
+
 ## [2.2.1](https://github.com/ReVanced/revanced-library/compare/v2.2.0...v2.2.1) (2024-03-09)
 
 
