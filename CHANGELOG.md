@@ -1,3 +1,10 @@
+# [2.3.0-dev.3](https://github.com/ReVanced/revanced-library/compare/v2.3.0-dev.2...v2.3.0-dev.3) (2024-03-14)
+
+
+### Features
+
+* Improve exception message ([b15efa4](https://github.com/ReVanced/revanced-library/commit/b15efa41f8dc7d73865d0eab15be274b9ee3d7a3))
+
 # [2.3.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v2.3.0-dev.1...v2.3.0-dev.2) (2024-03-14)
 
 
