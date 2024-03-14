@@ -1,3 +1,10 @@
+# [2.3.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v2.3.0-dev.1...v2.3.0-dev.2) (2024-03-14)
+
+
+### Features
+
+* Simplify signing utility API ([4c6a636](https://github.com/ReVanced/revanced-library/commit/4c6a6360cf83659d1f5c3a7c5710ac54426e9235))
+
 # [2.3.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.2.2-dev.1...v2.3.0-dev.1) (2024-03-13)
 
 
