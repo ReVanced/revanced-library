@@ -1,5 +1,5 @@
 [versions]
-jackson-module-kotlin = "2.15.0"
+jackson-module-kotlin = "2.16.1"
 jadb = "1.2.1"
 kotlin = "1.9.22"
 revanced-patcher = "19.3.1"
