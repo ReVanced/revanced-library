@@ -19,15 +19,20 @@ import app.revanced.library.installation.installer.RootInstaller.NoRootPermissio
 import java.io.File
 
 /**
- * [RootInstaller] for installing and uninstalling [Apk] files using root by mounting.
+ * [RootInstaller] for installing and uninstalling [Apk] files using root permissions by mounting.
  *
  * @param shellCommandRunnerSupplier A supplier for the [ShellCommandRunner] to use.
+ *
  * @throws NoRootPermissionException If the device does not have root permission.
  */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class RootInstaller(
     shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
-) : Installer() {
+) : Installer<RootInstallerResult>() {
+
+    /**
+     * The command runner used to run commands on the device.
+     */
     @Suppress("LeakingThis")
     protected val shellCommandRunner = shellCommandRunnerSupplier(this)
 
@@ -39,9 +44,10 @@ abstract class RootInstaller(
      * Installs the given [apk] by mounting.
      *
      * @param apk The [Apk] to install.
+     *
      * @throws PackageNameRequiredException If the [Apk] does not have a package name.
      */
-    override fun install(apk: Apk) {
+    override suspend fun install(apk: Apk): RootInstallerResult {
         logger.info("Installing ${apk.packageName} by mounting")
 
         val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
@@ -59,10 +65,10 @@ abstract class RootInstaller(
 
         DELETE(TMP_FILE_PATH)()
 
-        super.install(apk)
+        return RootInstallerResult.SUCCESS
     }
 
-    override fun uninstall(packageName: String) {
+    override suspend fun uninstall(packageName: String): RootInstallerResult {
         logger.info("Uninstalling $packageName by unmounting")
 
         UMOUNT(packageName)()
@@ -73,7 +79,7 @@ abstract class RootInstaller(
 
         KILL(packageName)()
 
-        super.uninstall(packageName)
+        return RootInstallerResult.SUCCESS
     }
 
     /**

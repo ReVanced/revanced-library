@@ -7,22 +7,29 @@ import java.util.logging.Logger
 /**
  * [Installer] for installing and uninstalling [Apk] files.
  */
-abstract class Installer {
+abstract class Installer<T> {
+    /**
+     * The [Logger].
+     */
     protected val logger: Logger = Logger.getLogger(this::class.java.name)
 
     /**
      * Installs the [Apk] file.
      *
      * @param apk The [Apk] file.
+     *
+     * @return The result of the installation.
      */
-    open fun install(apk: Apk) = logger.info("Installed ${apk.file.name}")
+    abstract suspend fun install(apk: Apk): T
 
     /**
      * Uninstalls the package.
      *
      * @param packageName The package name.
+     *
+     * @return The result of the uninstallation.
      */
-    open fun uninstall(packageName: String) = logger.info("Uninstalled $packageName")
+    abstract suspend fun uninstall(packageName: String): T
 
     /**
      * Apk file for [Installer].

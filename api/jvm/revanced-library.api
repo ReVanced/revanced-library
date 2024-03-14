@@ -2,8 +2,8 @@ public abstract class app/revanced/library/AdbManager {
 	public static final field Companion Lapp/revanced/library/AdbManager$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected abstract fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/AdbManager$Apk;)V
-	public fun uninstall (Ljava/lang/String;)V
+	public fun install (Lapp/revanced/library/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
+	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
 }
 
 public final class app/revanced/library/AdbManager$Apk {
@@ -31,8 +31,8 @@ public final class app/revanced/library/AdbManager$PackageNameRequiredException 
 public final class app/revanced/library/AdbManager$RootAdbManager : app/revanced/library/AdbManager {
 	public static final field Utils Lapp/revanced/library/AdbManager$RootAdbManager$Utils;
 	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/AdbManager$Apk;)V
-	public fun uninstall (Ljava/lang/String;)V
+	public fun install (Lapp/revanced/library/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
+	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
 }
 
 public final class app/revanced/library/AdbManager$RootAdbManager$Utils {
@@ -40,8 +40,8 @@ public final class app/revanced/library/AdbManager$RootAdbManager$Utils {
 
 public final class app/revanced/library/AdbManager$UserAdbManager : app/revanced/library/AdbManager {
 	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/AdbManager$Apk;)V
-	public fun uninstall (Ljava/lang/String;)V
+	public fun install (Lapp/revanced/library/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
+	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
 }
 
 public final class app/revanced/library/ApkSigner {
@@ -219,8 +219,19 @@ public final class app/revanced/library/installation/installer/AdbInstaller : ap
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
-	public fun uninstall (Ljava/lang/String;)V
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class app/revanced/library/installation/installer/AdbInstallerResult {
+}
+
+public final class app/revanced/library/installation/installer/AdbInstallerResult$Failure : app/revanced/library/installation/installer/AdbInstallerResult {
+	public final fun getException ()Ljava/lang/Exception;
+}
+
+public final class app/revanced/library/installation/installer/AdbInstallerResult$Success : app/revanced/library/installation/installer/AdbInstallerResult {
+	public static final field INSTANCE Lapp/revanced/library/installation/installer/AdbInstallerResult$Success;
 }
 
 public final class app/revanced/library/installation/installer/AdbRootInstaller : app/revanced/library/installation/installer/RootInstaller {
@@ -252,8 +263,8 @@ public final class app/revanced/library/installation/installer/Constants {
 public abstract class app/revanced/library/installation/installer/Installer {
 	public fun <init> ()V
 	protected final fun getLogger ()Ljava/util/logging/Logger;
-	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
-	public fun uninstall (Ljava/lang/String;)V
+	public abstract fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class app/revanced/library/installation/installer/Installer$Apk {
@@ -266,11 +277,19 @@ public final class app/revanced/library/installation/installer/Installer$Apk {
 public abstract class app/revanced/library/installation/installer/RootInstaller : app/revanced/library/installation/installer/Installer {
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	protected final fun getShellCommandRunner ()Lapp/revanced/library/installation/command/ShellCommandRunner;
-	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;)V
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected final fun invoke (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
 	protected final fun move (Ljava/io/File;Ljava/lang/String;)V
-	public fun uninstall (Ljava/lang/String;)V
+	public fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected final fun write (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/installer/RootInstallerResult : java/lang/Enum {
+	public static final field FAILURE Lapp/revanced/library/installation/installer/RootInstallerResult;
+	public static final field SUCCESS Lapp/revanced/library/installation/installer/RootInstallerResult;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/revanced/library/installation/installer/RootInstallerResult;
+	public static fun values ()[Lapp/revanced/library/installation/installer/RootInstallerResult;
 }
 
 public final class app/revanced/library/logging/Logger {

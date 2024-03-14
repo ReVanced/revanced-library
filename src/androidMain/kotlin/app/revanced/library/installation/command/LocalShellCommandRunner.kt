@@ -24,7 +24,7 @@ import java.io.InputStream
  */
 class LocalShellCommandRunner(
     private val context: Context,
-    private val onReady: () -> Unit
+    private val onReady: () -> Unit,
 ) : ShellCommandRunner(), ServiceConnection, Closeable {
     private var fileSystemManager: FileSystemManager? = null
 

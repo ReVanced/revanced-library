@@ -20,7 +20,7 @@ import java.io.File
 sealed class AdbManager private constructor(
     @Suppress("UNUSED_PARAMETER") deviceSerial: String?,
 ) {
-    protected abstract val installer: Installer
+    protected abstract val installer: Installer<*>
 
     /**
      * Installs the [Apk] file.
@@ -29,7 +29,9 @@ sealed class AdbManager private constructor(
      */
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated("Use Installer.install instead.")
-    open fun install(apk: Apk) = installer.install(Installer.Apk(apk.file, apk.packageName))
+    open fun install(apk: Apk) = suspend {
+        installer.install(Installer.Apk(apk.file, apk.packageName))
+    }
 
     /**
      * Uninstalls the package.
@@ -38,7 +40,9 @@ sealed class AdbManager private constructor(
      */
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated("Use Installer.uninstall instead.")
-    open fun uninstall(packageName: String) = installer.uninstall(packageName)
+    open fun uninstall(packageName: String) = suspend {
+        installer.uninstall(packageName)
+    }
 
     @Deprecated("Use Installer instead.")
     companion object {
@@ -69,11 +73,15 @@ sealed class AdbManager private constructor(
 
         @Suppress("DeprecatedCallableAddReplaceWith")
         @Deprecated("Use AdbRootInstaller.install instead.")
-        override fun install(apk: Apk) = installer.install(Installer.Apk(apk.file, apk.packageName))
+        override fun install(apk: Apk) = suspend {
+            installer.install(Installer.Apk(apk.file, apk.packageName))
+        }
 
         @Suppress("DeprecatedCallableAddReplaceWith")
         @Deprecated("Use AdbRootInstaller.uninstall instead.")
-        override fun uninstall(packageName: String) = installer.uninstall(packageName)
+        override fun uninstall(packageName: String) = suspend {
+            installer.uninstall(packageName)
+        }
 
         @Deprecated("This is deprecated.")
         companion object Utils {
@@ -97,11 +105,15 @@ sealed class AdbManager private constructor(
 
         @Suppress("DeprecatedCallableAddReplaceWith")
         @Deprecated("Use AdbInstaller.install instead.")
-        override fun install(apk: Apk) = installer.install(Installer.Apk(apk.file, apk.packageName))
+        override fun install(apk: Apk) = suspend {
+            installer.install(Installer.Apk(apk.file, apk.packageName))
+        }
 
         @Suppress("DeprecatedCallableAddReplaceWith")
         @Deprecated("Use AdbInstaller.uninstall instead.")
-        override fun uninstall(packageName: String) = installer.uninstall(packageName)
+        override fun uninstall(packageName: String) = suspend {
+            installer.uninstall(packageName)
+        }
     }
 
     /**
