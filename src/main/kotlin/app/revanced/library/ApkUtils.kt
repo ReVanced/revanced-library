@@ -103,6 +103,7 @@ object ApkUtils {
      *
      * @return The newly created private key and certificate pair.
      */
+    @Deprecated("This method will be removed in the future.")
     fun newPrivateKeyCertificatePair(
         privateKeyCertificatePairDetails: PrivateKeyCertificatePairDetails,
         keyStoreDetails: KeyStoreDetails,
@@ -131,9 +132,10 @@ object ApkUtils {
      *
      * @return The private key and certificate pair.
      */
+    @Deprecated("This method will be removed in the future.")
     fun readPrivateKeyCertificatePairFromKeyStore(
         keyStoreDetails: KeyStoreDetails,
-    ) = ApkSigner.readKeyCertificatePair(
+    ) = ApkSigner.readPrivateKeyCertificatePair(
         ApkSigner.readKeyStore(
             keyStoreDetails.keyStore.inputStream(),
             keyStoreDetails.keyStorePassword,
@@ -144,20 +146,26 @@ object ApkUtils {
 
     /**
      * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
+     * If [KeyStoreDetails.keyStore] does not exist,
+     * a new private key and certificate pair will be created and saved to the keystore.
      *
      * @param inputApkFile The apk file to sign.
      * @param outputApkFile The file to save the signed apk to.
      * @param signer The name of the signer.
-     * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
+     * @param keyStoreDetails The details for the keystore.
      */
-    fun sign(
+    fun signApk(
         inputApkFile: File,
         outputApkFile: File,
         signer: String,
-        privateKeyCertificatePair: ApkSigner.PrivateKeyCertificatePair,
+        keyStoreDetails: KeyStoreDetails,
     ) = ApkSigner.newApkSigner(
         signer,
-        privateKeyCertificatePair,
+        if (keyStoreDetails.keyStore.exists()) {
+            readPrivateKeyCertificatePairFromKeyStore(keyStoreDetails)
+        } else {
+            newPrivateKeyCertificatePair(PrivateKeyCertificatePairDetails(), keyStoreDetails)
+        },
     ).signApk(inputApkFile, outputApkFile)
 
     @Deprecated("This method will be removed in the future.")
@@ -181,6 +189,25 @@ object ApkUtils {
             newPrivateKeyCertificatePair(privateKeyCertificatePairDetails, keyStoreDetails)
         }
     }
+
+    /**
+     * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
+     *
+     * @param inputApkFile The apk file to sign.
+     * @param outputApkFile The file to save the signed apk to.
+     * @param signer The name of the signer.
+     * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
+     */
+    @Deprecated("This method will be removed in the future.")
+    fun sign(
+        inputApkFile: File,
+        outputApkFile: File,
+        signer: String,
+        privateKeyCertificatePair: ApkSigner.PrivateKeyCertificatePair,
+    ) = ApkSigner.newApkSigner(
+        signer,
+        privateKeyCertificatePair,
+    ).signApk(inputApkFile, outputApkFile)
 
     /**
      * Signs the apk file with the given options.
