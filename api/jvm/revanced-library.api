@@ -85,6 +85,7 @@ public final class app/revanced/library/ApkUtils {
 	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
 	public final fun sign (Ljava/io/File;Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
 	public final fun sign (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)V
+	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)V
 }
 
 public final class app/revanced/library/ApkUtils$KeyStoreDetails {

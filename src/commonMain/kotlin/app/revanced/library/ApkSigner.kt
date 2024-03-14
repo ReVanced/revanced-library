@@ -154,7 +154,7 @@ object ApkSigner {
         logger.fine("Reading key and certificate pair from keystore entry $keyStoreEntryAlias")
 
         if (!keyStore.containsAlias(keyStoreEntryAlias)) {
-            throw IllegalArgumentException("Keystore does not contain alias $keyStoreEntryAlias")
+            throw IllegalArgumentException("Keystore does not contain entry with alias $keyStoreEntryAlias")
         }
 
         // Read the private key and certificate from the keystore.
