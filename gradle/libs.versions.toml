@@ -7,7 +7,7 @@ binary-compatibility-validator = "0.14.0"
 apkzlib = "8.3.0"
 bcpkix-jdk15on = "1.70"
 guava = "33.0.0-jre"
-apksig = "8.3.0"
+apksig = "8.3.1"
 
 [libraries]
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }
