@@ -1,7 +1,7 @@
 [versions]
 jackson-module-kotlin = "2.15.0"
 jadb = "1.2.1"
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 revanced-patcher = "19.3.1"
 binary-compatibility-validator = "0.14.0"
 apkzlib = "8.3.0"
