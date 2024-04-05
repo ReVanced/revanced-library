@@ -2,7 +2,10 @@ package app.revanced.library.installation.installer
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
@@ -22,7 +25,7 @@ import java.io.File
 class LocalInstaller(
     private val context: Context,
     onResult: (result: LocalInstallerResult) -> Unit,
-) : Installer<Unit>(), Closeable {
+) : Installer<Unit, Installation>(), Closeable {
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val pmStatus = intent.getIntExtra(LocalInstallerService.EXTRA_STATUS, -999)
@@ -70,6 +73,14 @@ class LocalInstaller(
         val packageInstaller = context.packageManager.packageInstaller
 
         packageInstaller.uninstall(packageName, intentSender)
+    }
+
+    override suspend fun getInstallation(packageName: String) = try {
+        val packageInfo = context.packageManager.getPackageInfo(packageName, 0)
+
+        Installation(packageInfo.applicationInfo.sourceDir)
+    } catch (e: PackageManager.NameNotFoundException) {
+        null
     }
 
     override fun close() = context.unregisterReceiver(broadcastReceiver)

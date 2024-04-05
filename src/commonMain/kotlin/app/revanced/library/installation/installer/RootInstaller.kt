@@ -3,13 +3,15 @@ package app.revanced.library.installation.installer
 import app.revanced.library.installation.command.ShellCommandRunner
 import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION_PATH
 import app.revanced.library.installation.installer.Constants.DELETE
-import app.revanced.library.installation.installer.Constants.GET_INSTALLED_PATH
+import app.revanced.library.installation.installer.Constants.EXISTS
+import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
-import app.revanced.library.installation.installer.Constants.INSTALL_PATCHED_APK
 import app.revanced.library.installation.installer.Constants.KILL
+import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
+import app.revanced.library.installation.installer.Constants.MOUNT_APK
+import app.revanced.library.installation.installer.Constants.MOUNT_GREP
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
-import app.revanced.library.installation.installer.Constants.PATCHED_APK_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
@@ -28,7 +30,7 @@ import java.io.File
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class RootInstaller(
     shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
-) : Installer<RootInstallerResult>() {
+) : Installer<RootInstallerResult, RootInstallation>() {
 
     /**
      * The command runner used to run commands on the device.
@@ -55,7 +57,7 @@ abstract class RootInstaller(
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH().waitFor()
-        INSTALL_PATCHED_APK(packageName)().waitFor()
+        MOUNT_APK(packageName)().waitFor()
 
         // Install and run.
         TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
@@ -73,13 +75,26 @@ abstract class RootInstaller(
 
         UMOUNT(packageName)()
 
-        DELETE(PATCHED_APK_PATH)(packageName)()
+        DELETE(MOUNTED_APK_PATH)(packageName)()
         DELETE(MOUNT_SCRIPT_PATH)(packageName)()
         DELETE(TMP_FILE_PATH)() // Remove residual.
 
         KILL(packageName)()
 
         return RootInstallerResult.SUCCESS
+    }
+
+    override suspend fun getInstallation(packageName: String): RootInstallation? {
+        val patchedApkPath = MOUNTED_APK_PATH(packageName)
+
+        val patchedApkExists = EXISTS(patchedApkPath)().exitCode == 0
+        if (patchedApkExists) return null
+
+        return RootInstallation(
+            INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
+            patchedApkPath,
+            MOUNT_GREP(patchedApkPath)().exitCode == 0,
+        )
     }
 
     /**
@@ -107,7 +122,7 @@ abstract class RootInstaller(
      * @throws FailedToFindInstalledPackageException If the package is not installed.
      */
     private fun String.assertInstalled() {
-        if (GET_INSTALLED_PATH(this)().output.isNotEmpty()) {
+        if (INSTALLED_APK_PATH(this)().output.isNotEmpty()) {
             throw FailedToFindInstalledPackageException(this)
         }
     }

@@ -11,4 +11,5 @@ import app.revanced.library.installation.installer.Installer.Apk
  *
  * @see LocalInstaller
  */
+@Suppress("MemberVisibilityCanBePrivate")
 class LocalInstallerResult internal constructor(val pmStatus: Int, val extra: String, val packageName: String)

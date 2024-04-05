@@ -5,19 +5,21 @@ object Constants {
     const val PLACEHOLDER = "PLACEHOLDER"
 
     const val TMP_FILE_PATH = "/data/local/tmp/revanced.tmp"
-    const val INSTALLATION_PATH = "/data/adb/revanced/"
-    const val PATCHED_APK_PATH = "$INSTALLATION_PATH$PLACEHOLDER.apk"
+    const val MOUNT_PATH = "/data/adb/revanced/"
+    const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
 
+    const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
+    const val MOUNT_GREP = "grep $PLACEHOLDER /proc/mounts"
     const val DELETE = "rm -rf $PLACEHOLDER"
     const val CREATE_DIR = "mkdir -p"
     const val RESTART = "am start -S $PLACEHOLDER"
     const val KILL = "am force-stop $PLACEHOLDER"
-    const val GET_INSTALLED_PATH = "pm path $PLACEHOLDER"
-    const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $INSTALLATION_PATH"
+    const val INSTALLED_APK_PATH = "pm path $PLACEHOLDER"
+    const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
 
-    const val INSTALL_PATCHED_APK =
-        "base_path=\"$PATCHED_APK_PATH\" && " +
+    const val MOUNT_APK =
+        "base_path=\"$MOUNTED_APK_PATH\" && " +
             "mv $TMP_FILE_PATH \$base_path && " +
             "chmod 644 \$base_path && " +
             "chown system:system \$base_path && " +
@@ -48,7 +50,7 @@ object Constants {
         # Unmount any existing installations to prevent multiple unnecessary mounts.
         $UMOUNT
 
-        base_path="$PATCHED_APK_PATH"
+        base_path="$MOUNTED_APK_PATH"
 
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
 

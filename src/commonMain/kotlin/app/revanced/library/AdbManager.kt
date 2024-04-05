@@ -20,7 +20,7 @@ import java.io.File
 sealed class AdbManager private constructor(
     @Suppress("UNUSED_PARAMETER") deviceSerial: String?,
 ) {
-    protected abstract val installer: Installer<*>
+    protected abstract val installer: Installer<*, *>
 
     /**
      * Installs the [Apk] file.

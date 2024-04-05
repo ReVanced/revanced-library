@@ -6,8 +6,11 @@ import java.util.logging.Logger
 
 /**
  * [Installer] for installing and uninstalling [Apk] files.
+ *
+ * @param TInstallerResult The type of the result of the installation.
+ * @param TInstallation The type of the installation.
  */
-abstract class Installer<T> {
+abstract class Installer<TInstallerResult, TInstallation : Installation> {
     /**
      * The [Logger].
      */
@@ -20,7 +23,7 @@ abstract class Installer<T> {
      *
      * @return The result of the installation.
      */
-    abstract suspend fun install(apk: Apk): T
+    abstract suspend fun install(apk: Apk): TInstallerResult
 
     /**
      * Uninstalls the package.
@@ -29,7 +32,16 @@ abstract class Installer<T> {
      *
      * @return The result of the uninstallation.
      */
-    abstract suspend fun uninstall(packageName: String): T
+    abstract suspend fun uninstall(packageName: String): TInstallerResult
+
+    /**
+     * Gets the current installation or null if not installed.
+     *
+     * @param packageName The package name.
+     *
+     * @return The installation.
+     */
+    abstract suspend fun getInstallation(packageName: String): TInstallation?
 
     /**
      * Apk file for [Installer].
