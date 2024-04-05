@@ -22,7 +22,7 @@ import java.io.InputStream
  *
  * @see ShellCommandRunner
  */
-class LocalShellCommandRunner(
+class LocalShellCommandRunner internal constructor(
     private val context: Context,
     private val onReady: () -> Unit,
 ) : ShellCommandRunner(), ServiceConnection, Closeable {

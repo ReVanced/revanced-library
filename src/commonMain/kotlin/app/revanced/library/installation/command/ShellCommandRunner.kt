@@ -7,7 +7,7 @@ import java.util.logging.Logger
 /**
  * [ShellCommandRunner] for running commands on a device.
  */
-abstract class ShellCommandRunner {
+abstract class ShellCommandRunner internal constructor() {
     protected val logger: Logger = Logger.getLogger(this::class.java.name)
 
     /**
@@ -16,7 +16,7 @@ abstract class ShellCommandRunner {
      * @param content The content of the file.
      * @param targetFilePath The target file path.
      */
-    abstract fun write(
+    internal abstract fun write(
         content: InputStream,
         targetFilePath: String,
     )
@@ -27,7 +27,7 @@ abstract class ShellCommandRunner {
      * @param file The file to move.
      * @param targetFilePath The target file path.
      */
-    abstract fun move(
+    internal abstract fun move(
         file: File,
         targetFilePath: String,
     )
@@ -45,7 +45,7 @@ abstract class ShellCommandRunner {
      *
      * @return True if the device has root permission, false otherwise.
      */
-    abstract fun hasRootPermission(): Boolean
+    internal abstract fun hasRootPermission(): Boolean
 
     /**
      * Runs a command on the device as root.
@@ -53,7 +53,7 @@ abstract class ShellCommandRunner {
      * @param command The command to run.
      * @return The [RunResult].
      */
-     operator fun invoke(
+    internal operator fun invoke(
         command: String,
     ) = runCommand("su -c \'$command\'")
 }

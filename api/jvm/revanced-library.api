@@ -187,11 +187,6 @@ public final class app/revanced/library/Utils {
 }
 
 public final class app/revanced/library/installation/command/AdbShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner {
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Lse/vidstige/jadb/JadbDevice;)V
-	public fun hasRootPermission ()Z
-	public fun move (Ljava/io/File;Ljava/lang/String;)V
-	public fun write (Ljava/io/InputStream;Ljava/lang/String;)V
 }
 
 public abstract interface class app/revanced/library/installation/command/RunResult {
@@ -206,13 +201,8 @@ public final class app/revanced/library/installation/command/RunResult$DefaultIm
 }
 
 public abstract class app/revanced/library/installation/command/ShellCommandRunner {
-	public fun <init> ()V
 	protected final fun getLogger ()Ljava/util/logging/Logger;
-	public abstract fun hasRootPermission ()Z
-	public final fun invoke (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
-	public abstract fun move (Ljava/io/File;Ljava/lang/String;)V
 	protected abstract fun runCommand (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
-	public abstract fun write (Ljava/io/InputStream;Ljava/lang/String;)V
 }
 
 public final class app/revanced/library/installation/installer/AdbInstaller : app/revanced/library/installation/installer/Installer {
@@ -241,34 +231,11 @@ public final class app/revanced/library/installation/installer/AdbRootInstaller 
 	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
-public final class app/revanced/library/installation/installer/Constants {
-	public static final field CREATE_DIR Ljava/lang/String;
-	public static final field CREATE_INSTALLATION_PATH Ljava/lang/String;
-	public static final field DELETE Ljava/lang/String;
-	public static final field EXISTS Ljava/lang/String;
-	public static final field INSTALLED_APK_PATH Ljava/lang/String;
-	public static final field INSTALL_MOUNT_SCRIPT Ljava/lang/String;
-	public static final field INSTANCE Lapp/revanced/library/installation/installer/Constants;
-	public static final field KILL Ljava/lang/String;
-	public static final field MOUNTED_APK_PATH Ljava/lang/String;
-	public static final field MOUNT_APK Ljava/lang/String;
-	public static final field MOUNT_GREP Ljava/lang/String;
-	public static final field MOUNT_PATH Ljava/lang/String;
-	public static final field MOUNT_SCRIPT_PATH Ljava/lang/String;
-	public static final field PLACEHOLDER Ljava/lang/String;
-	public static final field RESTART Ljava/lang/String;
-	public static final field TMP_FILE_PATH Ljava/lang/String;
-	public static final field UMOUNT Ljava/lang/String;
-	public final fun getMOUNT_SCRIPT ()Ljava/lang/String;
-	public final fun invoke (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-}
-
 public class app/revanced/library/installation/installer/Installation {
 	public final fun getApkFilePath ()Ljava/lang/String;
 }
 
 public abstract class app/revanced/library/installation/installer/Installer {
-	public fun <init> ()V
 	public abstract fun getInstallation (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected final fun getLogger ()Ljava/util/logging/Logger;
 	public abstract fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -288,7 +255,6 @@ public final class app/revanced/library/installation/installer/RootInstallation 
 }
 
 public abstract class app/revanced/library/installation/installer/RootInstaller : app/revanced/library/installation/installer/Installer {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public fun getInstallation (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected final fun getShellCommandRunner ()Lapp/revanced/library/installation/command/ShellCommandRunner;
 	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

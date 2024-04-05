@@ -19,7 +19,7 @@ class AdbShellCommandRunner : ShellCommandRunner {
      *
      * @param device The device.
      */
-    constructor(device: JadbDevice) {
+    internal constructor(device: JadbDevice) {
         this.device = device
     }
 
@@ -28,7 +28,7 @@ class AdbShellCommandRunner : ShellCommandRunner {
      *
      * @param deviceSerial deviceSerial The device serial. If null, the first connected device will be used.
      */
-    constructor(deviceSerial: String?) {
+    internal constructor(deviceSerial: String?) {
         device = Utils.getDevice(deviceSerial, logger)
     }
 

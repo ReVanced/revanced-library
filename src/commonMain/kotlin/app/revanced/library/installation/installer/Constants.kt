@@ -1,7 +1,7 @@
 package app.revanced.library.installation.installer
 
 @Suppress("MemberVisibilityCanBePrivate")
-object Constants {
+internal object Constants {
     const val PLACEHOLDER = "PLACEHOLDER"
 
     const val TMP_FILE_PATH = "/data/local/tmp/revanced.tmp"

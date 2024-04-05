@@ -10,7 +10,7 @@ import java.util.logging.Logger
  * @param TInstallerResult The type of the result of the installation.
  * @param TInstallation The type of the installation.
  */
-abstract class Installer<TInstallerResult, TInstallation : Installation> {
+abstract class Installer<TInstallerResult, TInstallation : Installation> internal constructor() {
     /**
      * The [Logger].
      */

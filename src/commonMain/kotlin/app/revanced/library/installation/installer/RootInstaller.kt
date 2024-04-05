@@ -28,7 +28,7 @@ import java.io.File
  * @throws NoRootPermissionException If the device does not have root permission.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class RootInstaller(
+abstract class RootInstaller internal constructor(
     shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
 ) : Installer<RootInstallerResult, RootInstallation>() {
 

@@ -7,6 +7,7 @@ import app.revanced.library.installation.installer.Installer.Apk
  *
  * @see AdbInstaller
  */
+@Suppress("MemberVisibilityCanBePrivate")
 interface AdbInstallerResult {
     /**
      * The result of installing an [Apk] successfully.
