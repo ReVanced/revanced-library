@@ -1,3 +1,10 @@
+# [2.4.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.3.0...v2.4.0-dev.1) (2024-04-07)
+
+
+### Features
+
+* Add local Android installer ([#25](https://github.com/ReVanced/revanced-library/issues/25)) ([43d655a](https://github.com/ReVanced/revanced-library/commit/43d655aea5d86288ae9916630e0f30de219d5cfb))
+
 # [2.3.0](https://github.com/ReVanced/revanced-library/compare/v2.2.1...v2.3.0) (2024-03-14)
 
 
