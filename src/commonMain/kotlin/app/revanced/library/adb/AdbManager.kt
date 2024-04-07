@@ -1,12 +1,13 @@
 @file:Suppress("DEPRECATION")
 
-package app.revanced.library
+package app.revanced.library.adb
 
-import app.revanced.library.AdbManager.Apk
+import app.revanced.library.adb.AdbManager.Apk
 import app.revanced.library.installation.installer.AdbInstaller
 import app.revanced.library.installation.installer.AdbRootInstaller
 import app.revanced.library.installation.installer.Constants.PLACEHOLDER
 import app.revanced.library.installation.installer.Installer
+import app.revanced.library.run
 import se.vidstige.jadb.JadbDevice
 import java.io.File
 

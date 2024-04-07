@@ -1,49 +1,3 @@
-public abstract class app/revanced/library/AdbManager {
-	public static final field Companion Lapp/revanced/library/AdbManager$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected abstract fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
-	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class app/revanced/library/AdbManager$Apk {
-	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getFile ()Ljava/io/File;
-	public final fun getPackageName ()Ljava/lang/String;
-}
-
-public final class app/revanced/library/AdbManager$Companion {
-	public final fun getAdbManager (Ljava/lang/String;Z)Lapp/revanced/library/AdbManager;
-	public static synthetic fun getAdbManager$default (Lapp/revanced/library/AdbManager$Companion;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/AdbManager;
-}
-
-public final class app/revanced/library/AdbManager$DeviceNotFoundException : java/lang/Exception {
-	public fun <init> ()V
-}
-
-public final class app/revanced/library/AdbManager$FailedToFindInstalledPackageException : java/lang/Exception {
-}
-
-public final class app/revanced/library/AdbManager$PackageNameRequiredException : java/lang/Exception {
-}
-
-public final class app/revanced/library/AdbManager$RootAdbManager : app/revanced/library/AdbManager {
-	public static final field Utils Lapp/revanced/library/AdbManager$RootAdbManager$Utils;
-	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
-	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class app/revanced/library/AdbManager$RootAdbManager$Utils {
-}
-
-public final class app/revanced/library/AdbManager$UserAdbManager : app/revanced/library/AdbManager {
-	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
-	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
-}
-
 public final class app/revanced/library/ApkSigner {
 	public static final field INSTANCE Lapp/revanced/library/ApkSigner;
 	public final fun newApkSigner (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
@@ -184,6 +138,52 @@ public abstract interface class app/revanced/library/PatchUtils$Json$JsonPatch {
 public final class app/revanced/library/Utils {
 	public static final field INSTANCE Lapp/revanced/library/Utils;
 	public final fun isAndroidEnvironment ()Z
+}
+
+public abstract class app/revanced/library/adb/AdbManager {
+	public static final field Companion Lapp/revanced/library/adb/AdbManager$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected abstract fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
+	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
+	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
+}
+
+public final class app/revanced/library/adb/AdbManager$Apk {
+	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getFile ()Ljava/io/File;
+	public final fun getPackageName ()Ljava/lang/String;
+}
+
+public final class app/revanced/library/adb/AdbManager$Companion {
+	public final fun getAdbManager (Ljava/lang/String;Z)Lapp/revanced/library/adb/AdbManager;
+	public static synthetic fun getAdbManager$default (Lapp/revanced/library/adb/AdbManager$Companion;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/adb/AdbManager;
+}
+
+public final class app/revanced/library/adb/AdbManager$DeviceNotFoundException : java/lang/Exception {
+	public fun <init> ()V
+}
+
+public final class app/revanced/library/adb/AdbManager$FailedToFindInstalledPackageException : java/lang/Exception {
+}
+
+public final class app/revanced/library/adb/AdbManager$PackageNameRequiredException : java/lang/Exception {
+}
+
+public final class app/revanced/library/adb/AdbManager$RootAdbManager : app/revanced/library/adb/AdbManager {
+	public static final field Utils Lapp/revanced/library/adb/AdbManager$RootAdbManager$Utils;
+	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
+	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
+	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
+}
+
+public final class app/revanced/library/adb/AdbManager$RootAdbManager$Utils {
+}
+
+public final class app/revanced/library/adb/AdbManager$UserAdbManager : app/revanced/library/adb/AdbManager {
+	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
+	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
+	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
 }
 
 public final class app/revanced/library/installation/command/AdbShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner {
