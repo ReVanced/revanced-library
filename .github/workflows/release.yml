@@ -23,6 +23,9 @@ jobs:
       - name: Cache Gradle
         uses: burrunan/gradle-cache-action@v1
 
+      - name: Setup Java
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

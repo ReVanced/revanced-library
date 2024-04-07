@@ -1,7 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.binary.compatibility.validator)
     `maven-publish`
     signing
@@ -9,53 +8,87 @@ plugins {
 
 group = "app.revanced"
 
+// Because access to the project is necessary to authenticate with GitHub,
+// the following block must be placed in the root build.gradle.kts file
+// instead of the settings.gradle.kts file inside the dependencyResolutionManagement block.
 repositories {
     mavenCentral()
     mavenLocal()
     google()
     maven {
-        // A repository must be speficied for some reason. "registry" is a dummy.
+        // A repository must be specified for some reason. "registry" is a dummy.
         url = uri("https://maven.pkg.github.com/revanced/registry")
         credentials {
             username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
         }
     }
+    maven { url = uri("https://jitpack.io") }
 }
 
-dependencies {
-    implementation(libs.revanced.patcher)
-    implementation(libs.kotlin.reflect)
-    implementation(libs.jadb) // Fork with Shell v2 support.
-    implementation(libs.jackson.module.kotlin)
-    implementation(libs.apkzlib)
-    implementation(libs.apksig)
-    implementation(libs.bcpkix.jdk15on)
-    implementation(libs.guava)
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_11.toString()
+            }
+        }
+    }
 
-    testImplementation(libs.revanced.patcher)
-    testImplementation(libs.kotlin.test)
-}
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = JavaVersion.VERSION_11.toString()
+            }
+        }
 
-tasks {
-    test {
-        useJUnitPlatform()
-        testLogging {
-            events("PASSED", "SKIPPED", "FAILED")
+        publishLibraryVariants("release")
+    }
+
+    sourceSets {
+        androidMain.dependencies {
+            implementation(libs.libsu.nio)
+            implementation(libs.libsu.service)
+            implementation(libs.core.ktx)
+        }
+
+        commonMain.dependencies {
+            implementation(libs.revanced.patcher)
+            implementation(libs.kotlin.reflect)
+            implementation(libs.jadb) // Fork with Shell v2 support.
+            implementation(libs.bcpkix.jdk15on)
+            implementation(libs.jackson.module.kotlin)
+            implementation(libs.apkzlib)
+            implementation(libs.apksig)
+            implementation(libs.guava)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.revanced.patcher)
+            implementation(libs.kotlin.test.junit)
         }
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
+android {
+    namespace = "app.revanced.library"
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 26
+    }
+
+    buildFeatures {
+        aidl = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
 java {
     targetCompatibility = JavaVersion.VERSION_11
-
-    withSourcesJar()
 }
 
 publishing {
@@ -72,8 +105,6 @@ publishing {
 
     publications {
         create<MavenPublication>("revanced-library-publication") {
-            from(components["java"])
-
             version = project.version.toString()
 
             pom {
