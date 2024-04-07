@@ -1,0 +1,143 @@
+public final class app/revanced/library/networking/Server {
+	public final fun start ()Lio/ktor/server/engine/ApplicationEngine;
+	public final fun stop ()V
+}
+
+public final class app/revanced/library/networking/Server$DependenciesConfiguration {
+	public fun <init> (Lapp/revanced/library/networking/configuration/repository/StorageRepository;Lapp/revanced/library/networking/configuration/repository/PatchSetRepository;Lapp/revanced/library/networking/configuration/repository/AppRepository;Lapp/revanced/library/networking/configuration/repository/InstallerRepository;)V
+}
+
+public final class app/revanced/library/networking/Server$SecurityConfiguration {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/networking/Server$SerializersConfiguration {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class app/revanced/library/networking/ServerBuilder {
+	public fun <init> ()V
+	public final fun configureDependencies (Lkotlin/jvm/functions/Function1;)Lapp/revanced/library/networking/ServerBuilder;
+	public final fun configureSecurity (Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/networking/ServerBuilder;
+	public final fun configureSerializers (Lkotlin/jvm/functions/Function1;)Lapp/revanced/library/networking/ServerBuilder;
+}
+
+public final class app/revanced/library/networking/ServerBuilder$DependenciesConfigurationBuilder {
+	public final fun build ()Lapp/revanced/library/networking/Server$DependenciesConfiguration;
+	public final fun configureAppRepository (Lapp/revanced/library/networking/configuration/repository/AppRepository;)Lapp/revanced/library/networking/ServerBuilder$DependenciesConfigurationBuilder;
+	public final fun configureInstallerRepository (Lapp/revanced/library/networking/configuration/repository/InstallerRepository;)Lapp/revanced/library/networking/ServerBuilder$DependenciesConfigurationBuilder;
+	public final fun configurePatchSetRepository (Lapp/revanced/library/networking/configuration/repository/PatchSetRepository;)Lapp/revanced/library/networking/ServerBuilder$DependenciesConfigurationBuilder;
+	public final fun configureStorageRepository (Lapp/revanced/library/networking/configuration/repository/StorageRepository;)Lapp/revanced/library/networking/ServerBuilder$DependenciesConfigurationBuilder;
+}
+
+public final class app/revanced/library/networking/ServerBuilder$SerializersConfigurationBuilder {
+	public final fun build ()Lapp/revanced/library/networking/Server$SerializersConfiguration;
+	public final fun configurePatchOptionSerializers ([Lkotlin/Pair;)V
+}
+
+public final class app/revanced/library/networking/ServerKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+	public static final fun server (Ljava/lang/String;ILio/ktor/server/engine/ApplicationEngineFactory;Lkotlin/jvm/functions/Function1;)Lapp/revanced/library/networking/Server;
+	public static synthetic fun server$default (Ljava/lang/String;ILio/ktor/server/engine/ApplicationEngineFactory;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/revanced/library/networking/Server;
+}
+
+public final class app/revanced/library/networking/configuration/SerializationKt {
+	public static final fun configureSerialization (Lio/ktor/server/application/Application;Lapp/revanced/library/networking/Server$SerializersConfiguration;)V
+}
+
+public abstract class app/revanced/library/networking/configuration/repository/AppRepository {
+	public fun <init> ()V
+}
+
+public abstract class app/revanced/library/networking/configuration/repository/InstallerRepository {
+	public fun <init> ()V
+}
+
+public abstract class app/revanced/library/networking/configuration/repository/PatchSetRepository {
+	public fun <init> (Lapp/revanced/library/networking/configuration/repository/StorageRepository;)V
+}
+
+public abstract class app/revanced/library/networking/configuration/repository/StorageRepository {
+	public fun <init> (Ljava/io/File;Ljava/io/File;Ljava/io/File;Ljava/io/File;)V
+	public synthetic fun <init> (Ljava/io/File;Ljava/io/File;Ljava/io/File;Ljava/io/File;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAaptBinaryPath ()Ljava/io/File;
+	public final fun getKeystoreFilePath ()Ljava/io/File;
+	public final fun getOutputFilePath ()Ljava/io/File;
+	public final fun getTemporaryFilesPath ()Ljava/io/File;
+}
+
+public class app/revanced/library/networking/models/App {
+	public static final field Companion Lapp/revanced/library/networking/models/App$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final synthetic fun write$Self (Lapp/revanced/library/networking/models/App;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class app/revanced/library/networking/models/App$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lapp/revanced/library/networking/models/App$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lapp/revanced/library/networking/models/App;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lapp/revanced/library/networking/models/App;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class app/revanced/library/networking/models/App$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class app/revanced/library/networking/models/Patch {
+	public static final field Companion Lapp/revanced/library/networking/models/Patch$Companion;
+}
+
+public final class app/revanced/library/networking/models/Patch$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lapp/revanced/library/networking/models/Patch$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lapp/revanced/library/networking/models/Patch;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lapp/revanced/library/networking/models/Patch;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class app/revanced/library/networking/models/Patch$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class app/revanced/library/networking/models/Patch$KeyValuePatchOption {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/Object;
+	public final fun getValueType ()Ljava/lang/String;
+}
+
+public final class app/revanced/library/networking/models/Patch$PatchOption {
+	public static final field Companion Lapp/revanced/library/networking/models/Patch$PatchOption$Companion;
+}
+
+public final class app/revanced/library/networking/models/Patch$PatchOption$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public synthetic fun <init> (Lkotlinx/serialization/KSerializer;)V
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lapp/revanced/library/networking/models/Patch$PatchOption;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lapp/revanced/library/networking/models/Patch$PatchOption;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class app/revanced/library/networking/models/Patch$PatchOption$Companion {
+	public final fun serializer (Lkotlinx/serialization/KSerializer;)Lkotlinx/serialization/KSerializer;
+}
+
+public final class app/revanced/library/networking/models/PatchBundle {
+	public final fun getPatchBundleFile ()Ljava/io/File;
+	public final fun getPatchBundleIntegrationsFile ()Ljava/io/File;
+}
+

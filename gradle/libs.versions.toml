@@ -2,13 +2,18 @@
 jackson-module-kotlin = "2.15.0"
 jadb = "1.2.1"
 kotlin = "1.9.22"
+ktor-client = "2.3.10"
+ktor-server-test-host = "2.3.9"
 revanced-patcher = "19.3.1"
 binary-compatibility-validator = "0.14.0"
-android = "8.3.0"
+android = "8.3.2"
 bcpkix-jdk15on = "1.70"
 guava = "33.0.0-jre"
 libsu = "5.2.2"
 core-ktx = "1.12.0"
+ktor = "2.3.9"
+koin = "3.5.3"
+logback = "1.4.14"
 
 [libraries]
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }
@@ -24,9 +29,26 @@ libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu"
 libsu-nio = { module = "com.github.topjohnwu.libsu:nio", version.ref = "libsu" }
 libsu-service = { module = "com.github.topjohnwu.libsu:service", version.ref = "libsu" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-client" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-client" }
+ktor-server-conditional-headers = { module = "io.ktor:ktor-server-conditional-headers" }
+ktor-server-core = { module = "io.ktor:ktor-server-core" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors" }
+ktor-server-caching-headers = { module = "io.ktor:ktor-server-caching-headers" }
+ktor-server-host-common = { module = "io.ktor:ktor-server-host-common" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json" }
+koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
 
 [plugins]
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
 android-library = { id = "com.android.library", version.ref = "android" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
