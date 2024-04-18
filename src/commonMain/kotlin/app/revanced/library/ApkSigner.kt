@@ -331,10 +331,22 @@ object ApkSigner {
             signingExtension = null
         }
 
-        fun signApk(inputApkFile: File, outputApkFile: File) {
+        fun signApk(inputApkFile: File, outputApkFile: File, signingLevels: Set<Int>) {
             logger.info("Signing APK")
 
+            if (signingLevels.isNotEmpty() && signerBuilder != null) {
+                signerBuilder.setV1SigningEnabled(signingLevels.contains(1))
+                signerBuilder.setV2SigningEnabled(signingLevels.contains(2))
+                signerBuilder.setV3SigningEnabled(signingLevels.contains(3))
+                signerBuilder.setV4SigningEnabled(signingLevels.contains(4))
+            }
+
             signerBuilder?.setInputApk(inputApkFile)?.setOutputApk(outputApkFile)?.build()?.sign()
+        }
+
+        @Deprecated("This constructor will be removed in the future.")
+        fun signApk(inputApkFile: File, outputApkFile: File) {
+            signApk(inputApkFile, outputApkFile, setOf())
         }
 
         @Deprecated("This constructor will be removed in the future.")

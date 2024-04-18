@@ -2,6 +2,7 @@ package app.revanced.library
 
 import app.revanced.library.ApkSigner.newPrivateKeyCertificatePair
 import app.revanced.patcher.PatcherResult
+import com.android.apksig.ApkVerifier
 import com.android.tools.build.apkzlib.zip.AlignmentRules
 import com.android.tools.build.apkzlib.zip.StoredEntry
 import com.android.tools.build.apkzlib.zip.ZFile
@@ -153,12 +154,14 @@ object ApkUtils {
      * @param outputApkFile The file to save the signed apk to.
      * @param signer The name of the signer.
      * @param keyStoreDetails The details for the keystore.
+     * @param signingLevels Signature levels, empty to default.
      */
     fun signApk(
         inputApkFile: File,
         outputApkFile: File,
         signer: String,
         keyStoreDetails: KeyStoreDetails,
+        signingLevels: Set<Int>,
     ) = ApkSigner.newApkSigner(
         signer,
         if (keyStoreDetails.keyStore.exists()) {
@@ -166,7 +169,25 @@ object ApkUtils {
         } else {
             newPrivateKeyCertificatePair(PrivateKeyCertificatePairDetails(), keyStoreDetails)
         },
-    ).signApk(inputApkFile, outputApkFile)
+    ).signApk(inputApkFile, outputApkFile, signingLevels)
+
+    /**
+     * Signs [inputApkFile] with the given options and saves the signed apk to [outputApkFile].
+     * If [KeyStoreDetails.keyStore] does not exist,
+     * a new private key and certificate pair will be created and saved to the keystore.
+     *
+     * @param inputApkFile The apk file to sign.
+     * @param outputApkFile The file to save the signed apk to.
+     * @param signer The name of the signer.
+     * @param keyStoreDetails The details for the keystore.
+     */
+    @Deprecated("This method will be removed in the future.")
+    fun signApk(
+        inputApkFile: File,
+        outputApkFile: File,
+        signer: String,
+        keyStoreDetails: KeyStoreDetails,
+    ) = signApk(inputApkFile, outputApkFile, signer, keyStoreDetails, setOf())
 
     @Deprecated("This method will be removed in the future.")
     private fun readOrNewPrivateKeyCertificatePair(
@@ -234,6 +255,27 @@ object ApkUtils {
         signingOptions.signer,
         readOrNewPrivateKeyCertificatePair(signingOptions),
     )
+
+    /**
+     * Read apk signature levels.
+     *
+     * Note: a well-signed apk is required.
+     */
+    fun readSigningLevels(apkFile: File): Set<Int> {
+        val verify = ApkVerifier.Builder(apkFile).build().verify()
+        if (!verify.isVerified)
+            return setOf()
+        val result = mutableSetOf<Int>()
+        if (verify.v1SchemeSigners.isNotEmpty())
+            result.add(1)
+        if (verify.v2SchemeSigners.isNotEmpty())
+            result.add(2)
+        if (verify.v3SchemeSigners.isNotEmpty())
+            result.add(3)
+        if (verify.v4SchemeSigners.isNotEmpty())
+            result.add(4)
+        return result
+    }
 
     /**
      * Options for signing an apk.

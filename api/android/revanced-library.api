@@ -29,6 +29,7 @@ public final class app/revanced/library/ApkSigner$Signer {
 	public final fun signApk (Lcom/android/tools/build/apkzlib/zip/ZFile;)V
 	public final fun signApk (Ljava/io/File;)V
 	public final fun signApk (Ljava/io/File;Ljava/io/File;)V
+	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/util/Set;)V
 }
 
 public final class app/revanced/library/ApkUtils {
@@ -36,10 +37,12 @@ public final class app/revanced/library/ApkUtils {
 	public final fun applyTo (Lapp/revanced/patcher/PatcherResult;Ljava/io/File;)V
 	public final fun newPrivateKeyCertificatePair (Lapp/revanced/library/ApkUtils$PrivateKeyCertificatePairDetails;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public final fun readPrivateKeyCertificatePairFromKeyStore (Lapp/revanced/library/ApkUtils$KeyStoreDetails;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
+	public final fun readSigningLevels (Ljava/io/File;)Ljava/util/Set;
 	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
 	public final fun sign (Ljava/io/File;Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
 	public final fun sign (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)V
 	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)V
+	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;Ljava/util/Set;)V
 }
 
 public final class app/revanced/library/ApkUtils$KeyStoreDetails {
