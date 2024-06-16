@@ -1,6 +1,6 @@
 package app.revanced.library.installation.command
 
-import app.revanced.library.installation.installer.Utils
+import app.revanced.library.installation.installer.getDevice
 import se.vidstige.jadb.JadbDevice
 import se.vidstige.jadb.RemoteFile
 import java.io.File
@@ -29,7 +29,7 @@ class AdbShellCommandRunner : ShellCommandRunner {
      * @param deviceSerial deviceSerial The device serial. If null, the first connected device will be used.
      */
     internal constructor(deviceSerial: String?) {
-        device = Utils.getDevice(deviceSerial, logger)
+        device = getDevice(deviceSerial, logger)
     }
 
     override fun runCommand(command: String) = device.shellProcessBuilder(command).start().let { process ->

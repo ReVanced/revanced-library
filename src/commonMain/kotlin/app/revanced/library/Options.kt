@@ -2,9 +2,8 @@
 
 package app.revanced.library
 
-import app.revanced.library.Options.Patch.Option
-import app.revanced.patcher.PatchSet
-import app.revanced.patcher.patch.options.PatchOptionException
+import app.revanced.patcher.patch.OptionException
+import app.revanced.patcher.patch.Patch
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import java.util.logging.Logger
@@ -23,7 +22,7 @@ object Options {
      * @return The JSON string containing the options.
      */
     fun serialize(
-        patches: PatchSet,
+        patches: Set<app.revanced.patcher.patch.Patch<*>>,
         prettyPrint: Boolean = false,
     ): String =
         patches
@@ -35,12 +34,12 @@ object Options {
                         val optionValue =
                             try {
                                 option.value
-                            } catch (e: PatchOptionException) {
+                            } catch (e: OptionException) {
                                 logger.warning("Using default option value for the ${patch.name} patch: ${e.message}")
                                 option.default
                             }
 
-                        Option(option.key, optionValue)
+                        Patch.Option(option.key, optionValue)
                     },
                 )
             }
@@ -68,7 +67,7 @@ object Options {
      *
      * @param json The JSON string containing the options.
      */
-    fun PatchSet.setOptions(json: String) {
+    fun Set<app.revanced.patcher.patch.Patch<*>>.setOptions(json: String) {
         filter { it.options.any() }.let { patches ->
             if (patches.isEmpty()) return
 
@@ -82,7 +81,7 @@ object Options {
                     jsonPatchOptions.forEach { (option, value) ->
                         try {
                             patch.options[option] = value
-                        } catch (e: PatchOptionException) {
+                        } catch (e: OptionException) {
                             logger.warning("Could not set option value for the ${patch.name} patch: ${e.message}")
                         }
                     }
@@ -97,7 +96,7 @@ object Options {
      * @param file The file containing the JSON string containing the options.
      * @see setOptions
      */
-    fun PatchSet.setOptions(file: File) = setOptions(file.readText())
+    fun Set<app.revanced.patcher.patch.Patch<*>>.setOptions(file: File) = setOptions(file.readText())
 
     /**
      * Data class for a patch and its [Option]s.
