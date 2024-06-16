@@ -1,12 +1,12 @@
 package app.revanced.library
 
-import app.revanced.patcher.PatchSet
+import app.revanced.patcher.patch.Option
+import app.revanced.patcher.patch.Package
 import app.revanced.patcher.patch.Patch
-import app.revanced.patcher.patch.options.PatchOption
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.InputStream
 import java.io.OutputStream
-import kotlin.reflect.jvm.jvmName
+import kotlin.reflect.KType
 
 typealias PackageName = String
 typealias Version = String
@@ -29,31 +29,29 @@ object PatchUtils {
      * @return A map of package names to a map of versions to their count.
      */
     fun getMostCommonCompatibleVersions(
-        patches: PatchSet,
+        patches: Set<Patch<*>>,
         packageNames: Set<String>? = null,
         countUnusedPatches: Boolean = false,
     ): PackageNameMap =
         buildMap {
-            fun filterWantedPackages(compatiblePackages: Iterable<Patch.CompatiblePackage>): Iterable<Patch.CompatiblePackage> {
+            fun filterWantedPackages(compatiblePackages: Iterable<Package>): Iterable<Package> {
                 val wantedPackages = packageNames?.toHashSet() ?: return compatiblePackages
-                return compatiblePackages.filter { it.name in wantedPackages }
+                return compatiblePackages.filter { (name, _) -> name in wantedPackages }
             }
 
             patches
                 .filter { it.use || countUnusedPatches }
                 .flatMap { it.compatiblePackages ?: emptyList() }
                 .let(::filterWantedPackages)
-                .forEach { compatiblePackage ->
-                    if (compatiblePackage.versions?.isEmpty() == true) {
+                .forEach { (name, versions) ->
+                    if (versions?.isEmpty() == true) {
                         return@forEach
                     }
 
-                    val versionMap = getOrPut(compatiblePackage.name) { linkedMapOf() }
+                    val versionMap = getOrPut(name) { linkedMapOf() }
 
-                    compatiblePackage.versions?.let { versions ->
-                        versions.forEach { version ->
-                            versionMap[version] = versionMap.getOrDefault(version, 0) + 1
-                        }
+                    versions?.forEach { version ->
+                        versionMap[version] = versionMap.getOrDefault(version, 0) + 1
                     }
                 }
 
@@ -79,7 +77,7 @@ object PatchUtils {
          * @param outputStream The output stream to write the JSON to.
          */
         fun serialize(
-            patches: PatchSet,
+            patches: Set<Patch<*>>,
             transform: (Patch<*>) -> JsonPatch = { patch -> FullJsonPatch.fromPatch(patch) },
             prettyPrint: Boolean = false,
             outputStream: OutputStream,
@@ -119,10 +117,10 @@ object PatchUtils {
         class FullJsonPatch internal constructor(
             val name: String?,
             val description: String?,
-            val compatiblePackages: Set<Patch.CompatiblePackage>?,
-            val dependencies: Set<String>?,
+            val compatiblePackages: Set<Package>?,
+            // Cannot serialize dependencies, because they are references to other patches and patch names are nullable.
+            // val dependencies: Set<String>,
             val use: Boolean,
-            var requiresIntegrations: Boolean,
             val options: Map<String, FullJsonPatchOption<*>>,
         ) : JsonPatch {
             companion object {
@@ -131,16 +129,15 @@ object PatchUtils {
                         patch.name,
                         patch.description,
                         patch.compatiblePackages,
-                        buildSet { patch.dependencies?.forEach { add(it.jvmName) } },
+                        // buildSet { patch.dependencies.forEach { add(it.name) } },
                         patch.use,
-                        patch.requiresIntegrations,
                         patch.options.mapValues { FullJsonPatchOption.fromPatchOption(it.value) },
                     )
             }
 
             /**
-             * A JSON representation of a [PatchOption].
-             * @see PatchOption
+             * A JSON representation of a [Option].
+             * @see Option
              */
             class FullJsonPatchOption<T> internal constructor(
                 val key: String,
@@ -149,10 +146,10 @@ object PatchUtils {
                 val title: String?,
                 val description: String?,
                 val required: Boolean,
-                val valueType: String,
+                val type: KType,
             ) {
                 companion object {
-                    fun fromPatchOption(option: PatchOption<*>) =
+                    fun fromPatchOption(option: Option<*>) =
                         FullJsonPatchOption(
                             option.key,
                             option.default,
@@ -160,7 +157,7 @@ object PatchUtils {
                             option.title,
                             option.description,
                             option.required,
-                            option.valueType,
+                            option.type,
                         )
                 }
             }

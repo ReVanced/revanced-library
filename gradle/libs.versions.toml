@@ -1,14 +1,11 @@
 [versions]
-jackson-module-kotlin = "2.15.0"
+jackson-module-kotlin = "2.16.1"
 jadb = "1.2.1"
-kotlin = "1.9.22"
-revanced-patcher = "19.3.1"
-binary-compatibility-validator = "0.14.0"
-android = "8.3.0"
-bcpkix-jdk15on = "1.70"
-guava = "33.0.0-jre"
+kotlin = "2.0.0"
+kotlinx-coroutines = "1.8.1"
+kotlinx-serialization = "1.7.1"
 libsu = "5.2.2"
-core-ktx = "1.12.0"
+revanced-patcher = "20.0.0"
 
 [libraries]
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-module-kotlin" }

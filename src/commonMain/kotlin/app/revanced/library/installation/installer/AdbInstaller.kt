@@ -17,7 +17,7 @@ import se.vidstige.jadb.managers.PackageManager
 class AdbInstaller(
     deviceSerial: String? = null,
 ) : Installer<AdbInstallerResult, Installation>() {
-    private val device = Utils.getDevice(deviceSerial, logger)
+    private val device = getDevice(deviceSerial, logger)
     private val adbShellCommandRunner = AdbShellCommandRunner(device)
     private val packageManager = PackageManager(device)
 
