@@ -102,7 +102,6 @@ public final class app/revanced/library/PatchUtils$Json {
 }
 
 public final class app/revanced/library/PatchUtils$Json$FullJsonPatch : app/revanced/library/PatchUtils$Json$JsonPatch {
-	public static final field Companion Lapp/revanced/library/PatchUtils$Json$FullJsonPatch$Companion;
 	public final fun getCompatiblePackages ()Ljava/util/Set;
 	public final fun getDescription ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
@@ -110,12 +109,7 @@ public final class app/revanced/library/PatchUtils$Json$FullJsonPatch : app/reva
 	public final fun getUse ()Z
 }
 
-public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$Companion {
-	public final fun fromPatch (Lapp/revanced/patcher/patch/Patch;)Lapp/revanced/library/PatchUtils$Json$FullJsonPatch;
-}
-
 public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption {
-	public static final field Companion Lapp/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption$Companion;
 	public final fun getDefault ()Ljava/lang/Object;
 	public final fun getDescription ()Ljava/lang/String;
 	public final fun getKey ()Ljava/lang/String;
@@ -123,10 +117,6 @@ public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPa
 	public final fun getTitle ()Ljava/lang/String;
 	public final fun getType ()Lkotlin/reflect/KType;
 	public final fun getValues ()Ljava/util/Map;
-}
-
-public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption$Companion {
-	public final fun fromPatchOption (Lapp/revanced/patcher/patch/Option;)Lapp/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption;
 }
 
 public abstract interface class app/revanced/library/PatchUtils$Json$JsonPatch {

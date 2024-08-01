@@ -123,8 +123,8 @@ object PatchUtils {
             val use: Boolean,
             val options: Map<String, FullJsonPatchOption<*>>,
         ) : JsonPatch {
-            companion object {
-                fun fromPatch(patch: Patch<*>) =
+            internal companion object {
+                internal fun fromPatch(patch: Patch<*>) =
                     FullJsonPatch(
                         patch.name,
                         patch.description,
@@ -148,8 +148,8 @@ object PatchUtils {
                 val required: Boolean,
                 val type: KType,
             ) {
-                companion object {
-                    fun fromPatchOption(option: Option<*>) =
+                internal companion object {
+                    internal fun fromPatchOption(option: Option<*>) =
                         FullJsonPatchOption(
                             option.key,
                             option.default,
