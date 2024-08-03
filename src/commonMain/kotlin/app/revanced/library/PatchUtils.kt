@@ -8,63 +8,19 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlin.reflect.KType
 
-typealias PackageName = String
-typealias Version = String
-typealias Count = Int
-
-typealias VersionMap = LinkedHashMap<Version, Count>
-typealias PackageNameMap = Map<PackageName, VersionMap>
-
-/**
- * Utility functions for working with patches.
- */
-@Suppress("MemberVisibilityCanBePrivate", "unused")
+@Deprecated("Functions have been moved to top level.")
 object PatchUtils {
-    /**
-     * Get the count of versions for each compatible package from a supplied set of [patches] ordered by the most common version.
-     *
-     * @param patches The set of patches to check.
-     * @param packageNames The names of the compatible packages to include. If null, all packages will be included.
-     * @param countUnusedPatches Whether to count patches that are not used.
-     * @return A map of package names to a map of versions to their count.
-     */
+    @Deprecated(
+        "Function has been moved to top level.",
+        ReplaceWith("patches.mostCommonCompatibleVersions(packageNames, countUnusedPatches)"),
+    )
     fun getMostCommonCompatibleVersions(
         patches: Set<Patch<*>>,
         packageNames: Set<String>? = null,
         countUnusedPatches: Boolean = false,
-    ): PackageNameMap =
-        buildMap {
-            fun filterWantedPackages(compatiblePackages: Iterable<Package>): Iterable<Package> {
-                val wantedPackages = packageNames?.toHashSet() ?: return compatiblePackages
-                return compatiblePackages.filter { (name, _) -> name in wantedPackages }
-            }
+    ): PackageNameMap = patches.mostCommonCompatibleVersions(packageNames, countUnusedPatches)
 
-            patches
-                .filter { it.use || countUnusedPatches }
-                .flatMap { it.compatiblePackages ?: emptyList() }
-                .let(::filterWantedPackages)
-                .forEach { (name, versions) ->
-                    if (versions?.isEmpty() == true) {
-                        return@forEach
-                    }
-
-                    val versionMap = getOrPut(name) { linkedMapOf() }
-
-                    versions?.forEach { version ->
-                        versionMap[version] = versionMap.getOrDefault(version, 0) + 1
-                    }
-                }
-
-            // Sort the version maps by the most common version.
-            forEach { (packageName, versionMap) ->
-                this[packageName] =
-                    versionMap
-                        .asIterable()
-                        .sortedWith(compareByDescending { it.value })
-                        .associate { it.key to it.value } as VersionMap
-            }
-        }
-
+    @Deprecated("Functions have been moved to the Serialization class.")
     object Json {
         private val mapper = jacksonObjectMapper()
 
@@ -76,6 +32,7 @@ object PatchUtils {
          * @param prettyPrint Whether to pretty print the JSON.
          * @param outputStream The output stream to write the JSON to.
          */
+        @Deprecated("Functions have been moved to the Serialization class.")
         fun serialize(
             patches: Set<Patch<*>>,
             transform: (Patch<*>) -> JsonPatch = { patch -> FullJsonPatch.fromPatch(patch) },
@@ -99,6 +56,7 @@ object PatchUtils {
          * @return A set of [JsonPatch]es.
          * @see FullJsonPatch
          */
+        @Deprecated("This function will be removed in the future.")
         fun <T : JsonPatch> deserialize(
             inputStream: InputStream,
             jsonPatchElementClass: Class<T>,

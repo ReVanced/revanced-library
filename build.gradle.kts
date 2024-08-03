@@ -1,7 +1,8 @@
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.binary.compatibility.validator)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
     `maven-publish`
     signing
 }
@@ -47,25 +48,26 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
+            implementation(libs.core.ktx)
             implementation(libs.libsu.nio)
             implementation(libs.libsu.service)
-            implementation(libs.core.ktx)
         }
 
         commonMain.dependencies {
-            implementation(libs.revanced.patcher)
-            implementation(libs.kotlin.reflect)
-            implementation(libs.jadb) // Fork with Shell v2 support.
-            implementation(libs.bcpkix.jdk15on)
-            implementation(libs.jackson.module.kotlin)
-            implementation(libs.apkzlib)
             implementation(libs.apksig)
+            implementation(libs.apkzlib)
+            implementation(libs.bcpkix.jdk15on)
             implementation(libs.guava)
+            implementation(libs.jadb)
+            implementation(libs.jackson.module.kotlin)
+            implementation(libs.kotlin.reflect)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.revanced.patcher)
         }
 
         commonTest.dependencies {
-            implementation(libs.revanced.patcher)
             implementation(libs.kotlin.test.junit)
+            implementation(libs.revanced.patcher)
         }
     }
 }

@@ -88,6 +88,15 @@ public final class app/revanced/library/Options$Patch$Option {
 	public final fun getValue ()Ljava/lang/Object;
 }
 
+public final class app/revanced/library/OptionsKt {
+	public static final fun setOptions (Ljava/util/Set;Ljava/util/Map;)V
+}
+
+public final class app/revanced/library/PatchKt {
+	public static final fun mostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
+	public static synthetic fun mostCommonCompatibleVersions$default (Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
+}
+
 public final class app/revanced/library/PatchUtils {
 	public static final field INSTANCE Lapp/revanced/library/PatchUtils;
 	public final fun getMostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
@@ -120,6 +129,11 @@ public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPa
 }
 
 public abstract interface class app/revanced/library/PatchUtils$Json$JsonPatch {
+}
+
+public final class app/revanced/library/SerializationKt {
+	public static final fun serializeTo (Ljava/util/Set;Ljava/io/OutputStream;Z)V
+	public static synthetic fun serializeTo$default (Ljava/util/Set;Ljava/io/OutputStream;ZILjava/lang/Object;)V
 }
 
 public final class app/revanced/library/Utils {
