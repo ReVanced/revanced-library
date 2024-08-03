@@ -8,7 +8,32 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger("Options")
+
+typealias PatchName = String
+typealias OptionKey = String
+typealias OptionValue = Any?
+typealias PatchesOptions = Map<PatchName, Map<OptionKey, OptionValue>>
+
+/**
+ * Set the options for a set of patches that have a name.
+ *
+ * @param options The options to set. The key is the patch name and the value is a map of option keys to option values.
+ */
+fun Set<Patch<*>>.setOptions(options: PatchesOptions) = filter { it.name != null }.forEach { patch ->
+    val patchOptions = options[patch.name] ?: return@forEach
+
+    patch.options.forEach option@{ option ->
+        try {
+            patch.options[option.key] = patchOptions[option.key] ?: return@option
+        } catch (e: OptionException) {
+            logger.warning("Could not set option value for the \"${patch.name}\" patch: ${e.message}")
+        }
+    }
+}
+
 @Suppress("unused")
+@Deprecated("Functions have been moved to top level.")
 object Options {
     private val logger = Logger.getLogger(Options::class.java.name)
 
@@ -21,6 +46,7 @@ object Options {
      * @param prettyPrint Whether to pretty print the JSON.
      * @return The JSON string containing the options.
      */
+    @Deprecated("Functions have been moved to the Serialization class.")
     fun serialize(
         patches: Set<app.revanced.patcher.patch.Patch<*>>,
         prettyPrint: Boolean = false,
@@ -35,7 +61,7 @@ object Options {
                             try {
                                 option.value
                             } catch (e: OptionException) {
-                                logger.warning("Using default option value for the ${patch.name} patch: ${e.message}")
+                                logger.warning("Using default option value for the \"${patch.name}\" patch: ${e.message}")
                                 option.default
                             }
 
@@ -60,6 +86,7 @@ object Options {
      * @return A set of [Patch]s.
      * @see Patch
      */
+    @Deprecated("Functions have been moved to the Serialization class.")
     fun deserialize(json: String): Array<Patch> = mapper.readValue(json, Array<Patch>::class.java)
 
     /**
@@ -67,26 +94,16 @@ object Options {
      *
      * @param json The JSON string containing the options.
      */
+    @Deprecated("Function has been moved to top level.")
     fun Set<app.revanced.patcher.patch.Patch<*>>.setOptions(json: String) {
         filter { it.options.any() }.let { patches ->
             if (patches.isEmpty()) return
 
-            val jsonPatches =
-                deserialize(json).associate {
-                    it.patchName to it.options.associate { option -> option.key to option.value }
-                }
-
-            patches.forEach { patch ->
-                jsonPatches[patch.name]?.let { jsonPatchOptions ->
-                    jsonPatchOptions.forEach { (option, value) ->
-                        try {
-                            patch.options[option] = value
-                        } catch (e: OptionException) {
-                            logger.warning("Could not set option value for the ${patch.name} patch: ${e.message}")
-                        }
-                    }
-                }
+            val jsonPatches = deserialize(json).associate {
+                it.patchName to it.options.associate { option -> option.key to option.value }
             }
+
+            setOptions(jsonPatches)
         }
     }
 
@@ -96,6 +113,7 @@ object Options {
      * @param file The file containing the JSON string containing the options.
      * @see setOptions
      */
+    @Deprecated("Function has been moved to top level.")
     fun Set<app.revanced.patcher.patch.Patch<*>>.setOptions(file: File) = setOptions(file.readText())
 
     /**

@@ -1,27 +1,19 @@
 package app.revanced.library
 
-import app.revanced.patcher.PatchSet
-import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.patch.BytecodePatch
-import app.revanced.patcher.patch.Patch
-import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.booleanPatchOption
-import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.intArrayPatchOption
-import app.revanced.patcher.patch.options.PatchOption.PatchExtensions.stringPatchOption
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
+import app.revanced.patcher.patch.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal class PatchUtilsTest {
+internal class MostCommonCompatibleVersionsTest {
     private val patches =
         arrayOf(
-            newPatch("some.package", setOf("a")) { stringPatchOption("string", "value") },
+            newPatch("some.package", setOf("a")) { stringOption("string", "value") },
             newPatch("some.package", setOf("a", "b"), use = false),
             newPatch("some.package", setOf("a", "b", "c"), use = false),
             newPatch("some.other.package", setOf("b"), use = false),
-            newPatch("some.other.package", setOf("b", "c")) { booleanPatchOption("bool", true) },
+            newPatch("some.other.package", setOf("b", "c")) { booleanOption("bool", true) },
             newPatch("some.other.package", setOf("b", "c", "d")),
-            newPatch("some.other.other.package") { intArrayPatchOption("intArray", arrayOf(1, 2, 3)) },
+            newPatch("some.other.other.package") { intsOption("intArray", listOf(1, 2, 3)) },
             newPatch("some.other.other.package", setOf("a")),
             newPatch("some.other.other.package", setOf("b")),
             newPatch("some.other.other.other.package", use = false),
@@ -141,38 +133,24 @@ internal class PatchUtilsTest {
         assertEqualsVersion(null, patches, "other.package")
     }
 
-    @Test
-    fun `serializes to and deserializes from JSON string correctly`() {
-        val out = ByteArrayOutputStream()
-        PatchUtils.Json.serialize(patches, outputStream = out)
-
-        val deserialized =
-            PatchUtils.Json.deserialize(
-                ByteArrayInputStream(out.toByteArray()),
-                PatchUtils.Json.FullJsonPatch::class.java,
-            )
-
-        assert(patches.size == deserialized.size)
-    }
-
     private fun assertEqualsVersions(
         expected: PackageNameMap,
-        patches: PatchSet,
+        patches: Set<Patch<*>>,
         compatiblePackageNames: Set<String>?,
         countUnusedPatches: Boolean = false,
     ) = assertEquals(
         expected,
-        PatchUtils.getMostCommonCompatibleVersions(patches, compatiblePackageNames, countUnusedPatches),
+        patches.mostCommonCompatibleVersions(compatiblePackageNames, countUnusedPatches),
     )
 
     private fun assertEqualsVersion(
         expected: String?,
-        patches: PatchSet,
+        patches: Set<Patch<*>>,
         compatiblePackageName: String,
     ) {
         assertEquals(
             expected,
-            PatchUtils.getMostCommonCompatibleVersions(patches, setOf(compatiblePackageName))
+            patches.mostCommonCompatibleVersions(setOf(compatiblePackageName))
                 .entries.firstOrNull()?.value?.keys?.firstOrNull(),
         )
     }
@@ -181,19 +159,23 @@ internal class PatchUtilsTest {
         packageName: String,
         versions: Set<String>? = null,
         use: Boolean = true,
-        options: Patch<*>.() -> Unit = {},
-    ) = object : BytecodePatch(
+        options: PatchBuilder<*>.() -> Unit = {},
+    ) = bytecodePatch(
         name = "test",
-        compatiblePackages = setOf(CompatiblePackage(packageName, versions?.toSet())),
         use = use,
     ) {
-        init {
-            options()
+        if (versions == null) {
+            compatibleWith(packageName)
+        } else {
+            compatibleWith(
+                if (versions.isEmpty()) {
+                    packageName()
+                } else {
+                    packageName(*versions.toTypedArray())
+                },
+            )
         }
 
-        override fun execute(context: BytecodeContext) {}
-
-        // Needed to make the patches unique.
-        override fun equals(other: Any?) = false
+        options()
     }
 }
