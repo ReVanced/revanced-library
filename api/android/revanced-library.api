@@ -1,0 +1,221 @@
+public final class app/revanced/library/ApkSigner {
+	public static final field INSTANCE Lapp/revanced/library/ApkSigner;
+	public final fun newApkSigner (Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
+	public final fun newKeyStore (Ljava/util/Set;)Ljava/security/KeyStore;
+	public final fun newPrivateKeyCertificatePair (Ljava/lang/String;Ljava/util/Date;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
+	public final fun readKeyStore (Ljava/io/InputStream;Ljava/lang/String;)Ljava/security/KeyStore;
+	public final fun readPrivateKeyCertificatePair (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
+}
+
+public final class app/revanced/library/ApkSigner$KeyStoreEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)V
+	public final fun getAlias ()Ljava/lang/String;
+	public final fun getPassword ()Ljava/lang/String;
+	public final fun getPrivateKeyCertificatePair ()Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
+}
+
+public final class app/revanced/library/ApkSigner$PrivateKeyCertificatePair {
+	public fun <init> (Ljava/security/PrivateKey;Ljava/security/cert/X509Certificate;)V
+	public final fun getCertificate ()Ljava/security/cert/X509Certificate;
+	public final fun getPrivateKey ()Ljava/security/PrivateKey;
+}
+
+public final class app/revanced/library/ApkSigner$Signer {
+	public final fun signApk (Ljava/io/File;Ljava/io/File;)V
+}
+
+public final class app/revanced/library/ApkUtils {
+	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
+	public final fun applyTo (Lapp/revanced/patcher/PatcherResult;Ljava/io/File;)V
+	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)V
+}
+
+public final class app/revanced/library/ApkUtils$KeyStoreDetails {
+	public fun <init> (Ljava/io/File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAlias ()Ljava/lang/String;
+	public final fun getKeyStore ()Ljava/io/File;
+	public final fun getKeyStorePassword ()Ljava/lang/String;
+	public final fun getPassword ()Ljava/lang/String;
+}
+
+public final class app/revanced/library/ApkUtils$PrivateKeyCertificatePairDetails {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/Date;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Date;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCommonName ()Ljava/lang/String;
+	public final fun getValidUntil ()Ljava/util/Date;
+}
+
+public final class app/revanced/library/OptionsKt {
+	public static final fun setOptions (Ljava/util/Set;Ljava/util/Map;)V
+}
+
+public final class app/revanced/library/PatchKt {
+	public static final fun mostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
+	public static synthetic fun mostCommonCompatibleVersions$default (Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
+}
+
+public final class app/revanced/library/SerializationKt {
+	public static final fun serializeTo (Ljava/util/Set;Ljava/io/OutputStream;Z)V
+	public static synthetic fun serializeTo$default (Ljava/util/Set;Ljava/io/OutputStream;ZILjava/lang/Object;)V
+}
+
+public final class app/revanced/library/Utils {
+	public static final field INSTANCE Lapp/revanced/library/Utils;
+	public final fun isAndroidEnvironment ()Z
+}
+
+public final class app/revanced/library/installation/command/AdbShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner {
+}
+
+public abstract interface class app/revanced/library/installation/command/ILocalShellCommandRunnerRootService : android/os/IInterface {
+	public static final field DESCRIPTOR Ljava/lang/String;
+	public abstract fun getFileSystemService ()Landroid/os/IBinder;
+}
+
+public class app/revanced/library/installation/command/ILocalShellCommandRunnerRootService$Default : app/revanced/library/installation/command/ILocalShellCommandRunnerRootService {
+	public fun <init> ()V
+	public fun asBinder ()Landroid/os/IBinder;
+	public fun getFileSystemService ()Landroid/os/IBinder;
+}
+
+public abstract class app/revanced/library/installation/command/ILocalShellCommandRunnerRootService$Stub : android/os/Binder, app/revanced/library/installation/command/ILocalShellCommandRunnerRootService {
+	public fun <init> ()V
+	public fun asBinder ()Landroid/os/IBinder;
+	public static fun asInterface (Landroid/os/IBinder;)Lapp/revanced/library/installation/command/ILocalShellCommandRunnerRootService;
+	public fun onTransact (ILandroid/os/Parcel;Landroid/os/Parcel;I)Z
+}
+
+public final class app/revanced/library/installation/command/LocalShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner, android/content/ServiceConnection, java/io/Closeable {
+	public fun close ()V
+	public fun onServiceConnected (Landroid/content/ComponentName;Landroid/os/IBinder;)V
+	public fun onServiceDisconnected (Landroid/content/ComponentName;)V
+}
+
+public abstract interface class app/revanced/library/installation/command/RunResult {
+	public abstract fun getError ()Ljava/lang/String;
+	public abstract fun getExitCode ()I
+	public abstract fun getOutput ()Ljava/lang/String;
+	public abstract fun waitFor ()V
+}
+
+public final class app/revanced/library/installation/command/RunResult$DefaultImpls {
+	public static fun waitFor (Lapp/revanced/library/installation/command/RunResult;)V
+}
+
+public abstract class app/revanced/library/installation/command/ShellCommandRunner {
+	protected final fun getLogger ()Ljava/util/logging/Logger;
+	protected abstract fun runCommand (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
+}
+
+public final class app/revanced/library/installation/installer/AdbInstaller : app/revanced/library/installation/installer/Installer {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getInstallation (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class app/revanced/library/installation/installer/AdbInstallerResult {
+}
+
+public final class app/revanced/library/installation/installer/AdbInstallerResult$Failure : app/revanced/library/installation/installer/AdbInstallerResult {
+	public final fun getException ()Ljava/lang/Exception;
+}
+
+public final class app/revanced/library/installation/installer/AdbInstallerResult$Success : app/revanced/library/installation/installer/AdbInstallerResult {
+	public static final field INSTANCE Lapp/revanced/library/installation/installer/AdbInstallerResult$Success;
+}
+
+public final class app/revanced/library/installation/installer/AdbRootInstaller : app/revanced/library/installation/installer/RootInstaller {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class app/revanced/library/installation/installer/DeviceNotFoundException : java/lang/Exception {
+	public fun <init> ()V
+}
+
+public class app/revanced/library/installation/installer/Installation {
+	public final fun getApkFilePath ()Ljava/lang/String;
+}
+
+public abstract class app/revanced/library/installation/installer/Installer {
+	public abstract fun getInstallation (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected final fun getLogger ()Ljava/util/logging/Logger;
+	public abstract fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class app/revanced/library/installation/installer/Installer$Apk {
+	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getFile ()Ljava/io/File;
+	public final fun getPackageName ()Ljava/lang/String;
+}
+
+public final class app/revanced/library/installation/installer/LocalInstaller : app/revanced/library/installation/installer/Installer, java/io/Closeable {
+	public static final field Companion Lapp/revanced/library/installation/installer/LocalInstaller$Companion;
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
+	public fun close ()V
+	public fun getInstallation (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class app/revanced/library/installation/installer/LocalInstaller$Companion {
+}
+
+public final class app/revanced/library/installation/installer/LocalInstallerResult {
+	public final fun getExtra ()Ljava/lang/String;
+	public final fun getPackageName ()Ljava/lang/String;
+	public final fun getPmStatus ()I
+}
+
+public final class app/revanced/library/installation/installer/LocalInstallerService : android/app/Service {
+	public fun <init> ()V
+	public fun onBind (Landroid/content/Intent;)Landroid/os/IBinder;
+	public fun onStartCommand (Landroid/content/Intent;II)I
+}
+
+public final class app/revanced/library/installation/installer/LocalRootInstaller : app/revanced/library/installation/installer/RootInstaller, java/io/Closeable {
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close ()V
+}
+
+public final class app/revanced/library/installation/installer/RootInstallation : app/revanced/library/installation/installer/Installation {
+	public final fun getInstalledApkFilePath ()Ljava/lang/String;
+	public final fun getMounted ()Z
+}
+
+public abstract class app/revanced/library/installation/installer/RootInstaller : app/revanced/library/installation/installer/Installer {
+	public fun getInstallation (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected final fun getShellCommandRunner ()Lapp/revanced/library/installation/command/ShellCommandRunner;
+	public fun install (Lapp/revanced/library/installation/installer/Installer$Apk;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected final fun invoke (Ljava/lang/String;)Lapp/revanced/library/installation/command/RunResult;
+	protected final fun move (Ljava/io/File;Ljava/lang/String;)V
+	public fun uninstall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected final fun write (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/revanced/library/installation/installer/RootInstallerResult : java/lang/Enum {
+	public static final field FAILURE Lapp/revanced/library/installation/installer/RootInstallerResult;
+	public static final field SUCCESS Lapp/revanced/library/installation/installer/RootInstallerResult;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lapp/revanced/library/installation/installer/RootInstallerResult;
+	public static fun values ()[Lapp/revanced/library/installation/installer/RootInstallerResult;
+}
+
+public final class app/revanced/library/logging/Logger {
+	public static final field INSTANCE Lapp/revanced/library/logging/Logger;
+	public final fun addHandler (Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public final fun removeAllHandlers ()V
+	public final fun setDefault ()V
+	public final fun setFormat (Ljava/lang/String;)V
+	public static synthetic fun setFormat$default (Lapp/revanced/library/logging/Logger;Ljava/lang/String;ILjava/lang/Object;)V
+}
+

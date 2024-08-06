@@ -1,3 +1,34 @@
+# [3.0.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.4.0-dev.1...v3.0.0-dev.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* Make functions internal which are supposed to be internal ([893d22d](https://github.com/ReVanced/revanced-library/commit/893d22d7938fa1c7544795635ed2ffacdd0cbf0d))
+
+
+### Build System
+
+* Refactor to DSL to bump ReVanced Patcher ([7f5d6da](https://github.com/ReVanced/revanced-library/commit/7f5d6dad7ba73e2ee53010241ba3204d04860a22))
+
+
+### Features
+
+* Remove deprecated functions ([b9bf3bc](https://github.com/ReVanced/revanced-library/commit/b9bf3bc88284c0381c7370c3606b662da2ef380d))
+
+
+### BREAKING CHANGES
+
+* Some functions have been removed.
+* Some functions are not available anymore.
+* The signature of some functions has changed.
+
+# [2.4.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v2.3.0...v2.4.0-dev.1) (2024-04-07)
+
+
+### Features
+
+* Add local Android installer ([#25](https://github.com/ReVanced/revanced-library/issues/25)) ([43d655a](https://github.com/ReVanced/revanced-library/commit/43d655aea5d86288ae9916630e0f30de219d5cfb))
+
 # [2.3.0](https://github.com/ReVanced/revanced-library/compare/v2.2.1...v2.3.0) (2024-03-14)
 
 
