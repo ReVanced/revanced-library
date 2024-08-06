@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.binary.compatibility.validator)
@@ -29,18 +31,14 @@ repositories {
 
 kotlin {
     jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_11.toString()
-            }
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
         }
     }
 
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_11.toString()
-            }
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
         }
 
         publishLibraryVariants("release")
@@ -98,41 +96,40 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/revanced/revanced-library")
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
 
-    publications {
-        create<MavenPublication>("revanced-library-publication") {
-            version = project.version.toString()
+    // KMP plugin creates a publication already, so just configure the POM.
+    publications.all {
+        if (this !is MavenPublication) return@all
 
-            pom {
-                name = "ReVanced Library"
-                description = "Library containing common utilities for ReVanced"
-                url = "https://revanced.app"
+        pom {
+            name = "ReVanced Library"
+            description = "Library containing common utilities for ReVanced"
+            url = "https://revanced.app"
 
-                licenses {
-                    license {
-                        name = "GNU General Public License v3.0"
-                        url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
-                    }
+            licenses {
+                license {
+                    name = "GNU General Public License v3.0"
+                    url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
                 }
+            }
 
-                developers {
-                    developer {
-                        id = "ReVanced"
-                        name = "ReVanced"
-                        email = "contact@revanced.app"
-                    }
+            developers {
+                developer {
+                    id = "ReVanced"
+                    name = "ReVanced"
+                    email = "contact@revanced.app"
                 }
+            }
 
-                scm {
-                    connection = "scm:git:git://github.com/revanced/revanced-library.git"
-                    developerConnection = "scm:git:git@github.com:revanced/revanced-library.git"
-                    url = "https://github.com/revanced/revanced-library"
-                }
+            scm {
+                connection = "scm:git:git://github.com/revanced/revanced-library.git"
+                developerConnection = "scm:git:git@github.com:revanced/revanced-library.git"
+                url = "https://github.com/revanced/revanced-library"
             }
         }
     }
@@ -140,5 +137,5 @@ publishing {
 
 signing {
     useGpgCmd()
-    sign(publishing.publications["revanced-library-publication"])
+    sign(publishing.publications)
 }
