@@ -1,13 +1,8 @@
 public final class app/revanced/library/ApkSigner {
 	public static final field INSTANCE Lapp/revanced/library/ApkSigner;
-	public final fun newApkSigner (Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
 	public final fun newApkSigner (Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)Lapp/revanced/library/ApkSigner$Signer;
-	public final fun newApkSigner (Ljava/lang/String;Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$Signer;
-	public final fun newApkSigner (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$Signer;
-	public final fun newKeyStore (Ljava/io/OutputStream;Ljava/lang/String;Ljava/util/Set;)V
 	public final fun newKeyStore (Ljava/util/Set;)Ljava/security/KeyStore;
 	public final fun newPrivateKeyCertificatePair (Ljava/lang/String;Ljava/util/Date;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
-	public final fun readKeyCertificatePair (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 	public final fun readKeyStore (Ljava/io/InputStream;Ljava/lang/String;)Ljava/security/KeyStore;
 	public final fun readPrivateKeyCertificatePair (Ljava/security/KeyStore;Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
 }
@@ -26,19 +21,12 @@ public final class app/revanced/library/ApkSigner$PrivateKeyCertificatePair {
 }
 
 public final class app/revanced/library/ApkSigner$Signer {
-	public final fun signApk (Lcom/android/tools/build/apkzlib/zip/ZFile;)V
-	public final fun signApk (Ljava/io/File;)V
 	public final fun signApk (Ljava/io/File;Ljava/io/File;)V
 }
 
 public final class app/revanced/library/ApkUtils {
 	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
 	public final fun applyTo (Lapp/revanced/patcher/PatcherResult;Ljava/io/File;)V
-	public final fun newPrivateKeyCertificatePair (Lapp/revanced/library/ApkUtils$PrivateKeyCertificatePairDetails;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
-	public final fun readPrivateKeyCertificatePairFromKeyStore (Lapp/revanced/library/ApkUtils$KeyStoreDetails;)Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;
-	public final fun sign (Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
-	public final fun sign (Ljava/io/File;Ljava/io/File;Lapp/revanced/library/ApkUtils$SigningOptions;)V
-	public final fun sign (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkSigner$PrivateKeyCertificatePair;)V
 	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)V
 }
 
@@ -59,35 +47,6 @@ public final class app/revanced/library/ApkUtils$PrivateKeyCertificatePairDetail
 	public final fun getValidUntil ()Ljava/util/Date;
 }
 
-public final class app/revanced/library/ApkUtils$SigningOptions {
-	public fun <init> (Ljava/io/File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getAlias ()Ljava/lang/String;
-	public final fun getKeyStore ()Ljava/io/File;
-	public final fun getKeyStorePassword ()Ljava/lang/String;
-	public final fun getPassword ()Ljava/lang/String;
-	public final fun getSigner ()Ljava/lang/String;
-}
-
-public final class app/revanced/library/Options {
-	public static final field INSTANCE Lapp/revanced/library/Options;
-	public final fun deserialize (Ljava/lang/String;)[Lapp/revanced/library/Options$Patch;
-	public final fun serialize (Ljava/util/Set;Z)Ljava/lang/String;
-	public static synthetic fun serialize$default (Lapp/revanced/library/Options;Ljava/util/Set;ZILjava/lang/Object;)Ljava/lang/String;
-	public final fun setOptions (Ljava/util/Set;Ljava/io/File;)V
-	public final fun setOptions (Ljava/util/Set;Ljava/lang/String;)V
-}
-
-public final class app/revanced/library/Options$Patch {
-	public final fun getOptions ()Ljava/util/List;
-	public final fun getPatchName ()Ljava/lang/String;
-}
-
-public final class app/revanced/library/Options$Patch$Option {
-	public final fun getKey ()Ljava/lang/String;
-	public final fun getValue ()Ljava/lang/Object;
-}
-
 public final class app/revanced/library/OptionsKt {
 	public static final fun setOptions (Ljava/util/Set;Ljava/util/Map;)V
 }
@@ -95,40 +54,6 @@ public final class app/revanced/library/OptionsKt {
 public final class app/revanced/library/PatchKt {
 	public static final fun mostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
 	public static synthetic fun mostCommonCompatibleVersions$default (Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
-}
-
-public final class app/revanced/library/PatchUtils {
-	public static final field INSTANCE Lapp/revanced/library/PatchUtils;
-	public final fun getMostCommonCompatibleVersions (Ljava/util/Set;Ljava/util/Set;Z)Ljava/util/Map;
-	public static synthetic fun getMostCommonCompatibleVersions$default (Lapp/revanced/library/PatchUtils;Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Ljava/util/Map;
-}
-
-public final class app/revanced/library/PatchUtils$Json {
-	public static final field INSTANCE Lapp/revanced/library/PatchUtils$Json;
-	public final fun deserialize (Ljava/io/InputStream;Ljava/lang/Class;)Ljava/util/Set;
-	public final fun serialize (Ljava/util/Set;Lkotlin/jvm/functions/Function1;ZLjava/io/OutputStream;)V
-	public static synthetic fun serialize$default (Lapp/revanced/library/PatchUtils$Json;Ljava/util/Set;Lkotlin/jvm/functions/Function1;ZLjava/io/OutputStream;ILjava/lang/Object;)V
-}
-
-public final class app/revanced/library/PatchUtils$Json$FullJsonPatch : app/revanced/library/PatchUtils$Json$JsonPatch {
-	public final fun getCompatiblePackages ()Ljava/util/Set;
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getOptions ()Ljava/util/Map;
-	public final fun getUse ()Z
-}
-
-public final class app/revanced/library/PatchUtils$Json$FullJsonPatch$FullJsonPatchOption {
-	public final fun getDefault ()Ljava/lang/Object;
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getKey ()Ljava/lang/String;
-	public final fun getRequired ()Z
-	public final fun getTitle ()Ljava/lang/String;
-	public final fun getType ()Lkotlin/reflect/KType;
-	public final fun getValues ()Ljava/util/Map;
-}
-
-public abstract interface class app/revanced/library/PatchUtils$Json$JsonPatch {
 }
 
 public final class app/revanced/library/SerializationKt {
@@ -139,52 +64,6 @@ public final class app/revanced/library/SerializationKt {
 public final class app/revanced/library/Utils {
 	public static final field INSTANCE Lapp/revanced/library/Utils;
 	public final fun isAndroidEnvironment ()Z
-}
-
-public abstract class app/revanced/library/adb/AdbManager {
-	public static final field Companion Lapp/revanced/library/adb/AdbManager$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected abstract fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
-	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class app/revanced/library/adb/AdbManager$Apk {
-	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getFile ()Ljava/io/File;
-	public final fun getPackageName ()Ljava/lang/String;
-}
-
-public final class app/revanced/library/adb/AdbManager$Companion {
-	public final fun getAdbManager (Ljava/lang/String;Z)Lapp/revanced/library/adb/AdbManager;
-	public static synthetic fun getAdbManager$default (Lapp/revanced/library/adb/AdbManager$Companion;Ljava/lang/String;ZILjava/lang/Object;)Lapp/revanced/library/adb/AdbManager;
-}
-
-public final class app/revanced/library/adb/AdbManager$DeviceNotFoundException : java/lang/Exception {
-	public fun <init> ()V
-}
-
-public final class app/revanced/library/adb/AdbManager$FailedToFindInstalledPackageException : java/lang/Exception {
-}
-
-public final class app/revanced/library/adb/AdbManager$PackageNameRequiredException : java/lang/Exception {
-}
-
-public final class app/revanced/library/adb/AdbManager$RootAdbManager : app/revanced/library/adb/AdbManager {
-	public static final field Utils Lapp/revanced/library/adb/AdbManager$RootAdbManager$Utils;
-	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
-	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class app/revanced/library/adb/AdbManager$RootAdbManager$Utils {
-}
-
-public final class app/revanced/library/adb/AdbManager$UserAdbManager : app/revanced/library/adb/AdbManager {
-	public synthetic fun getInstaller ()Lapp/revanced/library/installation/installer/Installer;
-	public fun install (Lapp/revanced/library/adb/AdbManager$Apk;)Lkotlin/jvm/functions/Function1;
-	public fun uninstall (Ljava/lang/String;)Lkotlin/jvm/functions/Function1;
 }
 
 public final class app/revanced/library/installation/command/AdbShellCommandRunner : app/revanced/library/installation/command/ShellCommandRunner {
