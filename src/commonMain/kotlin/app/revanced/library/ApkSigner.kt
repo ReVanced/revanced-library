@@ -1,9 +1,6 @@
 package app.revanced.library
 
 import com.android.apksig.ApkSigner.SignerConfig
-import com.android.tools.build.apkzlib.sign.SigningExtension
-import com.android.tools.build.apkzlib.sign.SigningOptions
-import com.android.tools.build.apkzlib.zip.ZFile
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.cert.X509v3CertificateBuilder
@@ -13,7 +10,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import java.math.BigInteger
 import java.security.*
 import java.security.cert.X509Certificate
@@ -198,105 +194,6 @@ object ApkSigner {
     )
 
     /**
-     * Read a [PrivateKeyCertificatePair] from a keystore entry.
-     *
-     * @param keyStore The keystore to read the entry from.
-     * @param keyStoreEntryAlias The alias of the key store entry to read.
-     * @param keyStoreEntryPassword The password for recovering the signing key.
-     *
-     * @return The read [PrivateKeyCertificatePair].
-     *
-     * @throws IllegalArgumentException If the keystore does not contain the given alias or the password is invalid.
-     */
-    @Deprecated("This method will be removed in the future.")
-    fun readKeyCertificatePair(
-        keyStore: KeyStore,
-        keyStoreEntryAlias: String,
-        keyStoreEntryPassword: String,
-    ) = readPrivateKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword)
-
-    /**
-     * Create a new keystore with a new keypair and saves it to the given [keyStoreOutputStream].
-     *
-     * @param keyStoreOutputStream The stream to write the keystore to.
-     * @param keyStorePassword The password for the keystore.
-     * @param entries The entries to add to the keystore.
-     */
-    @Deprecated("This method will be removed in the future.")
-    fun newKeyStore(
-        keyStoreOutputStream: OutputStream,
-        keyStorePassword: String?,
-        entries: Set<KeyStoreEntry>,
-    ) = newKeyStore(entries).store(
-        keyStoreOutputStream,
-        keyStorePassword?.toCharArray(),
-    )
-
-    /**
-     * Create a new [Signer].
-     *
-     * @param privateKeyCertificatePair The private key and certificate pair to use for signing.
-     *
-     * @return The new [Signer].
-     *
-     * @see PrivateKeyCertificatePair
-     * @see Signer
-     */
-    @Deprecated("This method will be removed in the future.")
-    fun newApkSigner(privateKeyCertificatePair: PrivateKeyCertificatePair) =
-        Signer(
-            SigningExtension(
-                SigningOptions.builder()
-                    .setMinSdkVersion(21) // TODO: Extracting from the target APK would be ideal.
-                    .setV1SigningEnabled(true)
-                    .setV2SigningEnabled(true)
-                    .setCertificates(privateKeyCertificatePair.certificate)
-                    .setKey(privateKeyCertificatePair.privateKey)
-                    .build(),
-            ),
-        )
-
-    /**
-     * Create a new [Signer].
-     *
-     * @param signer The name of the signer.
-     * @param keyStore The keystore to use for signing.
-     * @param keyStoreEntryAlias The alias of the key store entry to use for signing.
-     * @param keyStoreEntryPassword The password for recovering the signing key.
-     *
-     * @return The new [Signer].
-     *
-     * @see KeyStore
-     * @see Signer
-     */
-    @Deprecated("This method will be removed in the future.")
-    fun newApkSigner(
-        signer: String,
-        keyStore: KeyStore,
-        keyStoreEntryAlias: String,
-        keyStoreEntryPassword: String,
-    ) = newApkSigner(signer, readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))
-
-    /**
-     * Create a new [Signer].
-     *
-     * @param keyStore The keystore to use for signing.
-     * @param keyStoreEntryAlias The alias of the key store entry to use for signing.
-     * @param keyStoreEntryPassword The password for recovering the signing key.
-     *
-     * @return The new [Signer].
-     *
-     * @see KeyStore
-     * @see Signer
-     */
-    @Deprecated("This method will be removed in the future.")
-    fun newApkSigner(
-        keyStore: KeyStore,
-        keyStoreEntryAlias: String,
-        keyStoreEntryPassword: String,
-    ) = newApkSigner("ReVanced", readKeyCertificatePair(keyStore, keyStoreEntryAlias, keyStoreEntryPassword))
-
-    /**
      * An entry in a keystore.
      *
      * @param alias The alias of the entry.
@@ -322,48 +219,11 @@ object ApkSigner {
         val certificate: X509Certificate,
     )
 
-    class Signer {
-        private val signerBuilder: com.android.apksig.ApkSigner.Builder?
-        private val signingExtension: SigningExtension?
-
-        internal constructor(signerBuilder: com.android.apksig.ApkSigner.Builder) {
-            this.signerBuilder = signerBuilder
-            signingExtension = null
-        }
-
+    class Signer internal constructor(private val signerBuilder: com.android.apksig.ApkSigner.Builder) {
         fun signApk(inputApkFile: File, outputApkFile: File) {
             logger.info("Signing APK")
 
-            signerBuilder?.setInputApk(inputApkFile)?.setOutputApk(outputApkFile)?.build()?.sign()
-        }
-
-        @Deprecated("This constructor will be removed in the future.")
-        internal constructor(signingExtension: SigningExtension) {
-            signerBuilder = null
-            this.signingExtension = signingExtension
-        }
-
-        /**
-         * Sign an APK file.
-         *
-         * @param apkFile The APK file to sign.
-         */
-        @Deprecated("This method will be removed in the future.")
-        fun signApk(apkFile: File) = ZFile.openReadWrite(apkFile).use {
-            @Suppress("DEPRECATION")
-            signApk(it)
-        }
-
-        /**
-         * Sign an APK file.
-         *
-         * @param apkZFile The APK [ZFile] to sign.
-         */
-        @Deprecated("This method will be removed in the future.")
-        fun signApk(apkZFile: ZFile) {
-            logger.info("Signing ${apkZFile.file.name}")
-
-            signingExtension?.register(apkZFile)
+            signerBuilder.setInputApk(inputApkFile)?.setOutputApk(outputApkFile)?.build()?.sign()
         }
     }
 }

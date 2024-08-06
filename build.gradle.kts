@@ -59,7 +59,6 @@ kotlin {
             implementation(libs.bcpkix.jdk15on)
             implementation(libs.guava)
             implementation(libs.jadb)
-            implementation(libs.jackson.module.kotlin)
             implementation(libs.kotlin.reflect)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.revanced.patcher)
