@@ -1,6 +1,9 @@
 package app.revanced.library
 
-import app.revanced.patcher.patch.*
+import app.revanced.patcher.patch.booleanOption
+import app.revanced.patcher.patch.bytecodePatch
+import app.revanced.patcher.patch.floatsOption
+import app.revanced.patcher.patch.stringOption
 import kotlinx.serialization.json.*
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
@@ -33,7 +36,7 @@ class SerializationTest {
 
         assert(deserializedPatch["name"]!!.jsonPrimitive.content == "Test patch")
 
-        assert(deserializedPatch["compatiblePackages"]!!.jsonArray.size == 2) {
+        assert(deserializedPatch["compatiblePackages"]!!.jsonObject.size == 2) {
             "The patch should be compatible with two packages."
         }
 
