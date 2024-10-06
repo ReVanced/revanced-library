@@ -54,7 +54,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.apksig)
             implementation(libs.apkzlib)
-            implementation(libs.bcpkix.jdk15on)
+            implementation(libs.bcpkix.jdk18on)
             implementation(libs.guava)
             implementation(libs.jadb)
             implementation(libs.kotlin.reflect)
