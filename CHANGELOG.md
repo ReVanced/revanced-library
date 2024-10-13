@@ -1,3 +1,14 @@
+## [3.0.1-dev.3](https://github.com/ReVanced/revanced-library/compare/v3.0.1-dev.2...v3.0.1-dev.3) (2024-10-06)
+
+## [3.0.1-dev.2](https://github.com/ReVanced/revanced-library/compare/v3.0.1-dev.1...v3.0.1-dev.2) (2024-10-01)
+
+## [3.0.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.0.0...v3.0.1-dev.1) (2024-08-16)
+
+
+### Bug Fixes
+
+* Serialize compatible packages as a map instead of a set of pairs. ([737e272](https://github.com/ReVanced/revanced-library/commit/737e272481fe3b0b4c89233d139b5e657a0c1de4))
+
 # [3.0.0](https://github.com/ReVanced/revanced-library/compare/v2.3.0...v3.0.0) (2024-08-06)
 
 

@@ -1,14 +1,19 @@
 package app.revanced.library
 
-import app.revanced.patcher.patch.*
-import kotlinx.serialization.*
+import app.revanced.patcher.patch.Option
+import app.revanced.patcher.patch.Patch
+import app.revanced.patcher.patch.VersionName
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.encodeStructure
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
+import kotlinx.serialization.serializer
 import java.io.OutputStream
 
 private class PatchSerializer : KSerializer<Patch<*>> {
@@ -17,7 +22,7 @@ private class PatchSerializer : KSerializer<Patch<*>> {
         element<String?>("description")
         element<Boolean>("use")
         element<List<String>>("dependencies")
-        element<Set<Package>?>("compatiblePackages")
+        element<Map<PackageName, Set<VersionName>?>?>("compatiblePackages")
         element("options", OptionSerializer.descriptor)
     }
 
@@ -52,8 +57,8 @@ private class PatchSerializer : KSerializer<Patch<*>> {
             encodeNullableSerializableElement(
                 descriptor,
                 4,
-                SetSerializer(PairSerializer(String.serializer(), SetSerializer(String.serializer()).nullable)),
-                value.compatiblePackages,
+                MapSerializer(String.serializer(), SetSerializer(String.serializer()).nullable),
+                value.compatiblePackages?.associate { (packageName, versions) -> packageName to versions },
             )
             encodeSerializableElement(
                 descriptor,
