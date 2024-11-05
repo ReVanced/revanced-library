@@ -82,7 +82,7 @@ object ApkUtils {
                 // Delete resources that were staged for deletion.
                 if (resources.deleteResources.isNotEmpty()) {
                     targetApkZFile.entries().filter { entry ->
-                        resources.deleteResources.any { shouldDelete -> shouldDelete(entry.centralDirectoryHeader.name) }
+                        entry.centralDirectoryHeader.name in resources.deleteResources
                     }.forEach(StoredEntry::delete)
                 }
             }
