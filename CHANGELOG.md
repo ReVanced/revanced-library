@@ -1,3 +1,10 @@
+## [3.0.3-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.0.2...v3.0.3-dev.1) (2024-11-11)
+
+
+### Bug Fixes
+
+* Detect if app is installed by fixing inversion ([649f06b](https://github.com/ReVanced/revanced-library/commit/649f06b19dd4d2a3f3216a0b3ea947b9fe0d475f))
+
 ## [3.0.2](https://github.com/ReVanced/revanced-library/compare/v3.0.1...v3.0.2) (2024-11-05)
 
 ## [3.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.0.1...v3.0.2-dev.1) (2024-11-05)
