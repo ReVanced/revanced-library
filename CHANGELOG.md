@@ -1,3 +1,10 @@
+# [3.1.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.0.3-dev.1...v3.1.0-dev.1) (2024-11-25)
+
+
+### Features
+
+* Warn when option could not be set because the option does not exist ([7ec6504](https://github.com/ReVanced/revanced-library/commit/7ec650461935faf2a8fbb667db3cf137157b70b5))
+
 ## [3.0.3-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.0.2...v3.0.3-dev.1) (2024-11-11)
 
 
