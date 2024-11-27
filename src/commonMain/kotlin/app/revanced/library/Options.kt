@@ -19,11 +19,16 @@ private val logger = Logger.getLogger("Options")
  * @param options The options to set. The key is the patch name and the value is a map of option keys to option values.
  */
 fun Set<Patch<*>>.setOptions(options: PatchesOptions) = filter { it.name != null }.forEach { patch ->
-    val patchOptions = options[patch.name] ?: return@forEach
+    options[patch.name]?.forEach setOption@{ (optionKey, optionValue) ->
+        if (optionKey !in patch.options) {
+            return@setOption logger.warning(
+                "Could not set option for the \"${patch.name}\" patch because " +
+                    "option with key \"${optionKey}\" does not exist",
+            )
+        }
 
-    patch.options.forEach option@{ option ->
         try {
-            patch.options[option.key] = patchOptions[option.key] ?: return@option
+            patch.options[optionKey] = optionValue
         } catch (e: OptionException) {
             logger.warning("Could not set option value for the \"${patch.name}\" patch: ${e.message}")
         }

@@ -122,13 +122,12 @@ abstract class RootInstaller internal constructor(
      * @throws FailedToFindInstalledPackageException If the package is not installed.
      */
     private fun String.assertInstalled() {
-        if (INSTALLED_APK_PATH(this)().output.isNotEmpty()) {
+        if (INSTALLED_APK_PATH(this)().output.isEmpty()) {
             throw FailedToFindInstalledPackageException(this)
         }
     }
 
-    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) :
-        Exception("Failed to find installed package \"$packageName\" because no activity was found")
+    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) : Exception("Failed to find installed package \"$packageName\" because no activity was found")
 
     internal class PackageNameRequiredException internal constructor() : Exception("Package name is required")
     internal class NoRootPermissionException internal constructor() : Exception("No root permission")
