@@ -1,6 +1,5 @@
 package app.revanced.library.installation.installer
 
-import app.revanced.library.installation.installer.Installer.Apk
 import java.io.File
 import java.util.logging.Logger
 

@@ -19,14 +19,14 @@ internal object Constants {
     const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
 
     const val MOUNT_APK =
-        "base_path=\"$MOUNTED_APK_PATH\" && " +
+        "base_path='$MOUNTED_APK_PATH' && " +
             "mv $TMP_FILE_PATH \$base_path && " +
             "chmod 644 \$base_path && " +
             "chown system:system \$base_path && " +
             "chcon u:object_r:apk_data_file:s0  \$base_path"
 
     const val UMOUNT =
-        "grep $PLACEHOLDER /proc/mounts | " +
+        "$MOUNT_GREP | " +
             "while read -r line; do echo \$line | " +
             "cut -d ' ' -f 2 | " +
             "sed 's/apk.*/apk/' | " +
@@ -49,6 +49,11 @@ internal object Constants {
 
         # Unmount any existing installations to prevent multiple unnecessary mounts.
         $UMOUNT
+        
+        # sanity check to make sure pkg is no longer mounted:
+        if $MOUNT_GREP >/dev/null; then
+            exit 1
+        fi
 
         base_path="$MOUNTED_APK_PATH"
 
@@ -56,13 +61,14 @@ internal object Constants {
 
         # Use Magisk mirror, if possible.
         if command -v magisk &> /dev/null; then
-            MIRROR="${'$'}(magisk --path)/.magisk/mirror"
+            MIRROR="$(magisk --path)/.magisk/mirror"
         fi
 
-        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
+        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path || exit 1
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
         $KILL
+        exit 0
         """.trimIndent()
 
     /**

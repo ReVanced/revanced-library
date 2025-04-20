@@ -1,5 +1,7 @@
 package app.revanced.library.installation.command
 
+import app.revanced.library.installation.command.AdbShellCommandRunner.ShellCmdFailure
+
 /**
  * The result of a command execution.
  */
@@ -23,4 +25,11 @@ interface RunResult {
      * Waits for the command to finish.
      */
     fun waitFor() {}
+
+    /**
+     * Verifies whether the command exits with code 0.
+     *
+     * @throws ShellCmdFailure if given [RunResult] exited unsuccessfully.
+     */
+    fun ensureSuccess() {}
 }

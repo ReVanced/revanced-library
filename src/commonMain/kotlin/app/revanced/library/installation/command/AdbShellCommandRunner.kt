@@ -41,10 +41,14 @@ class AdbShellCommandRunner : ShellCommandRunner {
             override fun waitFor() {
                 process.waitFor()
             }
+
+            override fun ensureSuccess() {
+                if (exitCode != 0) throw ShellCmdFailure()
+            }
         }
     }
 
-    override fun hasRootPermission(): Boolean = invoke("whoami").exitCode == 0
+    override fun hasRootPermission(): Boolean = invoke("exit").exitCode == 0
 
     override fun write(content: InputStream, targetFilePath: String) =
         device.push(content, System.currentTimeMillis(), 644, RemoteFile(targetFilePath))
@@ -56,4 +60,6 @@ class AdbShellCommandRunner : ShellCommandRunner {
      * @param targetFilePath The target file path.
      */
     override fun move(file: File, targetFilePath: String) = device.push(file, RemoteFile(targetFilePath))
+
+    internal class ShellCmdFailure internal constructor() : Exception("Shell command execution failure")
 }

@@ -2,7 +2,6 @@ package app.revanced.library.installation.installer
 
 import app.revanced.library.installation.command.AdbShellCommandRunner
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
-import app.revanced.library.installation.installer.Installer.Apk
 import se.vidstige.jadb.JadbException
 import se.vidstige.jadb.managers.Package
 import se.vidstige.jadb.managers.PackageManager

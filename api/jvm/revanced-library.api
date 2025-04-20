@@ -70,6 +70,7 @@ public final class app/revanced/library/installation/command/AdbShellCommandRunn
 }
 
 public abstract interface class app/revanced/library/installation/command/RunResult {
+	public abstract fun ensureSuccess ()V
 	public abstract fun getError ()Ljava/lang/String;
 	public abstract fun getExitCode ()I
 	public abstract fun getOutput ()Ljava/lang/String;
@@ -77,6 +78,7 @@ public abstract interface class app/revanced/library/installation/command/RunRes
 }
 
 public final class app/revanced/library/installation/command/RunResult$DefaultImpls {
+	public static fun ensureSuccess (Lapp/revanced/library/installation/command/RunResult;)V
 	public static fun waitFor (Lapp/revanced/library/installation/command/RunResult;)V
 }
 
