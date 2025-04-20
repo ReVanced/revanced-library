@@ -50,7 +50,7 @@ internal object Constants {
         # Unmount any existing installations to prevent multiple unnecessary mounts.
         $UMOUNT
         
-        # sanity check to make sure pkg is no longer mounted:
+        # Sanity check to make sure pkg is no longer mounted.
         if $MOUNT_GREP >/dev/null; then
             exit 1
         fi

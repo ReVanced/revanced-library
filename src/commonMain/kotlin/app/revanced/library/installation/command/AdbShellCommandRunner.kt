@@ -43,7 +43,7 @@ class AdbShellCommandRunner : ShellCommandRunner {
             }
 
             override fun ensureSuccess() {
-                if (exitCode != 0) throw ShellCmdFailure()
+                if (exitCode != 0) throw ShellCommandRunnerException()
             }
         }
     }
@@ -60,6 +60,4 @@ class AdbShellCommandRunner : ShellCommandRunner {
      * @param targetFilePath The target file path.
      */
     override fun move(file: File, targetFilePath: String) = device.push(file, RemoteFile(targetFilePath))
-
-    internal class ShellCmdFailure internal constructor() : Exception("Shell command execution failure")
 }

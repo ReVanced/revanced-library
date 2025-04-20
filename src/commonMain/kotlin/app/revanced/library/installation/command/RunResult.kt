@@ -1,6 +1,6 @@
 package app.revanced.library.installation.command
 
-import app.revanced.library.installation.command.AdbShellCommandRunner.ShellCmdFailure
+import app.revanced.library.installation.command.ShellCommandRunner.ShellCommandRunnerException
 
 /**
  * The result of a command execution.
@@ -29,7 +29,7 @@ interface RunResult {
     /**
      * Verifies whether the command exits with code 0.
      *
-     * @throws ShellCmdFailure if given [RunResult] exited unsuccessfully.
+     * @throws ShellCommandRunnerException if given [RunResult] exited unsuccessfully.
      */
     fun ensureSuccess() {}
 }
