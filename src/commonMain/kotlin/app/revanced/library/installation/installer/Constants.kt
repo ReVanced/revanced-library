@@ -37,6 +37,13 @@ internal object Constants {
     val MOUNT_SCRIPT =
         """
         #!/system/bin/sh
+        # Mount using Magisk mirror, if available.
+        MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
+        MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
+        if [ ! -f ${'$'}MIRROR ]; then
+            MIRROR=""
+        fi
+
         until [ "$( getprop sys.boot_completed )" = 1 ]; do sleep 3; done
         until [ -d "/sdcard/Android" ]; do sleep 1; done
 
@@ -53,12 +60,6 @@ internal object Constants {
         base_path="$MOUNTED_APK_PATH"
 
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
-
-        # Use Magisk mirror, if possible.
-        if command -v magisk &> /dev/null; then
-            MIRROR="${'$'}(magisk --path)/.magisk/mirror"
-        fi
-
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
