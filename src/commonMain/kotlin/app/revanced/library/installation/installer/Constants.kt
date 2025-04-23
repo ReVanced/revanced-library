@@ -49,11 +49,6 @@ internal object Constants {
 
         # Unmount any existing installations to prevent multiple unnecessary mounts.
         $UMOUNT
-        
-        # Sanity check to make sure pkg is no longer mounted.
-        if $MOUNT_GREP >/dev/null; then
-            exit 1
-        fi
 
         base_path="$MOUNTED_APK_PATH"
 
@@ -64,11 +59,10 @@ internal object Constants {
             MIRROR="$(magisk --path)/.magisk/mirror"
         fi
 
-        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path || exit 1
+        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
         $KILL
-        exit 0
         """.trimIndent()
 
     /**
