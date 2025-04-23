@@ -10,7 +10,7 @@ internal object Constants {
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
-    const val MOUNT_GREP = "grep $PLACEHOLDER /proc/mounts"
+    const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
     const val DELETE = "rm -rf $PLACEHOLDER"
     const val CREATE_DIR = "mkdir -p"
     const val RESTART = "am start -S $PLACEHOLDER"
