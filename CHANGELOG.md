@@ -1,3 +1,10 @@
+## [3.1.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.1.0...v3.1.1-dev.1) (2025-05-02)
+
+
+### Bug Fixes
+
+* Interpret package name as a string instead of Regex when using grep  ([#68](https://github.com/ReVanced/revanced-library/issues/68)) ([254f36d](https://github.com/ReVanced/revanced-library/commit/254f36d03cc8fd3e2508a5e8f69bb5c8e1eb9775))
+
 # [3.1.0](https://github.com/ReVanced/revanced-library/compare/v3.0.2...v3.1.0) (2024-11-27)
 
 
