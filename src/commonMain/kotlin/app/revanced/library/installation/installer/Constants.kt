@@ -4,13 +4,14 @@ package app.revanced.library.installation.installer
 internal object Constants {
     const val PLACEHOLDER = "PLACEHOLDER"
 
+    const val SELINUX_CONTEXT = "u:object_r:apk_data_file:s0"
     const val TMP_FILE_PATH = "/data/local/tmp/revanced.tmp"
     const val MOUNT_PATH = "/data/adb/revanced/"
     const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
-    const val MOUNT_GREP = "grep $PLACEHOLDER /proc/mounts"
+    const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
     const val DELETE = "rm -rf $PLACEHOLDER"
     const val CREATE_DIR = "mkdir -p"
     const val RESTART = "am start -S $PLACEHOLDER"
@@ -23,7 +24,7 @@ internal object Constants {
             "mv $TMP_FILE_PATH \$base_path && " +
             "chmod 644 \$base_path && " +
             "chown system:system \$base_path && " +
-            "chcon u:object_r:apk_data_file:s0  \$base_path"
+            "chcon $SELINUX_CONTEXT  \$base_path"
 
     const val UMOUNT =
         "grep $PLACEHOLDER /proc/mounts | " +
@@ -52,7 +53,7 @@ internal object Constants {
 
         base_path="$MOUNTED_APK_PATH"
 
-        chcon u:object_r:apk_data_file:s0 ${'$'}base_path
+        chcon $SELINUX_CONTEXT ${'$'}base_path
 
         # Use Magisk mirror, if possible.
         if command -v magisk &> /dev/null; then
