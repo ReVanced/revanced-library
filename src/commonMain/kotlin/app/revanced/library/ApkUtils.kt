@@ -53,7 +53,7 @@ object ApkUtils {
     fun PatcherResult.applyTo(apkFile: File) {
         ZFile.openReadWrite(apkFile, zFileOptions).use { targetApkZFile ->
             dexFiles.forEach { dexFile ->
-                targetApkZFile.add(dexFile.name, dexFile.stream)
+                targetApkZFile.add(dexFile.name, dexFile.file.inputStream())
             }
 
             resources?.let { resources ->
