@@ -57,7 +57,7 @@ internal object Constants {
         # Mount using Magisk mirror, if available.
         MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
         MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-        if [ ! -f ${'$'}MIRROR ]; then
+        if [ -z "$(ls -A "${'$'}MIRROR" 2>/dev/null)" ]; then
             MIRROR=""
         fi
         
