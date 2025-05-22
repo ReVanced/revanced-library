@@ -7,6 +7,7 @@ import se.vidstige.jadb.JadbException
 import se.vidstige.jadb.managers.Package
 import se.vidstige.jadb.managers.PackageManager
 import se.vidstige.jadb.managers.PackageManager.UPDATE_OWNERSHIP
+import java.nio.charset.StandardCharsets
 
 /**
  * [AdbInstaller] for installing and uninstalling [Apk] files using ADB.
@@ -21,20 +22,22 @@ class AdbInstaller(
     private val device = getDevice(deviceSerial, logger)
     private val adbShellCommandRunner = AdbShellCommandRunner(device)
     private val packageManager = PackageManager(device)
-    private val deviceSdkVersion = device.sdkVersion
 
     init {
         logger.fine("Connected to $deviceSerial")
     }
 
+    private fun getSdkVersion(): Int? = runCatching {
+        device.executeShell("getprop", "ro.build.version.sdk")
+            .bufferedReader(StandardCharsets.UTF_8)
+            .use { it.readLine()?.trim()?.toInt() }
+    }.getOrNull()
+
     override suspend fun install(apk: Apk): AdbInstallerResult {
-        return runPackageManager { 
-            if(deviceSdkVersion != null && deviceSdkVersion >= 34) {
-                logger.info("Installing ${apk.file.name} with ownership")
-                installWithOptions(apk.file, arrayListOf(UPDATE_OWNERSHIP))
-            } else {
-                logger.info("Installing ${apk.file.name}")
-                install(apk.file)
+        getSdkVersion().let {
+            return runPackageManager {
+                if (it == null || it < 34) install(apk.file)
+                else installWithOptions(apk.file, arrayListOf(UPDATE_OWNERSHIP))
             }
         }
     }

@@ -89,6 +89,8 @@ class LocalInstaller(
         private val sessionParams = PackageInstaller.SessionParams(
             PackageInstaller.SessionParams.MODE_FULL_INSTALL,
         ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                setRequestUpdateOwnership(true)
             setInstallReason(PackageManager.INSTALL_REASON_USER)
         }
 
