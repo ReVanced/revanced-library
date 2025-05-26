@@ -86,6 +86,7 @@ class LocalInstaller(
 
     override fun close() = context.unregisterReceiver(broadcastReceiver)
 
+    @SuppressLint("MissingPermission")
     companion object {
         private val sessionParams = PackageInstaller.SessionParams(
             PackageInstaller.SessionParams.MODE_FULL_INSTALL,
