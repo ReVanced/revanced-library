@@ -1,3 +1,10 @@
+# [3.2.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.1.1-dev.1...v3.2.0-dev.1) (2025-05-27)
+
+
+### Features
+
+* Request the update ownership enforcement ([#71](https://github.com/ReVanced/revanced-library/issues/71)) ([be0f6bf](https://github.com/ReVanced/revanced-library/commit/be0f6bf247461d16fbf649a9f2dc6facbb5b0c93))
+
 ## [3.1.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.1.0...v3.1.1-dev.1) (2025-05-02)
 
 
