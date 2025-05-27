@@ -34,7 +34,7 @@ class AdbInstaller(
         return runPackageManager {
             val sdkVersion = shellCommandRunner(GET_SDK_VERSION).output.toInt()
             if (sdkVersion < 34) install(apk.file)
-            else installWithOptions(apk.file, arrayListOf(UPDATE_OWNERSHIP))
+            else installWithOptions(apk.file, listOf(UPDATE_OWNERSHIP))
         }
     }
 
