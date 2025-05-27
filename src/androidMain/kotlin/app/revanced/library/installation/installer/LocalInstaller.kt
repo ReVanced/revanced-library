@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.ContextCompat
 import app.revanced.library.installation.installer.Installer.Apk
 import java.io.Closeable
@@ -85,10 +86,13 @@ class LocalInstaller(
 
     override fun close() = context.unregisterReceiver(broadcastReceiver)
 
+    @SuppressLint("MissingPermission")
     companion object {
         private val sessionParams = PackageInstaller.SessionParams(
             PackageInstaller.SessionParams.MODE_FULL_INSTALL,
         ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                setRequestUpdateOwnership(true)
             setInstallReason(PackageManager.INSTALL_REASON_USER)
         }
 

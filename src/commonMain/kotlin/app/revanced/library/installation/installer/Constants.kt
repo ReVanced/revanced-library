@@ -18,7 +18,8 @@ internal object Constants {
     const val KILL = "am force-stop $PLACEHOLDER"
     const val INSTALLED_APK_PATH = "pm path $PLACEHOLDER"
     const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
-
+    const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
+    
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
             "mv $TMP_FILE_PATH \$base_path && " +
