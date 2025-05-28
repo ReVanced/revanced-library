@@ -60,7 +60,6 @@ internal object Constants {
         if [ -z "$(ls -A "${'$'}MIRROR" 2>/dev/null)" ]; then
             MIRROR=""
         fi
-        
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
