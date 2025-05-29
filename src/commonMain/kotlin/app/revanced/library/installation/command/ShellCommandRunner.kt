@@ -55,5 +55,5 @@ abstract class ShellCommandRunner internal constructor() {
      */
     internal operator fun invoke(
         command: String,
-    ) = runCommand("su -c \'$command\'")
+    ) = runCommand(command)
 }
