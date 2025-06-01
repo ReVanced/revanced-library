@@ -1,5 +1,5 @@
 [versions]
-android = "8.5.2"
+android = "8.10.1"
 bcpkix-jdk18on = "1.77"
 binary-compatibility-validator = "0.15.1"
 core-ktx = "1.15.0"
