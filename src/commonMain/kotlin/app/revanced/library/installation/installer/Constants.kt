@@ -55,11 +55,14 @@ internal object Constants {
         chcon u:object_r:apk_data_file:s0 ${'$'}base_path
 
         # Mount using Magisk mirror, if available.
-        MAGISKTMP="$( magisk --path )" || MAGISKTMP=/sbin
-        MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-        if [ -z "$(ls -A "${'$'}MIRROR" 2>/dev/null)" ]; then
-            MIRROR=""
+        if command -v magisk &> /dev/null; then
+            MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
+            MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
+            if [ -z "$(ls -A "${'$'}MIRROR" 2>/dev/null)" ]; then
+                MIRROR=""
+            fi
         fi
+
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
