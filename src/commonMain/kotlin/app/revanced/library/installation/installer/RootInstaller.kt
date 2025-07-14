@@ -72,9 +72,35 @@ abstract class RootInstaller internal constructor(
 
     override suspend fun uninstall(packageName: String): RootInstallerResult {
         logger.info("Uninstalling $packageName by unmounting")
-
-        UMOUNT(packageName)()
-
+        
+         UMOUNT(packageName)()
+	//checks for leftover mount points
+	logger.info("Checking for leftover mountpoints for $packageName")
+	val grepResult = shellCommandRunner(
+        "su -c \"grep $packageName /proc/mounts\"")
+        
+        val leftoverMounts = grepResult.output
+      
+        if(leftoverMounts.isNotEmpty()){
+        logger.info("Found leftover mountpoints:\n$leftoverMounts")
+        
+        leftoverMounts.lines().forEach { line ->
+        	if (line.isBlank()) return@forEach
+        	
+        	val parts = line.split(" ")
+        	if (parts.size < 2) return@forEach
+        	
+        	val mountpoint = parts[1]
+        	
+        	logger.info("Unmounting leftover:$mountpoint")
+        	shellCommandRunner("su -c \"umount $mountpoint\"")
+        	}
+        }else{
+        	logger.info("No leftover mountpoints found.")
+        	}
+        
+       
+        
         DELETE(MOUNTED_APK_PATH)(packageName)()
         DELETE(MOUNT_SCRIPT_PATH)(packageName)()
         DELETE(TMP_FILE_PATH)() // Remove residual.
