@@ -47,6 +47,18 @@ public final class app/revanced/library/ApkUtils$PrivateKeyCertificatePairDetail
 	public final fun getValidUntil ()Ljava/util/Date;
 }
 
+public final class app/revanced/library/CryptographyKt {
+	public static final fun getPublicKey (Lorg/bouncycastle/openpgp/PGPPublicKeyRing;)Lorg/bouncycastle/openpgp/PGPPublicKey;
+	public static final fun getPublicKeyRing (Lorg/bouncycastle/openpgp/PGPPublicKeyRingCollection;J)Lorg/bouncycastle/openpgp/PGPPublicKeyRing;
+	public static final fun getPublicKeyRingCollection (Ljava/io/InputStream;)Lorg/bouncycastle/openpgp/PGPPublicKeyRingCollection;
+	public static final fun getSignature (Ljava/io/InputStream;)Lorg/bouncycastle/openpgp/PGPSignature;
+	public static final fun matchGitHub (Ldev/sigstore/fulcio/client/ImmutableFulcioCertificateMatcher$Builder;Ljava/lang/String;)Ldev/sigstore/fulcio/client/ImmutableFulcioCertificateMatcher$Builder;
+	public static final fun verificationOptions (Lkotlin/jvm/functions/Function1;)Ldev/sigstore/VerificationOptions;
+	public static final fun verifySLSA ([BLjava/io/InputStream;Ldev/sigstore/VerificationOptions;)Z
+	public static final fun verifySLSA ([BLjava/io/InputStream;Lkotlin/jvm/functions/Function1;)Z
+	public static final fun verifySignature ([BLorg/bouncycastle/openpgp/PGPSignature;Lorg/bouncycastle/openpgp/PGPPublicKey;)Z
+}
+
 public final class app/revanced/library/OptionsKt {
 	public static final fun setOptions (Ljava/util/Set;Ljava/util/Map;)V
 }
@@ -73,7 +85,7 @@ public abstract interface class app/revanced/library/installation/command/RunRes
 	public abstract fun getError ()Ljava/lang/String;
 	public abstract fun getExitCode ()I
 	public abstract fun getOutput ()Ljava/lang/String;
-	public abstract fun waitFor ()V
+	public fun waitFor ()V
 }
 
 public final class app/revanced/library/installation/command/RunResult$DefaultImpls {

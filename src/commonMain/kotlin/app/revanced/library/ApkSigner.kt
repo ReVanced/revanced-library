@@ -1,6 +1,7 @@
 package app.revanced.library
 
 import com.android.apksig.ApkSigner.SignerConfig
+import com.android.apksig.KeyConfig
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.cert.X509v3CertificateBuilder
@@ -155,12 +156,11 @@ object ApkSigner {
 
         // Read the private key and certificate from the keystore.
 
-        val privateKey =
-            try {
-                keyStore.getKey(keyStoreEntryAlias, keyStoreEntryPassword.toCharArray()) as PrivateKey
-            } catch (exception: UnrecoverableKeyException) {
-                throw IllegalArgumentException("Invalid password for keystore entry $keyStoreEntryAlias")
-            }
+        val privateKey = try {
+            keyStore.getKey(keyStoreEntryAlias, keyStoreEntryPassword.toCharArray()) as PrivateKey
+        } catch (exception: UnrecoverableKeyException) {
+            throw IllegalArgumentException("Invalid password for keystore entry $keyStoreEntryAlias")
+        }
 
         val certificate = keyStore.getCertificate(keyStoreEntryAlias) as X509Certificate
 
@@ -186,7 +186,7 @@ object ApkSigner {
             listOf(
                 SignerConfig.Builder(
                     signer,
-                    privateKeyCertificatePair.privateKey,
+                    KeyConfig.Jca(privateKeyCertificatePair.privateKey),
                     listOf(privateKeyCertificatePair.certificate),
                 ).build(),
             ),

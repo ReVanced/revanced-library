@@ -54,7 +54,9 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.apksig)
             implementation(libs.apkzlib)
-            implementation(libs.bcpkix.jdk18on)
+            implementation(libs.bouncycastle.bcpkix)
+            implementation(libs.bouncycastle.pgp)
+            implementation(libs.sigstore.java)
             implementation(libs.guava)
             implementation(libs.jadb)
             implementation(libs.kotlin.reflect)

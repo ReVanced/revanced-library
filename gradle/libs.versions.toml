@@ -1,20 +1,20 @@
 [versions]
-android = "8.5.2"
-bcpkix-jdk18on = "1.77"
-binary-compatibility-validator = "0.15.1"
-core-ktx = "1.15.0"
-guava = "33.2.1-jre"
+android = "8.12.3"
+binary-compatibility-validator = "0.18.1"
+core-ktx = "1.17.0"
+guava = "33.5.0-jre"
 jadb = "1.2.1.1"
-kotlin = "2.0.20"
-kotlinx-coroutines = "1.8.1"
-kotlinx-serialization = "1.7.1"
+kotlin = "2.2.21"
+kotlinx-coroutines = "1.10.2"
+kotlinx-serialization = "1.9.0"
 libsu = "5.2.2"
 revanced-patcher = "21.0.0"
+bouncy-castle = "1.82"
+sigstore = "2.0.0-rc2"
 
 [libraries]
 apkzlib = { module = "com.android.tools.build:apkzlib", version.ref = "android" }
 apksig = { module = "com.android.tools.build:apksig", version.ref = "android" }
-bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-jdk18on" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 jadb = { module = "app.revanced:jadb", version.ref = "jadb" } # Fork with Shell v2 support.
@@ -26,6 +26,9 @@ libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu"
 libsu-nio = { module = "com.github.topjohnwu.libsu:nio", version.ref = "libsu" }
 libsu-service = { module = "com.github.topjohnwu.libsu:service", version.ref = "libsu" }
 revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
+bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncy-castle" }
+bouncycastle-pgp = { module = "org.bouncycastle:bcpg-jdk18on", version.ref = "bouncy-castle" }
+sigstore-java = { module = "dev.sigstore:sigstore-java", version.ref = "sigstore" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "android" }
