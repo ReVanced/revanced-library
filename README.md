@@ -111,7 +111,7 @@ you can follow the [ReVanced documentation](https://github.com/ReVanced/revanced
 
 ## 📜 License
 
-ReVanced Library is licensed under the GPLv3 license. Please see the [licence file](LICENSE) for more information.
+ReVanced Library is licensed under the GPLv3 license. Please see the [license file](LICENSE) for more information.
 [tl;dr](https://www.tldrlegal.com/license/gnu-general-public-license-v3-gpl-3) you may copy, distribute and modify ReVanced Library as long as you track changes/dates in source files.
 Any modifications to ReVanced Library must also be made available under the GPL,
 along with build & install instructions.
