@@ -54,6 +54,7 @@ object ApkUtils {
         ZFile.openReadWrite(apkFile, zFileOptions).use { targetApkZFile ->
             dexFiles.forEach { dexFile ->
                 targetApkZFile.add(dexFile.name, dexFile.stream)
+                dexFile.stream.close()
             }
 
             resources?.let { resources ->
