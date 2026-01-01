@@ -2,7 +2,7 @@
 android = "8.5.2"
 bcpkix-jdk18on = "1.77"
 binary-compatibility-validator = "0.15.1"
-core-ktx = "1.15.0"
+core-ktx = "1.17.0"
 guava = "33.2.1-jre"
 jadb = "1.2.1.1"
 kotlin = "2.0.20"
