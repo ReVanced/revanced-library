@@ -8,9 +8,9 @@ kotlin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
 kotlinx-serialization = "1.9.0"
 libsu = "5.2.2"
-revanced-patcher = "21.0.0"
+revanced-patcher = "22.0.0-local"
 bouncy-castle = "1.82"
-sigstore = "2.0.0-rc2"
+sigstore = "2.0.0"
 
 [libraries]
 apkzlib = { module = "com.android.tools.build:apkzlib", version.ref = "android" }
