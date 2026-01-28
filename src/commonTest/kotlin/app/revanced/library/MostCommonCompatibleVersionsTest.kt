@@ -50,19 +50,18 @@ internal class MostCommonCompatibleVersionsTest {
 
     @Test
     fun `common versions correctly ordered for each package`() {
-        fun assertEqualsExpected(compatiblePackageNames: Set<String>?) =
-            assertEqualsVersions(
-                expected =
-                mapOf(
-                    "some.package" to linkedMapOf("a" to 3, "b" to 2, "c" to 1),
-                    "some.other.package" to linkedMapOf("b" to 3, "c" to 2, "d" to 1),
-                    "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
-                    "some.other.other.other.package" to linkedMapOf(),
-                ),
-                patches,
-                compatiblePackageNames,
-                countUnusedPatches = true,
-            )
+        fun assertEqualsExpected(compatiblePackageNames: Set<String>?) = assertEqualsVersions(
+            expected =
+            mapOf(
+                "some.package" to linkedMapOf("a" to 3, "b" to 2, "c" to 1),
+                "some.other.package" to linkedMapOf("b" to 3, "c" to 2, "d" to 1),
+                "some.other.other.package" to linkedMapOf("a" to 1, "b" to 1),
+                "some.other.other.other.package" to linkedMapOf(),
+            ),
+            patches,
+            compatiblePackageNames,
+            countUnusedPatches = true,
+        )
 
         assertEqualsExpected(
             compatiblePackageNames =
@@ -112,7 +111,7 @@ internal class MostCommonCompatibleVersionsTest {
 
     @Test
     fun `return null because no patches were supplied`() {
-        assertEqualsVersion(null, emptySet<BytecodePatch>(), "some.package")
+        assertEqualsVersion(null, emptySet(), "some.package")
     }
 
     @Test
@@ -135,7 +134,7 @@ internal class MostCommonCompatibleVersionsTest {
 
     private fun assertEqualsVersions(
         expected: PackageNameMap,
-        patches: Set<Patch<*>>,
+        patches: Set<Patch>,
         compatiblePackageNames: Set<String>?,
         countUnusedPatches: Boolean = false,
     ) = assertEquals(
@@ -145,7 +144,7 @@ internal class MostCommonCompatibleVersionsTest {
 
     private fun assertEqualsVersion(
         expected: String?,
-        patches: Set<Patch<*>>,
+        patches: Set<Patch>,
         compatiblePackageName: String,
     ) {
         assertEquals(

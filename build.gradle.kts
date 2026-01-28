@@ -69,6 +69,13 @@ kotlin {
             implementation(libs.revanced.patcher)
         }
     }
+
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-Xexplicit-backing-fields",
+            "-Xcontext-parameters",
+        )
+    }
 }
 
 android {

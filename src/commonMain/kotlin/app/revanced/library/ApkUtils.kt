@@ -1,7 +1,7 @@
 package app.revanced.library
 
 import app.revanced.library.ApkSigner.newPrivateKeyCertificatePair
-import app.revanced.patcher.PatcherResult
+import app.revanced.patcher.PatchesResult
 import com.android.tools.build.apkzlib.zip.AlignmentRules
 import com.android.tools.build.apkzlib.zip.StoredEntry
 import com.android.tools.build.apkzlib.zip.ZFile
@@ -38,7 +38,7 @@ object ApkUtils {
         )
 
     /**
-     * Applies the [PatcherResult] to the given [apkFile].
+     * Applies the [PatchesResult] to the given [apkFile].
      *
      * The order of operation is as follows:
      * 1. Write patched dex files.
@@ -50,7 +50,7 @@ object ApkUtils {
      *
      * @param apkFile The file to apply the patched files to.
      */
-    fun PatcherResult.applyTo(apkFile: File) {
+    fun PatchesResult.applyTo(apkFile: File) {
         ZFile.openReadWrite(apkFile, zFileOptions).use { targetApkZFile ->
             dexFiles.forEach { dexFile ->
                 targetApkZFile.add(dexFile.name, dexFile.stream)

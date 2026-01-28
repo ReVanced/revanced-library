@@ -17,7 +17,7 @@ typealias PackageNameMap = Map<PackageName, VersionMap>
  * @param countUnusedPatches Whether to count patches that are not used.
  * @return A map of package names to a map of versions to their count.
  */
-fun Set<Patch<*>>.mostCommonCompatibleVersions(
+fun Set<Patch>.mostCommonCompatibleVersions(
     packageNames: Set<String>? = null,
     countUnusedPatches: Boolean = false,
 ): PackageNameMap = buildMap {

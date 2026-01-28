@@ -16,7 +16,7 @@ import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.serializer
 import java.io.OutputStream
 
-private class PatchSerializer : KSerializer<Patch<*>> {
+private class PatchSerializer : KSerializer<Patch> {
     override val descriptor = buildClassSerialDescriptor("Patch") {
         element<String?>("name")
         element<String?>("description")
@@ -29,7 +29,7 @@ private class PatchSerializer : KSerializer<Patch<*>> {
     override fun deserialize(decoder: Decoder) = throw NotImplementedError("Deserialization is unsupported")
 
     @OptIn(ExperimentalSerializationApi::class)
-    override fun serialize(encoder: Encoder, value: Patch<*>) {
+    override fun serialize(encoder: Encoder, value: Patch) {
         encoder.encodeStructure(descriptor) {
             encodeNullableSerializableElement(
                 descriptor,
@@ -108,7 +108,7 @@ private val patchSerializer by lazy { Json }
  * @param prettyPrint Whether to pretty print the JSON.
  */
 @OptIn(ExperimentalSerializationApi::class)
-fun Set<Patch<*>>.serializeTo(
+fun Set<Patch>.serializeTo(
     outputStream: OutputStream,
     prettyPrint: Boolean = true,
 ) = if (prettyPrint) {
