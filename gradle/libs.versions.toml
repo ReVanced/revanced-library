@@ -1,6 +1,7 @@
 [versions]
-android = "8.12.3"
-binary-compatibility-validator = "0.18.1"
+android = "9.0.0"
+android-compileSdk = "36"
+android-minSdk = "26"
 core-ktx = "1.17.0"
 guava = "33.5.0-jre"
 jadb = "1.2.1.1"
@@ -11,6 +12,7 @@ libsu = "5.2.2"
 revanced-patcher = "22.0.0-local"
 bouncy-castle = "1.82"
 sigstore = "2.0.0"
+vanniktechMavenPublish = "0.35.0"
 
 [libraries]
 apkzlib = { module = "com.android.tools.build:apkzlib", version.ref = "android" }
@@ -32,7 +34,7 @@ sigstore-java = { module = "dev.sigstore:sigstore-java", version.ref = "sigstore
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "android" }
-binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }

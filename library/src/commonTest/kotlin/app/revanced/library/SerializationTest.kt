@@ -14,11 +14,11 @@ class SerializationTest {
         compatibleWith("com.example.package"("1.0.0"))
         compatibleWith("com.example.package2")
 
-        dependsOn(bytecodePatch(), bytecodePatch())
+        dependsOn(bytecodePatch { }, bytecodePatch { })
 
-        stringOption("key1", null, null, "title1", "description1")
-        booleanOption("key2", true, null, "title2", "description2")
-        floatsOption("key3", listOf(1.0f), mapOf("list" to listOf(1f)), "title3", "description3")
+        stringOption("name1", null, null, "description1")
+        booleanOption("name2", true, null, "description2")
+        floatsOption("name3", listOf(1.0f), mapOf("list" to listOf(1f)), "description3")
     }
 
     private var patches = setOf(testPatch)
@@ -50,7 +50,7 @@ class SerializationTest {
 
         assert(options.size == 3) { "The patch should have three options." }
 
-        assert(options[0].jsonObject["title"]!!.jsonPrimitive.content == "title1")
+        assert(options[0].jsonObject["name"]!!.jsonPrimitive.content == "name1")
         assert(options[0].jsonObject["default"]!!.jsonPrimitive.contentOrNull == null)
         assert(options[1].jsonObject["default"]!!.jsonPrimitive.boolean)
         assert(options[2].jsonObject["values"]!!.jsonObject["list"]!!.jsonArray[0].jsonPrimitive.float == 1f)

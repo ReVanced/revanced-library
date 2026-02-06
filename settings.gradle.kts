@@ -1,11 +1,4 @@
-// TODO: Figure out why this causes problems.
 rootProject.name = "revanced-library"
-
-buildCache {
-    local {
-        isEnabled = "CI" !in System.getenv()
-    }
-}
 
 pluginManagement {
     repositories {
@@ -13,3 +6,19 @@ pluginManagement {
         mavenCentral()
     }
 }
+
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+        maven {
+            name = "githubPackages"
+            url = uri("https://maven.pkg.github.com/revanced/revanced-library")
+            credentials(PasswordCredentials::class)
+        }
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+
+include(":library", ":aidl")

@@ -2,8 +2,6 @@ package app.revanced.library.installation.installer
 
 import android.content.Context
 import app.revanced.library.installation.command.LocalShellCommandRunner
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import com.topjohnwu.superuser.ipc.RootService
 import java.io.Closeable
 

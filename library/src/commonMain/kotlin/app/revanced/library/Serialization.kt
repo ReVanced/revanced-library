@@ -71,8 +71,7 @@ private class PatchSerializer : KSerializer<Patch> {
 
     private object OptionSerializer : KSerializer<Option<*>> {
         override val descriptor = buildClassSerialDescriptor("Option") {
-            element<String>("key")
-            element<String?>("title")
+            element<String>("name")
             element<String?>("description")
             element<Boolean>("required")
             // Type does not matter for serialization. Using String.
