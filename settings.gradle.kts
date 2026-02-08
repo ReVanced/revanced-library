@@ -20,4 +20,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":library", ":aidl")
+include(":library")

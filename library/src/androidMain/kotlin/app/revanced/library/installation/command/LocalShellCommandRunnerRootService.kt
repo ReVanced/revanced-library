@@ -8,8 +8,5 @@ import com.topjohnwu.superuser.nio.FileSystemManager
  * The [RootService] for the [LocalShellCommandRunner].
  */
 internal class LocalShellCommandRunnerRootService : RootService() {
-    override fun onBind(intent: Intent) = object : ILocalShellCommandRunnerRootService.Stub() {
-        override fun getFileSystemService() =
-            FileSystemManager.getService()
-    }
+    override fun onBind(intent: Intent) = FileSystemManager.getService()
 }

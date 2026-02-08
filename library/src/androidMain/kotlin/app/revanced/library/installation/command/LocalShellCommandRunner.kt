@@ -64,8 +64,7 @@ class LocalShellCommandRunner internal constructor(
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val ipc = ILocalShellCommandRunnerRootService.Stub.asInterface(service)
-        fileSystemManager = FileSystemManager.getRemote(ipc.fileSystemService)
+        fileSystemManager = FileSystemManager.getRemote(service!!)
 
         logger.info("LocalShellCommandRunner service is ready")
 

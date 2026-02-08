@@ -22,7 +22,6 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-            implementation(project(":aidl"))
             implementation(libs.core.ktx)
             implementation(libs.libsu.nio)
             implementation(libs.libsu.service)
