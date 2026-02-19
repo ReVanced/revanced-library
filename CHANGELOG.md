@@ -1,3 +1,10 @@
+# [3.2.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-02-19)
+
+
+### Features
+
+* Add SLSA attestation and PGP signature verification ([f64f17b](https://github.com/ReVanced/revanced-library/commit/f64f17ba8601baff661fb77a20bb72581e2cb101))
+
 # [3.2.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.1.1-dev.1...v3.2.0-dev.1) (2025-05-27)
 
 
