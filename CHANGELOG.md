@@ -1,3 +1,13 @@
+# [4.0.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.2.0-dev.2...v4.0.0-dev.1) (2026-02-21)
+
+
+* feat!: Update to ReVanced Patcher v22 ([#111](https://github.com/ReVanced/revanced-library/issues/111)) ([0f76b4c](https://github.com/ReVanced/revanced-library/commit/0f76b4cbee250e22b10c4ab4b1d4a8520e1d3277))
+
+
+### BREAKING CHANGES
+
+* ReVanced Patcher v22 updates APIs. Some of which affect the compatibility of ReVanced Library
+
 # [3.2.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-02-19)
 
 
