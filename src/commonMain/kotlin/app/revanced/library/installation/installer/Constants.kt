@@ -21,14 +21,14 @@ internal object Constants {
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
     
     const val MOUNT_APK =
-        "base_path=\"$MOUNTED_APK_PATH\" && " +
+        "base_path='$MOUNTED_APK_PATH' && " +
             "mv $TMP_FILE_PATH \$base_path && " +
             "chmod 644 \$base_path && " +
             "chown system:system \$base_path && " +
             "chcon $SELINUX_CONTEXT  \$base_path"
 
     const val UMOUNT =
-        "grep $PLACEHOLDER /proc/mounts | " +
+        "$MOUNT_GREP | " +
             "while read -r line; do echo \$line | " +
             "cut -d ' ' -f 2 | " +
             "sed 's/apk.*/apk/' | " +
@@ -58,7 +58,7 @@ internal object Constants {
 
         # Use Magisk mirror, if possible.
         if command -v magisk &> /dev/null; then
-            MIRROR="${'$'}(magisk --path)/.magisk/mirror"
+            MIRROR="$(magisk --path)/.magisk/mirror"
         fi
 
         mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path

@@ -56,4 +56,6 @@ abstract class ShellCommandRunner internal constructor() {
     internal operator fun invoke(
         command: String,
     ) = runCommand("su -c \'$command\'")
+
+    internal class ShellCommandRunnerException internal constructor() : Exception("Shell command execution failed")
 }

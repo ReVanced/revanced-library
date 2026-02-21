@@ -16,8 +16,6 @@ import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
 import app.revanced.library.installation.installer.Constants.invoke
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import java.io.File
 
 /**
@@ -50,9 +48,8 @@ abstract class RootInstaller internal constructor(
      * @throws PackageNameRequiredException If the [Apk] does not have a package name.
      */
     override suspend fun install(apk: Apk): RootInstallerResult {
-        logger.info("Installing ${apk.packageName} by mounting")
-
         val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
+        logger.info("Installing ${apk.packageName} by mounting")
 
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
@@ -61,8 +58,8 @@ abstract class RootInstaller internal constructor(
 
         // Install and run.
         TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
-        INSTALL_MOUNT_SCRIPT(packageName)().waitFor()
-        MOUNT_SCRIPT_PATH(packageName)().waitFor()
+        INSTALL_MOUNT_SCRIPT(packageName)().ensureSuccess()
+        MOUNT_SCRIPT_PATH(packageName)().ensureSuccess()
         RESTART(packageName)()
 
         DELETE(TMP_FILE_PATH)()
@@ -71,13 +68,17 @@ abstract class RootInstaller internal constructor(
     }
 
     override suspend fun uninstall(packageName: String): RootInstallerResult {
+        packageName.assertInstalled()
+        if (MOUNT_GREP(packageName)().exitCode != 0) {
+            throw NotMountedException()
+        }
         logger.info("Uninstalling $packageName by unmounting")
 
-        UMOUNT(packageName)()
+        UMOUNT(packageName)().ensureSuccess()
 
         DELETE(MOUNTED_APK_PATH)(packageName)()
         DELETE(MOUNT_SCRIPT_PATH)(packageName)()
-        DELETE(TMP_FILE_PATH)() // Remove residual.
+        DELETE(TMP_FILE_PATH)()
 
         KILL(packageName)()
 
@@ -131,4 +132,5 @@ abstract class RootInstaller internal constructor(
 
     internal class PackageNameRequiredException internal constructor() : Exception("Package name is required")
     internal class NoRootPermissionException internal constructor() : Exception("No root permission")
+    internal class NotMountedException internal constructor() : Exception("Package not mounted")
 }

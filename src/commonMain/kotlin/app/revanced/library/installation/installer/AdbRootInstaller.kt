@@ -1,8 +1,6 @@
 package app.revanced.library.installation.installer
 
 import app.revanced.library.installation.command.AdbShellCommandRunner
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 
 /**
  * [AdbRootInstaller] for installing and uninstalling [Apk] files with using ADB root permissions by mounting.
