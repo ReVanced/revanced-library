@@ -19,56 +19,57 @@ internal object Constants {
     const val INSTALLED_APK_PATH = "pm path $PLACEHOLDER"
     const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
-    
+
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
-            "mv $TMP_FILE_PATH \$base_path && " +
-            "chmod 644 \$base_path && " +
-            "chown system:system \$base_path && " +
-            "chcon $SELINUX_CONTEXT  \$base_path"
+                $$"mv $$TMP_FILE_PATH $base_path && " +
+                $$"chmod 644 $base_path && " +
+                $$"chown system:system $base_path && " +
+                $$"chcon $$SELINUX_CONTEXT  $base_path"
 
     const val UMOUNT =
         "grep $PLACEHOLDER /proc/mounts | " +
-            "while read -r line; do echo \$line | " +
-            "cut -d ' ' -f 2 | " +
-            "sed 's/apk.*/apk/' | " +
-            "xargs -r umount -l; done"
+                $$"while read -r line; do echo $line | " +
+                "cut -d ' ' -f 2 | " +
+                "sed 's/apk.*/apk/' | " +
+                "xargs -r umount -l; done"
 
-    const val INSTALL_MOUNT_SCRIPT = "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
+    const val INSTALL_MOUNT_SCRIPT =
+        "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
 
     val MOUNT_SCRIPT =
-        """
+        $$"""
         #!/system/bin/sh
         until [ "$( getprop sys.boot_completed )" = 1 ]; do sleep 3; done
         until [ -d "/sdcard/Android" ]; do sleep 1; done
 
-        stock_path=$( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+        stock_path=$( pm path $$PLACEHOLDER | grep base | sed 's/package://g' )
 
         # Make sure the app is installed.
-        if [ -z "${'$'}stock_path" ]; then
+        if [ -z "$stock_path" ]; then
             exit 1
         fi
 
         # Unmount any existing installations to prevent multiple unnecessary mounts.
-        $UMOUNT
+        $$UMOUNT
 
-        base_path="$MOUNTED_APK_PATH"
+        base_path="$$MOUNTED_APK_PATH"
 
-        chcon $SELINUX_CONTEXT ${'$'}base_path
+        chcon $$SELINUX_CONTEXT $base_path
 
         # Mount using Magisk mirror, if available.
-        if command -v magisk &> /dev/null; then
-            MAGISKTMP="${'$'}(magisk --path)" || MAGISKTMP=/sbin
-            MIRROR="${'$'}MAGISKTMP/.magisk/mirror"
-            if [ -z "$(ls -A "${'$'}MIRROR" 2>/dev/null)" ]; then
-                MIRROR=""
+        if command -v magisk >/dev/null 2>&1; then
+            if ! MAGISKTMP="$(magisk --path 2>/dev/null)"; then
+                MAGISKTMP=/sbin
             fi
+            MIRROR="$MAGISKTMP/.magisk/mirror"
+            [ -d "$MIRROR" ] || MIRROR=""
         fi
 
-        mount -o bind ${'$'}MIRROR${'$'}base_path ${'$'}stock_path
+        mount -o bind $MIRROR$base_path $stock_path
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
-        $KILL
+        $$KILL
         """.trimIndent()
 
     /**
