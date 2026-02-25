@@ -1,3 +1,51 @@
+# [4.0.0](https://github.com/ReVanced/revanced-library/compare/v3.1.0...v4.0.0) (2026-02-21)
+
+
+* feat!: Update to ReVanced Patcher v22 ([#111](https://github.com/ReVanced/revanced-library/issues/111)) ([0f76b4c](https://github.com/ReVanced/revanced-library/commit/0f76b4cbee250e22b10c4ab4b1d4a8520e1d3277))
+
+
+### Bug Fixes
+
+* Close streams to be able to delete cache folder ([b5e40fe](https://github.com/ReVanced/revanced-library/commit/b5e40fe47677a95a69e4efc34b63b610ef6c0f8c))
+* Interpret package name as a string instead of Regex when using grep  ([#68](https://github.com/ReVanced/revanced-library/issues/68)) ([254f36d](https://github.com/ReVanced/revanced-library/commit/254f36d03cc8fd3e2508a5e8f69bb5c8e1eb9775))
+* Use Magisk mirror only when it is really possible  ([#67](https://github.com/ReVanced/revanced-library/issues/67)) ([9162da9](https://github.com/ReVanced/revanced-library/commit/9162da952a50012551c14ed51045468c3bb3a545))
+
+
+### Features
+
+* Add SLSA attestation and PGP signature verification ([f64f17b](https://github.com/ReVanced/revanced-library/commit/f64f17ba8601baff661fb77a20bb72581e2cb101))
+* Request the update ownership enforcement ([#71](https://github.com/ReVanced/revanced-library/issues/71)) ([be0f6bf](https://github.com/ReVanced/revanced-library/commit/be0f6bf247461d16fbf649a9f2dc6facbb5b0c93))
+
+
+### BREAKING CHANGES
+
+* ReVanced Patcher v22 updates APIs. Some of which affect the compatibility of ReVanced Library
+
+# [4.0.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v4.0.0-dev.1...v4.0.0-dev.2) (2026-02-21)
+
+
+### Bug Fixes
+
+* Close streams to be able to delete cache folder ([b5e40fe](https://github.com/ReVanced/revanced-library/commit/b5e40fe47677a95a69e4efc34b63b610ef6c0f8c))
+* Use Magisk mirror only when it is really possible  ([#67](https://github.com/ReVanced/revanced-library/issues/67)) ([9162da9](https://github.com/ReVanced/revanced-library/commit/9162da952a50012551c14ed51045468c3bb3a545))
+
+# [4.0.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.2.0-dev.2...v4.0.0-dev.1) (2026-02-21)
+
+
+* feat!: Update to ReVanced Patcher v22 ([#111](https://github.com/ReVanced/revanced-library/issues/111)) ([0f76b4c](https://github.com/ReVanced/revanced-library/commit/0f76b4cbee250e22b10c4ab4b1d4a8520e1d3277))
+
+
+### BREAKING CHANGES
+
+* ReVanced Patcher v22 updates APIs. Some of which affect the compatibility of ReVanced Library
+
+# [3.2.0-dev.2](https://github.com/ReVanced/revanced-library/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-02-19)
+
+
+### Features
+
+* Add SLSA attestation and PGP signature verification ([f64f17b](https://github.com/ReVanced/revanced-library/commit/f64f17ba8601baff661fb77a20bb72581e2cb101))
+
 # [3.2.0-dev.1](https://github.com/ReVanced/revanced-library/compare/v3.1.1-dev.1...v3.2.0-dev.1) (2025-05-27)
 
 
