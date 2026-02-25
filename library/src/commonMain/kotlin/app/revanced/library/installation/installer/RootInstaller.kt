@@ -100,7 +100,7 @@ abstract class RootInstaller internal constructor(
     /**
      * Runs a command on the device.
      */
-    protected operator fun String.invoke() = shellCommandRunner(this)
+    protected operator fun String.invoke() = shellCommandRunner("su -c \'$this\'")
 
     /**
      * Moves the given file to the given [targetFilePath].
