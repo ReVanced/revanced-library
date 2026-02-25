@@ -35,7 +35,7 @@ class AdbShellCommandRunner : ShellCommandRunner {
     override fun runCommand(command: String) = device.shellProcessBuilder(command).start().let { process ->
         object : RunResult {
             override val exitCode by lazy { process.waitFor() }
-            override val output by lazy { process.inputStream.bufferedReader().readText() }
+            override val output by lazy { process.inputStream.bufferedReader().readText().removeSuffix("\n") }
             override val error by lazy { process.errorStream.bufferedReader().readText() }
 
             override fun waitFor() {
@@ -44,7 +44,7 @@ class AdbShellCommandRunner : ShellCommandRunner {
         }
     }
 
-    override fun hasRootPermission(): Boolean = invoke("whoami").exitCode == 0
+    override fun hasRootPermission(): Boolean = invoke("su -c whoami").exitCode == 0
 
     override fun write(content: InputStream, targetFilePath: String) =
         device.push(content, System.currentTimeMillis(), 644, RemoteFile(targetFilePath))
