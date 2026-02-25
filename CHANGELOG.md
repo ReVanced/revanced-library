@@ -1,3 +1,11 @@
+## [4.0.1](https://github.com/ReVanced/revanced-library/compare/v4.0.0...v4.0.1) (2026-02-25)
+
+
+### Bug Fixes
+
+* Correctly attest artifact provenance ([93482dc](https://github.com/ReVanced/revanced-library/commit/93482dc3b9bc531adba256a19e07ec9145184195))
+* Make ShellCommandRunner run without root ([#101](https://github.com/ReVanced/revanced-library/issues/101)) ([eb483ca](https://github.com/ReVanced/revanced-library/commit/eb483ca226f7ce3933e026b0c996776946b0c590))
+
 ## [4.0.1-dev.1](https://github.com/ReVanced/revanced-library/compare/v4.0.0...v4.0.1-dev.1) (2026-02-25)
 
 
