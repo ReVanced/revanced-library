@@ -19,7 +19,7 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
     /**
      * Installs the [Apk] file.
      *
-     * @param apk The [Apk] file.
+     * @param apk The base APK file and any associated split APK files.
      *
      * @return The result of the installation.
      */
@@ -46,8 +46,13 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
     /**
      * Apk file for [Installer].
      *
-     * @param file The [Apk] file.
+     * @param file The base [Apk] file.
      * @param packageName The package name of the [Apk] file.
+     * @param splitFiles Any split APK files to install or mount alongside the base APK, keyed by split name.
      */
-    class Apk(val file: File, val packageName: String? = null)
+    class Apk(
+        val file: File,
+        val packageName: String? = null,
+        val splitFiles: Map<String, File> = emptyMap(),
+    )
 }

@@ -7,6 +7,8 @@ import com.android.tools.build.apkzlib.zip.StoredEntry
 import com.android.tools.build.apkzlib.zip.ZFile
 import com.android.tools.build.apkzlib.zip.ZFileOptions
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.days
@@ -37,6 +39,52 @@ object ApkUtils {
             ),
         )
 
+    private fun getSigner(
+        signer: String,
+        keyStoreDetails: KeyStoreDetails,
+    ) = ApkSigner.newApkSigner(
+        signer,
+        if (keyStoreDetails.keyStore.exists()) {
+            readPrivateKeyCertificatePairFromKeyStore(keyStoreDetails)
+        } else {
+            newPrivateKeyCertificatePair(PrivateKeyCertificatePairDetails(), keyStoreDetails)
+        },
+    )
+
+    /**
+     * Applies [PatchedResources] to the given [ZFile].
+     */
+    private fun applyResources(targetApkZFile: ZFile, resources: PatchesResult.PatchedResources) {
+        // Add resources compiled by AAPT.
+        resources.resourcesApk?.let { resourcesApk ->
+            ZFile.openReadOnly(resourcesApk).use { resourcesApkZFile ->
+                // Delete all resources in the target APK before merging the new ones.
+                // This is necessary because the resources.apk renames resources.
+                // So unless, the old resources are deleted, there will be orphaned resources in the APK.
+                // It is not necessary, but for the sake of cleanliness, it is done.
+                targetApkZFile.entries().filter { entry ->
+                    entry.centralDirectoryHeader.name.startsWith(RES_PREFIX)
+                }.forEach(StoredEntry::delete)
+
+                targetApkZFile.mergeFrom(resourcesApkZFile) { false }
+            }
+        }
+
+        // Add resources not compiled by AAPT.
+        resources.otherResources?.let { otherResources ->
+            targetApkZFile.addAllRecursively(otherResources) { file ->
+                file.relativeTo(otherResources).invariantSeparatorsPath !in resources.doNotCompress
+            }
+        }
+
+        // Delete resources that were staged for deletion.
+        if (resources.deleteResources.isNotEmpty()) {
+            targetApkZFile.entries().filter { entry ->
+                entry.centralDirectoryHeader.name in resources.deleteResources
+            }.forEach(StoredEntry::delete)
+        }
+    }
+
     /**
      * Applies the [PatchesResult] to the given [apkFile].
      *
@@ -57,42 +105,35 @@ object ApkUtils {
                 dexFile.stream.close()
             }
 
-            resources?.let { resources ->
-                // Add resources compiled by AAPT.
-                resources.resourcesApk?.let { resourcesApk ->
-                    ZFile.openReadOnly(resourcesApk).use { resourcesApkZFile ->
-                        // Delete all resources in the target APK before merging the new ones.
-                        // This is necessary because the resources.apk renames resources.
-                        // So unless, the old resources are deleted, there will be orphaned resources in the APK.
-                        // It is not necessary, but for the sake of cleanliness, it is done.
-                        targetApkZFile.entries().filter { entry ->
-                            entry.centralDirectoryHeader.name.startsWith(RES_PREFIX)
-                        }.forEach(StoredEntry::delete)
-
-                        targetApkZFile.mergeFrom(resourcesApkZFile) { false }
-                    }
-                }
-
-                // Add resources not compiled by AAPT.
-                resources.otherResources?.let { otherResources ->
-                    targetApkZFile.addAllRecursively(otherResources) { file ->
-                        file.relativeTo(otherResources).invariantSeparatorsPath !in resources.doNotCompress
-                    }
-                }
-
-                // Delete resources that were staged for deletion.
-                if (resources.deleteResources.isNotEmpty()) {
-                    targetApkZFile.entries().filter { entry ->
-                        entry.centralDirectoryHeader.name in resources.deleteResources
-                    }.forEach(StoredEntry::delete)
-                }
-            }
+            resources?.let { applyResources(targetApkZFile, it) }
 
             logger.info("Aligning APK")
 
             targetApkZFile.realign()
 
             logger.fine("Writing changes")
+        }
+    }
+
+    /**
+     * Applies the [PatchesResult] split resources to the given split APK files.
+     *
+     * @param splitApkFiles The split APK files keyed by split name.
+     */
+    fun PatchesResult.applyToSplits(splitApkFiles: Map<String, File>) {
+        splitResources.forEach { (splitName, resources) ->
+            val splitFile = splitApkFiles[splitName]
+                ?: error("No split APK file found for split \"$splitName\"")
+
+            ZFile.openReadWrite(splitFile, zFileOptions).use { targetApkZFile ->
+                applyResources(targetApkZFile, resources)
+
+                logger.info("Aligning split APK \"$splitName\"")
+
+                targetApkZFile.realign()
+
+                logger.fine("Writing changes for split \"$splitName\"")
+            }
         }
     }
 
@@ -158,14 +199,32 @@ object ApkUtils {
         outputApkFile: File,
         signer: String,
         keyStoreDetails: KeyStoreDetails,
-    ) = ApkSigner.newApkSigner(
-        signer,
-        if (keyStoreDetails.keyStore.exists()) {
-            readPrivateKeyCertificatePairFromKeyStore(keyStoreDetails)
-        } else {
-            newPrivateKeyCertificatePair(PrivateKeyCertificatePairDetails(), keyStoreDetails)
-        },
-    ).signApk(inputApkFile, outputApkFile)
+    ) = getSigner(signer, keyStoreDetails).signApk(inputApkFile, outputApkFile)
+
+    /**
+     * Signs multiple APK files in place using the same signer.
+     *
+     * @param apkFiles The APK files to sign.
+     * @param signer The name of the signer.
+     * @param keyStoreDetails The details for the keystore.
+     */
+    fun signApks(
+        apkFiles: Collection<File>,
+        signer: String,
+        keyStoreDetails: KeyStoreDetails,
+    ) {
+        if (apkFiles.isEmpty()) return
+
+        val apkSigner = getSigner(signer, keyStoreDetails)
+
+        apkFiles.forEach { apkFile ->
+            val signedOutputFile = File(apkFile.parentFile, "${apkFile.nameWithoutExtension}-signed.${apkFile.extension}")
+
+            apkSigner.signApk(apkFile, signedOutputFile)
+
+            Files.move(signedOutputFile.toPath(), apkFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+    }
 
     /**
      * Details for a keystore.

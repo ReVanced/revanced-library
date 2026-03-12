@@ -27,7 +27,9 @@ public final class app/revanced/library/ApkSigner$Signer {
 public final class app/revanced/library/ApkUtils {
 	public static final field INSTANCE Lapp/revanced/library/ApkUtils;
 	public final fun applyTo (Lapp/revanced/patcher/PatchesResult;Ljava/io/File;)V
+	public final fun applyToSplits (Lapp/revanced/patcher/PatchesResult;Ljava/util/Map;)V
 	public final fun signApk (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)V
+	public final fun signApks (Ljava/util/Collection;Ljava/lang/String;Lapp/revanced/library/ApkUtils$KeyStoreDetails;)V
 }
 
 public final class app/revanced/library/ApkUtils$KeyStoreDetails {
@@ -165,8 +167,10 @@ public abstract class app/revanced/library/installation/installer/Installer {
 public final class app/revanced/library/installation/installer/Installer$Apk {
 	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/io/File;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/io/File;Ljava/lang/String;Ljava/util/Map;)V
 	public final fun getFile ()Ljava/io/File;
 	public final fun getPackageName ()Ljava/lang/String;
+	public final fun getSplitFiles ()Ljava/util/Map;
 }
 
 public final class app/revanced/library/installation/installer/LocalInstaller : app/revanced/library/installation/installer/Installer, java/io/Closeable {
@@ -230,4 +234,3 @@ public final class app/revanced/library/logging/Logger {
 	public final fun setFormat (Ljava/lang/String;)V
 	public static synthetic fun setFormat$default (Lapp/revanced/library/logging/Logger;Ljava/lang/String;ILjava/lang/Object;)V
 }
-

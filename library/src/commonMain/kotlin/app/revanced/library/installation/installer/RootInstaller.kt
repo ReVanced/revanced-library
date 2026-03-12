@@ -5,13 +5,14 @@ import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
-import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
-import app.revanced.library.installation.installer.Constants.MOUNT_APK
+import app.revanced.library.installation.installer.Constants.splitFileName
 import app.revanced.library.installation.installer.Constants.MOUNT_GREP
+import app.revanced.library.installation.installer.Constants.MOUNT_ROOT_PATH
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
+import app.revanced.library.installation.installer.Constants.PACKAGE_MOUNT_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
@@ -50,22 +51,25 @@ abstract class RootInstaller internal constructor(
      * @throws PackageNameRequiredException If the [Apk] does not have a package name.
      */
     override suspend fun install(apk: Apk): RootInstallerResult {
-        logger.info("Installing ${apk.packageName} by mounting")
+        logger.info("Installing ${apk.packageName} by mounting with ${apk.splitFiles.size} split APK(s)")
 
         val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
+        val mountDirectory = PACKAGE_MOUNT_PATH(packageName)
 
         // Setup files.
-        apk.file.move(TMP_FILE_PATH)
-        CREATE_INSTALLATION_PATH().waitFor()
-        MOUNT_APK(packageName)().waitFor()
+        CREATE_INSTALLATION_PATH(MOUNT_ROOT_PATH)()
+        CREATE_INSTALLATION_PATH(mountDirectory)()
+
+        moveApk(apk.file, mountDirectory, "base.apk")
+        apk.splitFiles.forEach { (splitName, splitFile) ->
+            moveApk(splitFile, mountDirectory, splitFileName(splitName))
+        }
 
         // Install and run.
-        TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
-        INSTALL_MOUNT_SCRIPT(packageName)().waitFor()
+        MOUNT_SCRIPT_PATH(packageName).write(MOUNT_SCRIPT(packageName))
+        "chmod +x ${MOUNT_SCRIPT_PATH(packageName)}"().waitFor()
         MOUNT_SCRIPT_PATH(packageName)().waitFor()
         RESTART(packageName)()
-
-        DELETE(TMP_FILE_PATH)()
 
         return RootInstallerResult.SUCCESS
     }
@@ -75,9 +79,8 @@ abstract class RootInstaller internal constructor(
 
         UMOUNT(packageName)()
 
-        DELETE(MOUNTED_APK_PATH)(packageName)()
+        DELETE(PACKAGE_MOUNT_PATH)(packageName)()
         DELETE(MOUNT_SCRIPT_PATH)(packageName)()
-        DELETE(TMP_FILE_PATH)() // Remove residual.
 
         KILL(packageName)()
 
@@ -88,7 +91,7 @@ abstract class RootInstaller internal constructor(
         val patchedApkPath = MOUNTED_APK_PATH(packageName)
 
         val patchedApkExists = EXISTS(patchedApkPath)().exitCode == 0
-        if (patchedApkExists) return null
+        if (!patchedApkExists) return null
 
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
@@ -108,6 +111,15 @@ abstract class RootInstaller internal constructor(
      * @param targetFilePath The target file path.
      */
     protected fun File.move(targetFilePath: String) = shellCommandRunner.move(this, targetFilePath)
+
+    private fun moveApk(file: File, directory: String, outputFileName: String) {
+        val temporaryPath = TMP_FILE_PATH(outputFileName)
+
+        DELETE(temporaryPath)()
+        file.move(temporaryPath)
+        "mv $temporaryPath $directory/$outputFileName"()
+        "chmod 644 $directory/$outputFileName && chown system:system $directory/$outputFileName && chcon ${Constants.SELINUX_CONTEXT} $directory/$outputFileName"()
+    }
 
     /**
      * Writes the given [content] to the file.
