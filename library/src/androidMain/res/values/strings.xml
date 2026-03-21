@@ -1,0 +1,12 @@
+<resources>
+    <string name="adb_install_conflict">Installation conflict. Please uninstall the existing app first.</string>
+    <string name="adb_install_no_storage">Insufficient storage space.</string>
+    <string name="adb_install_invalid_apk">The APK is invalid.</string>
+    <string name="adb_install_incompatible">The APK is incompatible with your device.</string>
+    <string name="adb_install_aborted">Installation was aborted.</string>
+    <string name="adb_install_timeout">Installation timed out during verification.</string>
+    <string name="adb_install_blocked">Installation was blocked by the system.</string>
+    <string name="adb_install_restricted">Installation is restricted by the user.</string>
+    <string name="adb_install_unknown_error">Installation failed: %s</string>
+    <string name="adb_uninstall_fail">Uninstall failed: %s</string>
+</resources>

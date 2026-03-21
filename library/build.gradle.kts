@@ -21,10 +21,26 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.core.ktx)
-            implementation(libs.libsu.nio)
-            implementation(libs.libsu.service)
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.core.ktx)
+                implementation(libs.libsu.nio)
+                implementation(libs.libsu.service)
+
+                // Shizuku & ADB
+                val libadb = libs.libadb.android.get()
+                api("${libadb.group}:${libadb.name}:${libadb.version}") {
+                    exclude(group = "org.bouncycastle")
+                }
+                val sunSecurity = libs.sun.security.android.get()
+                api("${sunSecurity.group}:${sunSecurity.name}:${sunSecurity.version}") {
+                    exclude(group = "org.bouncycastle")
+                }
+                implementation(libs.conscrypt.android)
+                implementation(libs.shizuku.api)
+                implementation(libs.shizuku.provider)
+                implementation(libs.work.runtime.ktx)
+            }
         }
 
         commonMain.dependencies {
