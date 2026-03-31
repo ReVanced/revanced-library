@@ -34,11 +34,15 @@ class LocalShellCommandRunner internal constructor(
         RootService.bind(intent, this)
     }
 
-    override fun runCommand(command: String) = shell.newJob().add(command).exec().let {
-        object : RunResult {
-            override val exitCode = it.code
-            override val output by lazy { it.out.joinToString("\n") }
-            override val error by lazy { it.err.joinToString("\n") }
+    override fun runCommand(command: String): RunResult {
+        val stdout = mutableListOf<String>()
+        val stderr = mutableListOf<String>()
+        val result = shell.newJob().add(command).to(stdout, stderr).exec()
+
+        return object : RunResult {
+            override val exitCode = result.code
+            override val output = stdout.joinToString("\n")
+            override val error = stderr.joinToString("\n")
         }
     }
 
