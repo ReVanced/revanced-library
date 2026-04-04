@@ -41,8 +41,12 @@ class LocalShellCommandRunner internal constructor(
 
         return object : RunResult {
             override val exitCode = result.code
-            override val output = stdout.joinToString("\n")
-            override val error = stderr.joinToString("\n")
+            override val output: String by lazy {
+                stdout.joinToString("\n")
+            }
+            override val error: String by lazy {
+                stderr.joinToString("\n")
+            }
         }
     }
 
