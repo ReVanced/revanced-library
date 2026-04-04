@@ -100,7 +100,7 @@ abstract class RootInstaller internal constructor(
     /**
      * Runs a command on the device.
      */
-    protected operator fun String.invoke() = shellCommandRunner("su -c \'$this\'")
+    protected operator fun String.invoke() = shellCommandRunner(this)
 
     /**
      * Moves the given file to the given [targetFilePath].
@@ -127,7 +127,7 @@ abstract class RootInstaller internal constructor(
         }
     }
 
-    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) : Exception("Failed to find installed package \"$packageName\" because no activity was found")
+    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) : Exception("Failed to resolve installed APK path for package \"$packageName\"")
 
     internal class PackageNameRequiredException internal constructor() : Exception("Package name is required")
     internal class NoRootPermissionException internal constructor() : Exception("No root permission")
