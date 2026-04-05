@@ -30,11 +30,11 @@ class AdbInstaller(
         logger.fine("Connected to $deviceSerial")
     }
 
-    override suspend fun install(apk: Apk): AdbInstallerResult {
+    override suspend fun install(patchedApk: Apk, stockApk: Apk?): AdbInstallerResult {
         return runPackageManager {
             val sdkVersion = shellCommandRunner(GET_SDK_VERSION).output.toInt()
-            if (sdkVersion < 34) install(apk.file)
-            else installWithOptions(apk.file, listOf(UPDATE_OWNERSHIP))
+            if (sdkVersion < 34) install(patchedApk.file)
+            else installWithOptions(patchedApk.file, listOf(UPDATE_OWNERSHIP))
         }
     }
 

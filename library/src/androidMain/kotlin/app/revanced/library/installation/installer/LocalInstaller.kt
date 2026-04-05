@@ -10,7 +10,6 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import app.revanced.library.installation.installer.Installer.Apk
 import java.io.Closeable
 import java.io.File
 
@@ -56,13 +55,13 @@ class LocalInstaller(
         )
     }
 
-    override suspend fun install(apk: Apk) {
-        logger.info("Installing ${apk.file.name}")
+    override suspend fun install(patchedApk: Apk, stockApk: Apk?) {
+        logger.info("Installing ${patchedApk.file.name}")
 
         val packageInstaller = context.packageManager.packageInstaller
 
         packageInstaller.openSession(packageInstaller.createSession(sessionParams)).use { session ->
-            session.writeApk(apk.file)
+            session.writeApk(patchedApk.file)
             session.commit(intentSender)
         }
     }

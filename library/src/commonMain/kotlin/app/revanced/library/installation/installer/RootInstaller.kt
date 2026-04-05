@@ -6,6 +6,7 @@ import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
+import app.revanced.library.installation.installer.Constants.INSTALL_STOCK_APK
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
 import app.revanced.library.installation.installer.Constants.MOUNT_APK
@@ -15,9 +16,8 @@ import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
+import app.revanced.library.installation.installer.Constants.UNINSTALL_KEEP_DATA
 import app.revanced.library.installation.installer.Constants.invoke
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import java.io.File
 
 /**
@@ -43,19 +43,26 @@ abstract class RootInstaller internal constructor(
     }
 
     /**
-     * Installs the given [apk] by mounting.
+     * Installs the given [patchedApk] by mounting.
      *
-     * @param apk The [Apk] to install.
+     * @param patchedApk The [Apk] to install.
      *
      * @throws PackageNameRequiredException If the [Apk] does not have a package name.
      */
-    override suspend fun install(apk: Apk): RootInstallerResult {
-        logger.info("Installing ${apk.packageName} by mounting")
+    override suspend fun install(patchedApk: Apk, stockApk: Apk?): RootInstallerResult {
+        logger.info("Installing ${patchedApk.packageName} by mounting")
 
-        val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
+        val packageName = patchedApk.packageName ?: throw PackageNameRequiredException()
+
+        // Ensure stock APK is installed
+        if (stockApk != null) {
+            UNINSTALL_KEEP_DATA(packageName)().waitFor()
+            logger.info("Installing stock APK for $packageName")
+            INSTALL_STOCK_APK(stockApk.file.absolutePath)().waitFor()
+        } else packageName.assertInstalled()
 
         // Setup files.
-        apk.file.move(TMP_FILE_PATH)
+        patchedApk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH().waitFor()
         MOUNT_APK(packageName)().waitFor()
 

@@ -19,6 +19,8 @@ internal object Constants {
     const val INSTALLED_APK_PATH = "pm path $PLACEHOLDER"
     const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
+    const val UNINSTALL_KEEP_DATA = "pm uninstall -k --user 0 $PLACEHOLDER"
+    const val INSTALL_STOCK_APK = "pm install -r -d --user 0 $PLACEHOLDER"
 
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +

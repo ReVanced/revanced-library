@@ -1,6 +1,5 @@
 package app.revanced.library.installation.installer
 
-import app.revanced.library.installation.installer.Installer.Apk
 import java.io.File
 import java.util.logging.Logger
 
@@ -19,11 +18,11 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
     /**
      * Installs the [Apk] file.
      *
-     * @param apk The [Apk] file.
+     * @param patchedApk The [Apk] file.
      *
      * @return The result of the installation.
      */
-    abstract suspend fun install(apk: Apk): TInstallerResult
+    abstract suspend fun install(patchedApk: Apk, stockApk: Apk? = null): TInstallerResult
 
     /**
      * Uninstalls the package.
