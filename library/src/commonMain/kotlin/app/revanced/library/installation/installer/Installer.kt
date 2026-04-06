@@ -18,7 +18,7 @@ abstract class Installer<TInstallerResult, TInstallation : Installation, TInstal
     /**
      * Installs the [Apk] file.
      *
-     * @param patchedApk The [Apk] file.
+     * @param options The [InstallOptions].
      *
      * @return The result of the installation.
      */
@@ -42,23 +42,5 @@ abstract class Installer<TInstallerResult, TInstallation : Installation, TInstal
      */
     abstract suspend fun getInstallation(packageName: String): TInstallation?
 
-    /**
-     * Apk file for [Installer].
-     *
-     * @param file The [Apk] file.
-     * @param packageName The package name of the [Apk] file.
-     */
-    sealed class Apk {
-        abstract val file: File
-
-        class Patched(
-            override val file: File
-        ) : Apk()
-
-        class Stock(
-            override val file: File,
-            val packageName: String,
-            val versionCode: Int
-        ) : Apk()
-    }
+    open class Apk(val file: File)
 }

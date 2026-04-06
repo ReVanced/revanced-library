@@ -17,7 +17,6 @@ import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
-import app.revanced.library.installation.installer.Constants.UNINSTALL_KEEP_DATA
 import app.revanced.library.installation.installer.Constants.invoke
 import java.io.File
 
@@ -46,12 +45,16 @@ abstract class RootInstaller internal constructor(
     /**
      * Installs the given APK by mounting it over a stock installation.
      *
-     * The stock APK is used to ensure a valid base for mounting, the app will be reinstalled if necessary.
+     * The stock APK is used to ensure a valid base for mounting. If the currently
+     * installed version differs from the expected stock version, the stock APK is
+     * installed first. If the installed version is newer than the expected version,
+     * reinstallation may be required.
      *
-     * @param options The install options containing:
-     * - the patched APK to mount
-     * - the stock APK to install beforehand if necessary
+     * @param options The install options containing the patched APK to mount and the
+     * stock APK to use as the installation base.
      *
+     * @throws PackageDowngradeRequiredException If the installed app version is
+     * newer than the expected stock version.
      */
     override suspend fun install(options: RootInstallOptions): RootInstallerResult {
         val patchedApk = options.patchedApk
@@ -63,11 +66,11 @@ abstract class RootInstaller internal constructor(
         // Ensure the installed base app matches the stock APK version.
         val installedVersionCode = getInstalledVersionCode(packageName)
 
-        if (installedVersionCode != expectedVersionCode) {
-            if (installedVersionCode != null && installedVersionCode > expectedVersionCode) {
-                UNINSTALL_KEEP_DATA(packageName)().waitFor()
-            }
+        if (installedVersionCode != null && installedVersionCode > expectedVersionCode) {
+            throw PackageDowngradeRequiredException(packageName)
+        }
 
+        if (installedVersionCode != expectedVersionCode) {
             logger.info("Installing stock APK for $packageName")
             INSTALL_STOCK_APK(stockApk.file.absolutePath)().waitFor()
         }
@@ -107,7 +110,7 @@ abstract class RootInstaller internal constructor(
         val patchedApkPath = MOUNTED_APK_PATH(packageName)
 
         val patchedApkExists = EXISTS(patchedApkPath)().exitCode == 0
-        if (patchedApkExists) return null
+        if (!patchedApkExists) return null
 
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
@@ -154,6 +157,9 @@ abstract class RootInstaller internal constructor(
 
         return result.output.trim().toIntOrNull()
     }
+
+    internal class PackageDowngradeRequiredException internal constructor(packageName: String) :
+        Exception("$packageName requires reinstallation for a downgrade, data wipe is likely")
 
     internal class FailedToFindInstalledPackageException internal constructor(packageName: String) :
         Exception("Failed to resolve installed APK path for package \"$packageName\"")
