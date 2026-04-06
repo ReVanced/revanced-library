@@ -9,7 +9,7 @@ import java.util.logging.Logger
  * @param TInstallerResult The type of the result of the installation.
  * @param TInstallation The type of the installation.
  */
-abstract class Installer<TInstallerResult, TInstallation : Installation> internal constructor() {
+abstract class Installer<TInstallerResult, TInstallation : Installation, TInstallOptions : InstallOptions> internal constructor() {
     /**
      * The [Logger].
      */
@@ -22,7 +22,7 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
      *
      * @return The result of the installation.
      */
-    abstract suspend fun install(patchedApk: Apk, stockApk: Apk? = null): TInstallerResult
+    abstract suspend fun install(options: TInstallOptions): TInstallerResult
 
     /**
      * Uninstalls the package.
@@ -48,5 +48,17 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
      * @param file The [Apk] file.
      * @param packageName The package name of the [Apk] file.
      */
-    class Apk(val file: File, val packageName: String? = null)
+    sealed class Apk {
+        abstract val file: File
+
+        class Patched(
+            override val file: File
+        ) : Apk()
+
+        class Stock(
+            override val file: File,
+            val packageName: String,
+            val versionCode: Int
+        ) : Apk()
+    }
 }

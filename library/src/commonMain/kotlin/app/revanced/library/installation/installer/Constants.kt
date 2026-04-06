@@ -21,7 +21,8 @@ internal object Constants {
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
     const val UNINSTALL_KEEP_DATA = "pm uninstall -k --user 0 $PLACEHOLDER"
     const val INSTALL_STOCK_APK = "pm install -r -d --user 0 $PLACEHOLDER"
-
+    const val GET_INSTALLED_VERSION_CODE =
+        "dumpsys package $PLACEHOLDER | sed -n 's/.*versionCode=\\([0-9]*\\).*/\\1/p' | head -n 1"
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
                 $$"mv $$TMP_FILE_PATH $base_path && " +

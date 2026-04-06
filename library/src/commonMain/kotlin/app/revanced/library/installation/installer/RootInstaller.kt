@@ -4,6 +4,7 @@ import app.revanced.library.installation.command.ShellCommandRunner
 import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION_PATH
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
+import app.revanced.library.installation.installer.Constants.GET_INSTALLED_VERSION_CODE
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.INSTALL_STOCK_APK
@@ -30,7 +31,7 @@ import java.io.File
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class RootInstaller internal constructor(
     shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
-) : Installer<RootInstallerResult, RootInstallation>() {
+) : Installer<RootInstallerResult, RootInstallation, RootInstallOptions>() {
 
     /**
      * The command runner used to run commands on the device.
@@ -43,23 +44,34 @@ abstract class RootInstaller internal constructor(
     }
 
     /**
-     * Installs the given [patchedApk] by mounting.
+     * Installs the given APK by mounting it over a stock installation.
      *
-     * @param patchedApk The [Apk] to install.
+     * The stock APK is used to ensure a valid base for mounting, the app will be reinstalled if necessary.
      *
-     * @throws PackageNameRequiredException If the [Apk] does not have a package name.
+     * @param options The install options containing:
+     * - the patched APK to mount
+     * - the stock APK to install beforehand if necessary
+     *
      */
-    override suspend fun install(patchedApk: Apk, stockApk: Apk?): RootInstallerResult {
-        logger.info("Installing ${patchedApk.packageName} by mounting")
+    override suspend fun install(options: RootInstallOptions): RootInstallerResult {
+        val patchedApk = options.patchedApk
+        val stockApk = options.stockApk
+        val packageName = stockApk.packageName
+        val expectedVersionCode = stockApk.versionCode
+        logger.info("Installing $packageName by mounting")
 
-        val packageName = patchedApk.packageName ?: throw PackageNameRequiredException()
+        // Ensure the installed base app matches the stock APK version.
+        val installedVersionCode = getInstalledVersionCode(packageName)
 
-        // Ensure stock APK is installed
-        if (stockApk != null) {
-            UNINSTALL_KEEP_DATA(packageName)().waitFor()
+        if (installedVersionCode != expectedVersionCode) {
+            if (installedVersionCode != null && installedVersionCode > expectedVersionCode) {
+                UNINSTALL_KEEP_DATA(packageName)().waitFor()
+            }
+
             logger.info("Installing stock APK for $packageName")
             INSTALL_STOCK_APK(stockApk.file.absolutePath)().waitFor()
-        } else packageName.assertInstalled()
+        }
+        packageName.assertInstalled()
 
         // Setup files.
         patchedApk.file.move(TMP_FILE_PATH)
@@ -121,7 +133,8 @@ abstract class RootInstaller internal constructor(
      *
      * @param content The content of the file.
      */
-    protected fun String.write(content: String) = shellCommandRunner.write(content.byteInputStream(), this)
+    protected fun String.write(content: String) =
+        shellCommandRunner.write(content.byteInputStream(), this)
 
     /**
      * Asserts that the package is installed.
@@ -134,8 +147,17 @@ abstract class RootInstaller internal constructor(
         }
     }
 
-    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) : Exception("Failed to resolve installed APK path for package \"$packageName\"")
+    private fun getInstalledVersionCode(packageName: String): Int? {
+        val result = GET_INSTALLED_VERSION_CODE(packageName)().waitFor()
 
-    internal class PackageNameRequiredException internal constructor() : Exception("Package name is required")
-    internal class NoRootPermissionException internal constructor() : Exception("No root permission")
+        if (result.exitCode != 0) return null
+
+        return result.output.trim().toIntOrNull()
+    }
+
+    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) :
+        Exception("Failed to resolve installed APK path for package \"$packageName\"")
+
+    internal class NoRootPermissionException internal constructor() :
+        Exception("No root permission")
 }
