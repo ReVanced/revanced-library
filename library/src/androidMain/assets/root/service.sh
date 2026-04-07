@@ -3,7 +3,26 @@ DIR=${0%/*}
 
 package_name="__PKG_NAME__"
 version="__VERSION__"
+label="__LABEL__"
 sanitized_package_name=$(echo "$package_name" | sed 's/\./_/g')
+
+ReadVolumeKeys() {
+    local result=$(getevent -ql | while read dev type code value; do
+        case "$code" in
+            KEY_VOLUMEUP) [ "$value" = "DOWN" ] && echo 1 && break ;;
+            KEY_VOLUMEDOWN) [ "$value" = "DOWN" ] && echo 2 && break ;;
+        esac
+    done)
+    return "${result:-0}"
+}
+
+vibrate() {
+    su -lp 2000 -c "cmd vibrator vibrate ${1:-500}" > /dev/null 2>&1
+}
+
+notify() {
+    su -lp 2000 -c "cmd notification post -S bigtext -t '$1' 'ReVancedInduction' '$2'" > /dev/null 2>&1
+}
 
 rm -f "$DIR/log"
 
@@ -46,8 +65,30 @@ if mount | grep -q "$stock_path" ; then
 fi
 
 if [ "$version" != "$stock_version" ]; then
-  echo "The version of the installed app ($stock_version) does not match the patched app ($version). Mounting anyways, as it might still work."
-  # Optional: exit 1 if you want to be strict
+  echo "The version of the installed app ($stock_version) does not match the patched app ($version)."
+  
+  vibrate 300
+  notify "Version Mismatch for $label" "Press Volume Up to mount anyway, or Volume Down to skip."
+  
+  ReadVolumeKeys
+  case $? in
+    2)
+      echo "User pressed Volume Down. Skipping bind mount."
+      exit 0
+      ;;
+    *)
+      echo "User pressed Volume Up. Proceeding with mount."
+      ;;
+  esac
+fi
+
+echo "Setting permissions for $base_path"
+chmod 644 "$base_path"
+chown system:system "$base_path"
+if echo "$base_path" | grep -q "/system/"; then
+  chcon u:object_r:system_file:s0 "$base_path"
+else
+  chcon u:object_r:apk_data_file:s0 "$base_path"
 fi
 
 echo "Mounting patched APK over stock path ($base_path => $stock_path)"
