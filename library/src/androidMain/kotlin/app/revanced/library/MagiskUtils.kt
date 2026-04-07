@@ -150,6 +150,7 @@ object MagiskUtils {
             .add("chown system:system \"$unifiedApkPath\"")
             .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
+            .add("chmod +x \"$modulePath/uninstall.sh\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
     }
@@ -182,6 +183,7 @@ object MagiskUtils {
             .add("chown system:system \"$unifiedApkPath\"")
             .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
+            .add("chmod +x \"$modulePath/uninstall.sh\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
     }
@@ -204,6 +206,10 @@ object MagiskUtils {
             .replace("__VERSION__", version)
             .replace("__LABEL__", label)
         remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { it.write(serviceSh.toByteArray()) }
+        
+        val uninstallSh = Constants.MAGISK_UNINSTALL_SCRIPT
+            .replace("__PKG_NAME__", packageName)
+        remoteFS.getFile("$modulePath/uninstall.sh").newOutputStream().use { it.write(uninstallSh.toByteArray()) }
     }
 
     private fun copyApk(remoteFS: FileSystemManager, source: File, destination: String) {
