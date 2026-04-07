@@ -20,9 +20,29 @@ object MagiskUtils {
     fun isInstalledAsMagiskModule(packageName: String, remoteFS: FileSystemManager) =
         remoteFS.getFile("$MODULES_PATH/revanced_${packageName.replace('.', '_')}").exists()
 
+    /**
+     * Bind-mounts the patched APK over the stock APK path.
+     * Matches the logic in [SERVICE_SH_TEMPLATE].
+     */
     fun mount(packageName: String, sourceDir: String) {
-        val modulePath = "$MODULES_PATH/$packageName-revanced"
-        val patchedApk = "$modulePath/$packageName.apk"
+        // Induction check: verify if already mounted
+        val checkMount = Shell.getShell().newJob().add("mount | grep -q \"$sourceDir\"").exec()
+        if (checkMount.isSuccess) return
+
+        val sanitizedPackageName = packageName.replace('.', '_')
+        val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
+        val fallbackModulePath = "$MODULES_PATH/$packageName-revanced"
+
+        // Automatic detection of APK path (Magisk Induction vs Standard Root)
+        val patchedApkCandidates = listOf(
+            "$modulePath/system/app/$sanitizedPackageName/base.apk",
+            "$fallbackModulePath/$packageName.apk"
+        )
+
+        val patchedApk = patchedApkCandidates.firstOrNull { path ->
+            Shell.getShell().newJob().add("[ -f \"$path\" ]").exec().isSuccess
+        } ?: throw Exception("Patch APK not found for $packageName")
+
         Shell.getShell().newJob()
             .add("mount -o bind \"$patchedApk\" \"$sourceDir\"")
             .exec()
@@ -30,6 +50,10 @@ object MagiskUtils {
     }
 
     fun unmount(sourceDir: String) {
+        // Skip if not mounted
+        val checkMount = Shell.getShell().newJob().add("mount | grep -q \"$sourceDir\"").exec()
+        if (!checkMount.isSuccess) return
+
         Shell.getShell().newJob()
             .add("umount -l \"$sourceDir\"")
             .exec()
