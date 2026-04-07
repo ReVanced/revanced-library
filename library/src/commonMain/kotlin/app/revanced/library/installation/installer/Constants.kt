@@ -7,7 +7,7 @@ object Constants {
     const val SELINUX_CONTEXT = "u:object_r:apk_data_file:s0"
     const val TMP_FILE_PATH = "/data/local/tmp/revanced.tmp"
     const val MOUNT_PATH = "/data/adb/revanced/"
-    const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
+    const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER/base.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
@@ -17,7 +17,7 @@ object Constants {
     const val RESTART = "am start -S $PLACEHOLDER"
     const val KILL = "am force-stop $PLACEHOLDER"
     const val INSTALLED_APK_PATH = "pm path $PLACEHOLDER"
-    const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
+    const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH$PLACEHOLDER"
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
 
     const val MAGISK_MODULES_PATH = "/data/adb/modules/"
@@ -39,10 +39,11 @@ object Constants {
 
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
-                "mv $TMP_FILE_PATH ${"$"}{base_path} && " +
-                "chmod 644 ${"$"}{base_path} && " +
-                "chown system:system ${"$"}{base_path} && " +
-                "chcon $SELINUX_CONTEXT ${"$"}{base_path}"
+                "mkdir -p \"${"$"}(dirname \"${"$"}{base_path}\")\" && " +
+                "mv $TMP_FILE_PATH \"${"$"}{base_path}\" && " +
+                "chmod 644 \"${"$"}{base_path}\" && " +
+                "chown system:system \"${"$"}{base_path}\" && " +
+                "chcon $SELINUX_CONTEXT \"${"$"}{base_path}\""
 
     val UMOUNT =
         """
@@ -149,9 +150,14 @@ object Constants {
         # Wait a bit more for package manager to settle
         sleep 10
 
-        base_path="${"$"}{DIR}/system/app/${"$"}{sanitized_package_name}/base.apk"
+        # Unified path for the patched APK (Source of truth)
+        base_path="/data/adb/revanced/${"$"}{package_name}/base.apk"
+        
+        # Fallback to local path if unified path doesn't exist (Legacy compatibility)
         if [ ! -f "${"$"}{base_path}" ]; then
-            # Fallback to old path for compatibility during transition
+            base_path="${"$"}{DIR}/system/app/${"$"}{sanitized_package_name}/base.apk"
+        fi
+        if [ ! -f "${"$"}{base_path}" ]; then
             base_path="${"$"}{DIR}/${"$"}{package_name}.apk"
         fi
 

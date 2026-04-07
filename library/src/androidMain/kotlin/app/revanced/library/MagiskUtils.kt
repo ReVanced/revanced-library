@@ -1,6 +1,7 @@
 package app.revanced.library
 
 import app.revanced.library.installation.installer.Constants
+import app.revanced.library.installation.installer.Constants.invoke
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.nio.FileSystemManager
 import java.io.File
@@ -37,8 +38,9 @@ object MagiskUtils {
         val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
         val fallbackModulePath = "$MODULES_PATH/$packageName-revanced"
 
-        // Automatic detection of APK path (Magisk Induction vs Standard Root)
+        // Automatic detection of APK path (Unified Path vs Magisk Induction vs Legacy Root)
         val patchedApkCandidates = listOf(
+            Constants.MOUNTED_APK_PATH(packageName),
             "$modulePath/system/app/$sanitizedPackageName/base.apk",
             "$fallbackModulePath/$packageName.apk"
         )
@@ -65,11 +67,17 @@ object MagiskUtils {
     }
 
     fun uninstall(packageName: String, remoteFS: FileSystemManager) {
+        val unifiedPath = Constants.MOUNTED_APK_PATH(packageName).substringBeforeLast("/")
+        remoteFS.getFile(unifiedPath).deleteRecursively()
+        
         remoteFS.getFile("$MODULES_PATH/$packageName-revanced").deleteRecursively()
             .also { if (!it) throw Exception("Failed to delete files") }
     }
 
     fun uninstallMagiskModule(packageName: String, remoteFS: FileSystemManager) {
+        val unifiedPath = Constants.MOUNTED_APK_PATH(packageName).substringBeforeLast("/")
+        remoteFS.getFile(unifiedPath).deleteRecursively()
+
         val sanitizedPackageName = packageName.replace('.', '_')
         remoteFS.getFile("$MODULES_PATH/revanced_$sanitizedPackageName").deleteRecursively()
             .also { if (!it) throw Exception("Failed to delete Magisk module files") }
@@ -121,27 +129,26 @@ object MagiskUtils {
     ) {
         val sanitizedPackageName = packageName.replace('.', '_')
         val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
-        val systemAppPath = "$modulePath/system/app/$sanitizedPackageName"
+        val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
 
+        // Ensure directories exist
+        val unifiedDir = unifiedApkPath.substringBeforeLast("/")
         Shell.getShell().newJob()
-            .add("mkdir -p \"$systemAppPath\"")
+            .add("mkdir -p \"$modulePath\"")
+            .add("mkdir -p \"$unifiedDir\"")
             .exec()
-            .assertSuccess("Failed to create system app directory")
+            .assertSuccess("Failed to create induction directories")
 
         writeInductionFiles(remoteFS, modulePath, packageName, version, label)
 
-        val targetApkPath = "$systemAppPath/base.apk"
-        copyApk(remoteFS, patchedApk, targetApkPath)
+        // Source of truth APK
+        copyApk(remoteFS, patchedApk, unifiedApkPath)
 
-        extractNativeLibraries(patchedApk, systemAppPath, remoteFS)
-
+        // Set permissions for unified path
         Shell.getShell().newJob()
-            .add("chmod 644 \"$targetApkPath\"")
-            .add("chmod 755 \"$systemAppPath\"")
-            .add("chmod -R 755 \"$systemAppPath/lib\"")
-            .add("find \"$systemAppPath/lib\" -type f -name \"*.so\" -exec chmod 644 {} +")
-            .add("chown -R system:system \"$modulePath/system\"")
-            .add("chcon -R u:object_r:system_file:s0 \"$modulePath/system\"")
+            .add("chmod 644 \"$unifiedApkPath\"")
+            .add("chown system:system \"$unifiedApkPath\"")
+            .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
@@ -155,21 +162,25 @@ object MagiskUtils {
         patchedApk: File
     ) {
         val modulePath = "$MODULES_PATH/$packageName-revanced"
-        remoteFS.getFile(modulePath).apply {
-            if (!mkdirs() && !exists()) {
-                throw Exception("Failed to create module directory")
-            }
-        }
+        val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
+
+        // Ensure directories exist
+        val unifiedDir = unifiedApkPath.substringBeforeLast("/")
+        Shell.getShell().newJob()
+            .add("mkdir -p \"$modulePath\"")
+            .add("mkdir -p \"$unifiedDir\"")
+            .exec()
+            .assertSuccess("Failed to create induction directories")
 
         writeInductionFiles(remoteFS, modulePath, packageName, version, label)
 
-        val apkPath = "$modulePath/$packageName.apk"
-        copyApk(remoteFS, patchedApk, apkPath)
+        // Source of truth APK
+        copyApk(remoteFS, patchedApk, unifiedApkPath)
 
         Shell.getShell().newJob()
-            .add("chmod 644 \"$apkPath\"")
-            .add("chown system:system \"$apkPath\"")
-            .add("chcon u:object_r:apk_data_file:s0 \"$apkPath\"")
+            .add("chmod 644 \"$unifiedApkPath\"")
+            .add("chown system:system \"$unifiedApkPath\"")
+            .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
