@@ -24,11 +24,8 @@ object Constants {
     const val MAGISK_MODULE_ID = "revanced_$PLACEHOLDER"
     const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
 
-    const val COPY_APK_TO_MODULE =
-        "cp $TMP_FILE_PATH $PLACEHOLDER && " +
-                "chmod 644 $PLACEHOLDER && " +
-                "chown system:system $PLACEHOLDER && " +
-                "chcon $SELINUX_CONTEXT $PLACEHOLDER"
+    const val MOVE = "mv $TMP_FILE_PATH $PLACEHOLDER"
+    const val SET_FILE_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"
 
     val MAGISK_MODULE_PROP =
         """

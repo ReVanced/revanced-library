@@ -1,14 +1,15 @@
 package app.revanced.library.installation.installer
 
 import app.revanced.library.installation.command.ShellCommandRunner
-import app.revanced.library.installation.installer.Constants.COPY_APK_TO_MODULE
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MAGISK_MODULE_PATH
 import app.revanced.library.installation.installer.Constants.MAGISK_MODULE_PROP
+import app.revanced.library.installation.installer.Constants.MOVE
 import app.revanced.library.installation.installer.Constants.RESTART
+import app.revanced.library.installation.installer.Constants.SET_FILE_PERMISSIONS
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.invoke
 
@@ -58,11 +59,10 @@ abstract class MagiskInstaller internal constructor(
         apk.file.move(TMP_FILE_PATH)
         "$modulePath/module.prop".write(MAGISK_MODULE_PROP(sanitizedPackageName)(packageName))
 
-        // Copy the patched APK into the module.
+        // Move the patched APK into the module and set permissions.
         val targetApkPath = "$moduleApkDir/base.apk"
-        COPY_APK_TO_MODULE(targetApkPath)().waitFor()
-
-        DELETE(TMP_FILE_PATH)()
+        MOVE(targetApkPath)().waitFor()
+        SET_FILE_PERMISSIONS(targetApkPath)().waitFor()
 
         RESTART(packageName)()
 
