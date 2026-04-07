@@ -37,13 +37,12 @@ if [ -z "$stock_path" ]; then
 fi
 
 if echo "$stock_path" | grep -q "^/system/"; then
-  echo "App is already running from system partition (likely our Magisk overlay). Skipping bind mount."
-  exit 0
+  echo "App is already running from system partition (likely our Magisk overlay). Proceeding with mount."
 fi
 
 if mount | grep -q "$stock_path" ; then
-  echo "Not mounting as stock path is already mounted"
-  exit 1
+  echo "Stock path is already mounted. Performing remount."
+  umount -l "$stock_path"
 fi
 
 if [ "$version" != "$stock_version" ]; then

@@ -25,13 +25,13 @@ object MagiskUtils {
      * Matches the logic in [SERVICE_SH_TEMPLATE].
      */
     fun mount(packageName: String, sourceDir: String) {
-        // Induction check: verify if already mounted
+        // Induction check: verify if already mounted, if so unmount to ensure clean remount
         val checkMount = Shell.getShell().newJob().add("mount | grep -q \"$sourceDir\"").exec()
-        if (checkMount.isSuccess) return
+        if (checkMount.isSuccess) unmount(sourceDir)
 
         // Induction check: verify if app is already running from system (e.g. Magisk overlay active)
         val checkSystem = Shell.getShell().newJob().add("pm path \"$packageName\" | grep -q \"^package:/system/\"").exec()
-        if (checkSystem.isSuccess) return
+        // Proceed with mount even if already in system partition
 
         val sanitizedPackageName = packageName.replace('.', '_')
         val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
