@@ -1,6 +1,6 @@
 package app.revanced.library
 
-import android.content.res.AssetManager
+import app.revanced.library.installation.installer.Constants
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.nio.FileSystemManager
 import java.io.File
@@ -22,7 +22,7 @@ object MagiskUtils {
 
     /**
      * Bind-mounts the patched APK over the stock APK path.
-     * Matches the logic in [SERVICE_SH_TEMPLATE].
+     * Matches the logic in the induction service script.
      */
     fun mount(packageName: String, sourceDir: String) {
         // Induction check: verify if already mounted, if so unmount to ensure clean remount
@@ -30,7 +30,7 @@ object MagiskUtils {
         if (checkMount.isSuccess) unmount(sourceDir)
 
         // Induction check: verify if app is already running from system (e.g. Magisk overlay active)
-        val checkSystem = Shell.getShell().newJob().add("pm path \"$packageName\" | grep -q \"^package:/system/\"").exec()
+        Shell.getShell().newJob().add("pm path \"$packageName\" | grep -q \"^package:/system/\"").exec()
         // Proceed with mount even if already in system partition
 
         val sanitizedPackageName = packageName.replace('.', '_')
@@ -114,7 +114,6 @@ object MagiskUtils {
 
     fun provisionMagiskModule(
         remoteFS: FileSystemManager,
-        assets: AssetManager,
         packageName: String,
         version: String,
         label: String,
@@ -129,35 +128,10 @@ object MagiskUtils {
             .exec()
             .assertSuccess("Failed to create system app directory")
 
-        val moduleProp = buildString {
-            appendLine("id=revanced_$sanitizedPackageName")
-            appendLine("name=$label ReVanced")
-            appendLine("version=$version")
-            appendLine("versionCode=1")
-            appendLine("author=ReVanced")
-            append("description=Patched by ReVanced")
-        }
-        remoteFS.getFile("$modulePath/module.prop").newOutputStream().use { it.write(moduleProp.toByteArray()) }
-
-        assets.open("root/service.sh").use { inputStream ->
-            remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { outputStream ->
-                val content = String(inputStream.readBytes())
-                    .replace("__PKG_NAME__", packageName)
-                    .replace("__VERSION__", version)
-                    .replace("__LABEL__", label)
-                    .toByteArray()
-                outputStream.write(content)
-            }
-        }
+        writeInductionFiles(remoteFS, modulePath, packageName, version, label)
 
         val targetApkPath = "$systemAppPath/base.apk"
-        remoteFS.getFile(patchedApk.absolutePath)
-            .also { if (!it.exists()) throw Exception("File doesn't exist") }
-            .newInputStream().use { inputStream ->
-                remoteFS.getFile(targetApkPath).newOutputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-            }
+        copyApk(remoteFS, patchedApk, targetApkPath)
 
         extractNativeLibraries(patchedApk, systemAppPath, remoteFS)
 
@@ -175,7 +149,6 @@ object MagiskUtils {
 
     fun provisionRootFolder(
         remoteFS: FileSystemManager,
-        assets: AssetManager,
         packageName: String,
         version: String,
         label: String,
@@ -188,30 +161,10 @@ object MagiskUtils {
             }
         }
 
-        listOf(
-            "service.sh",
-            "module.prop",
-        ).forEach { file ->
-            assets.open("root/$file").use { inputStream ->
-                remoteFS.getFile("$modulePath/$file").newOutputStream().use { outputStream ->
-                    val content = String(inputStream.readBytes())
-                        .replace("__PKG_NAME__", packageName)
-                        .replace("__VERSION__", version)
-                        .replace("__LABEL__", label)
-                        .toByteArray()
-                    outputStream.write(content)
-                }
-            }
-        }
+        writeInductionFiles(remoteFS, modulePath, packageName, version, label)
 
         val apkPath = "$modulePath/$packageName.apk"
-        remoteFS.getFile(patchedApk.absolutePath)
-            .also { if (!it.exists()) throw Exception("File doesn't exist") }
-            .newInputStream().use { inputStream ->
-                remoteFS.getFile(apkPath).newOutputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-            }
+        copyApk(remoteFS, patchedApk, apkPath)
 
         Shell.getShell().newJob()
             .add("chmod 644 \"$apkPath\"")
@@ -220,6 +173,36 @@ object MagiskUtils {
             .add("chmod +x \"$modulePath/service.sh\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
+    }
+
+    private fun writeInductionFiles(
+        remoteFS: FileSystemManager,
+        modulePath: String,
+        packageName: String,
+        version: String,
+        label: String
+    ) {
+        val moduleProp = Constants.INDUCTION_MODULE_PROP
+            .replace("__PKG_NAME__", packageName)
+            .replace("__VERSION__", version)
+            .replace("__LABEL__", label)
+        remoteFS.getFile("$modulePath/module.prop").newOutputStream().use { it.write(moduleProp.toByteArray()) }
+
+        val serviceSh = Constants.INDUCTION_SERVICE_SCRIPT
+            .replace("__PKG_NAME__", packageName)
+            .replace("__VERSION__", version)
+            .replace("__LABEL__", label)
+        remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { it.write(serviceSh.toByteArray()) }
+    }
+
+    private fun copyApk(remoteFS: FileSystemManager, source: File, destination: String) {
+        remoteFS.getFile(source.absolutePath)
+            .also { if (!it.exists()) throw Exception("Source APK file doesn't exist: ${source.absolutePath}") }
+            .newInputStream().use { inputStream ->
+                remoteFS.getFile(destination).newOutputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
     }
 
     private fun Shell.Result.assertSuccess(errorMessage: String) {
