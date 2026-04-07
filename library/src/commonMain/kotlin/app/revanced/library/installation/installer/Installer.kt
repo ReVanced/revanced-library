@@ -49,5 +49,10 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
      * @param file The [Apk] file.
      * @param packageName The package name of the [Apk] file.
      */
-    class Apk(val file: File, val packageName: String? = null)
+    class Apk(
+        val file: File,
+        val packageName: String? = null,
+        val version: String? = null,
+        val label: String? = null
+    )
 }

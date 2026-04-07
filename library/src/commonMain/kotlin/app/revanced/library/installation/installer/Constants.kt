@@ -27,14 +27,18 @@ object Constants {
     const val MOVE = "mv $TMP_FILE_PATH $PLACEHOLDER"
     const val SET_FILE_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"
 
+    /**
+     * Magisk module property template.
+     * Placeholders: __PKG_NAME__, __VERSION__, __LABEL__
+     */
     val MAGISK_MODULE_PROP =
         """
-        id=revanced_$PLACEHOLDER
-        name=ReVanced $PLACEHOLDER
-        version=1.0
-        versionCode=1
+        id=__PKG_NAME__-ReVanced
+        name=__LABEL__ ReVanced
+        version=__VERSION__
+        versionCode=0
         author=ReVanced
-        description=Patched by ReVanced
+        description=Mounts the patched APK on top of the original one
         """.trimIndent()
 
     const val MOUNT_APK =
@@ -92,19 +96,6 @@ object Constants {
         $KILL
         """.trimIndent()
 
-    /**
-     * Induction module property template.
-     * Placeholders: __PKG_NAME__, __VERSION__, __LABEL__
-     */
-    val INDUCTION_MODULE_PROP =
-        """
-        id=__PKG_NAME__-ReVanced
-        name=__LABEL__ ReVanced
-        version=__VERSION__
-        versionCode=0
-        author=ReVanced
-        description=Mounts the patched APK on top of the original one
-        """.trimIndent()
 
     /**
      * Induction service script template.

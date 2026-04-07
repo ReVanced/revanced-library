@@ -193,7 +193,7 @@ object MagiskUtils {
         version: String,
         label: String
     ) {
-        val moduleProp = Constants.INDUCTION_MODULE_PROP
+        val moduleProp = Constants.MAGISK_MODULE_PROP
             .replace("__PKG_NAME__", packageName)
             .replace("__VERSION__", version)
             .replace("__LABEL__", label)

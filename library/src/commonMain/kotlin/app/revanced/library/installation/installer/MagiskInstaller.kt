@@ -57,7 +57,13 @@ abstract class MagiskInstaller internal constructor(
 
         // Write module.prop.
         apk.file.move(TMP_FILE_PATH)
-        "$modulePath/module.prop".write(MAGISK_MODULE_PROP(sanitizedPackageName)(packageName))
+        
+        val moduleProp = MAGISK_MODULE_PROP
+            .replace("__PKG_NAME__", packageName)
+            .replace("__VERSION__", apk.version ?: "1.0")
+            .replace("__LABEL__", apk.label ?: packageName)
+            
+        "$modulePath/module.prop".write(moduleProp)
 
         // Move the patched APK into the module and set permissions.
         val targetApkPath = "$moduleApkDir/base.apk"
