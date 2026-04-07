@@ -17,16 +17,27 @@ import java.io.Closeable
  * @see LocalShellCommandRunner
  */
 @Suppress("unused")
-class LocalMagiskInstaller(
+class LocalMagiskInstaller private constructor(
     context: Context,
-    onReady: LocalMagiskInstaller.() -> Unit = {},
+    onReady: LocalMagiskInstaller.() -> Unit,
+    private val readyHook: Array<(() -> Unit)?>,
 ) : MagiskInstaller(
-    { installer ->
-        LocalShellCommandRunner(context) {
-            (installer as LocalMagiskInstaller).onReady()
-        }
-    },
+    { LocalShellCommandRunner(context) { readyHook[0]?.invoke() } },
 ),
     Closeable {
+
+    constructor(
+        context: Context,
+        onReady: LocalMagiskInstaller.() -> Unit = {},
+    ) : this(context, onReady, arrayOfNulls(1))
+
+    init {
+        // The supplier passed to [MagiskInstaller] runs during super-init, before `this`
+        // exists as a subclass reference, so the ready callback cannot capture it directly.
+        // Instead we route through [readyHook], which is populated here — safe because
+        // [LocalShellCommandRunner.onServiceConnected] fires asynchronously after IPC bind.
+        readyHook[0] = { onReady() }
+    }
+
     override fun close() = (shellCommandRunner as LocalShellCommandRunner).close()
 }
