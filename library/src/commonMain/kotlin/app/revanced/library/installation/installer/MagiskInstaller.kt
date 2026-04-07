@@ -22,7 +22,7 @@ import app.revanced.library.installation.installer.Constants.invoke
  */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class MagiskInstaller internal constructor(
-    shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
+    shellCommandRunnerSupplier: () -> ShellCommandRunner,
 ) : RootInstaller(shellCommandRunnerSupplier) {
 
     /**
@@ -37,7 +37,7 @@ abstract class MagiskInstaller internal constructor(
 
         val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
 
-        val sanitizedPackageName = packageName.replace('.', '_')
+        val formattedPackageName = packageName.replace('.', '_')
 
         // Resolve the stock APK path.
         val stockApkPath = INSTALLED_APK_PATH(packageName)().output
@@ -51,7 +51,7 @@ abstract class MagiskInstaller internal constructor(
             .substringBeforeLast("/")
 
         // Create the Magisk module directory structure.
-        val modulePath = MAGISK_MODULE_PATH(sanitizedPackageName)
+        val modulePath = MAGISK_MODULE_PATH(formattedPackageName)
         val moduleApkDir = "$modulePath/$stockApkParent"
         "mkdir -p $moduleApkDir"().waitFor()
 
@@ -78,9 +78,9 @@ abstract class MagiskInstaller internal constructor(
     override suspend fun uninstall(packageName: String): RootInstallerResult {
         logger.info("Uninstalling $packageName Magisk module")
 
-        val sanitizedPackageName = packageName.replace('.', '_')
+        val formattedPackageName = packageName.replace('.', '_')
 
-        DELETE(MAGISK_MODULE_PATH(sanitizedPackageName))()
+        DELETE(MAGISK_MODULE_PATH(formattedPackageName))()
         DELETE(TMP_FILE_PATH)()
 
         KILL(packageName)()
@@ -89,8 +89,8 @@ abstract class MagiskInstaller internal constructor(
     }
 
     override suspend fun getInstallation(packageName: String): RootInstallation? {
-        val sanitizedPackageName = packageName.replace('.', '_')
-        val modulePath = MAGISK_MODULE_PATH(sanitizedPackageName)
+        val formattedPackageName = packageName.replace('.', '_')
+        val modulePath = MAGISK_MODULE_PATH(formattedPackageName)
 
         val moduleExists = EXISTS("$modulePath/module.prop")().exitCode == 0
         if (!moduleExists) return null

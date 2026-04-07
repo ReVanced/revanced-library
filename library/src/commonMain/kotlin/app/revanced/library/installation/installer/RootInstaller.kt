@@ -29,14 +29,13 @@ import java.io.File
  */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class RootInstaller internal constructor(
-    shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
+    shellCommandRunnerSupplier: () -> ShellCommandRunner,
 ) : Installer<RootInstallerResult, RootInstallation>() {
 
     /**
      * The command runner used to run commands on the device.
      */
-    @Suppress("LeakingThis")
-    protected val shellCommandRunner = shellCommandRunnerSupplier(this)
+    protected val shellCommandRunner = shellCommandRunnerSupplier()
 
     init {
         if (!shellCommandRunner.hasRootPermission()) throw NoRootPermissionException()

@@ -34,14 +34,14 @@ object MagiskUtils {
         Shell.getShell().newJob().add("pm path \"$packageName\" | grep -q \"^package:/system/\"").exec()
         // Proceed with mount even if already in system partition
 
-        val sanitizedPackageName = packageName.replace('.', '_')
-        val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
+        val formattedPackageName = packageName.replace('.', '_')
+        val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
         val fallbackModulePath = "$MODULES_PATH/$packageName-revanced"
 
         // Automatic detection of APK path (Unified Path vs Magisk Induction vs Legacy Root)
         val patchedApkCandidates = listOf(
             Constants.MOUNTED_APK_PATH(packageName),
-            "$modulePath/system/app/$sanitizedPackageName/base.apk",
+            "$modulePath/system/app/$formattedPackageName/base.apk",
             "$fallbackModulePath/$packageName.apk"
         )
 
@@ -78,8 +78,8 @@ object MagiskUtils {
         val unifiedPath = Constants.MOUNTED_APK_PATH(packageName).substringBeforeLast("/")
         remoteFS.getFile(unifiedPath).deleteRecursively()
 
-        val sanitizedPackageName = packageName.replace('.', '_')
-        remoteFS.getFile("$MODULES_PATH/revanced_$sanitizedPackageName").deleteRecursively()
+        val formattedPackageName = packageName.replace('.', '_')
+        remoteFS.getFile("$MODULES_PATH/revanced_$formattedPackageName").deleteRecursively()
             .also { if (!it) throw Exception("Failed to delete Magisk module files") }
     }
 
@@ -127,8 +127,8 @@ object MagiskUtils {
         label: String,
         patchedApk: File
     ) {
-        val sanitizedPackageName = packageName.replace('.', '_')
-        val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
+        val formattedPackageName = packageName.replace('.', '_')
+        val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
         val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
 
         // Ensure directories exist
