@@ -29,6 +29,10 @@ object MagiskUtils {
         val checkMount = Shell.getShell().newJob().add("mount | grep -q \"$sourceDir\"").exec()
         if (checkMount.isSuccess) return
 
+        // Induction check: verify if app is already running from system (e.g. Magisk overlay active)
+        val checkSystem = Shell.getShell().newJob().add("pm path \"$packageName\" | grep -q \"^package:/system/\"").exec()
+        if (checkSystem.isSuccess) return
+
         val sanitizedPackageName = packageName.replace('.', '_')
         val modulePath = "$MODULES_PATH/revanced_$sanitizedPackageName"
         val fallbackModulePath = "$MODULES_PATH/$packageName-revanced"
