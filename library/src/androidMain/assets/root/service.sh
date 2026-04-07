@@ -8,8 +8,11 @@ sanitized_package_name=$(echo "$package_name" | sed 's/\./_/g')
 rm -f "$DIR/log"
 
 {
-echo "Induction check for $package_name"
+# Induction check for $package_name
 
+# This loop waits for the system to finish booting before attempting the bind-mount.
+# This is required for boot-time execution (service.sh) but is not needed for
+# manual/direct mounts performed while the system is already running.
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
 # Wait a bit more for package manager to settle
 sleep 10
