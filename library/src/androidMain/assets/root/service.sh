@@ -26,10 +26,10 @@ fi
 stock_path="$(pm path "$package_name" | grep base | sed 's/package://g' | head -n 1)"
 stock_version="$(dumpsys package "$package_name" | grep versionName | cut -d "=" -f2 | head -n 1 | sed 's/ //g')"
 
-echo "base_path: $base_path"
-echo "stock_path: $stock_path"
-echo "base_version: $version"
-echo "stock_version: $stock_version"
+echo "Base path: $base_path"
+echo "Stock path: $stock_path"
+echo "Base version: $version"
+echo "Stock version: $stock_version"
 
 if [ -z "$stock_path" ]; then
   echo "App $package_name is not installed. System app induction might have failed or still being processed."
@@ -51,7 +51,7 @@ if [ "$version" != "$stock_version" ]; then
   # Optional: exit 1 if you want to be strict
 fi
 
-echo "Mounting $base_path over $stock_path"
+echo "Mounting patched APK over stock path ($base_path => $stock_path)"
 mount -o bind "$base_path" "$stock_path"
 
 } >> "$DIR/log"
