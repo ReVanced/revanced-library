@@ -46,7 +46,7 @@ if mount | grep -q "$stock_path" ; then
 fi
 
 if [ "$version" != "$stock_version" ]; then
-  echo "Version mismatch: base=$version, stock=$stock_version. Attempting to mount anyway as it might be a minor diff."
+  echo "The version of the installed app ($stock_version) does not match the patched app ($version). Mounting anyways, as it might still work."
   # Optional: exit 1 if you want to be strict
 fi
 
