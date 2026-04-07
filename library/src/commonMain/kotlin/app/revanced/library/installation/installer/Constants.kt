@@ -41,6 +41,20 @@ object Constants {
         description=Mounts the patched APK on top of the original one
         """.trimIndent()
 
+    /**
+     * Magisk module uninstall script template. Magisk runs this when the module is
+     * removed via the Magisk app. It cleans up the unified source-of-truth APK that
+     * lives outside the module directory (which Magisk itself does not know about).
+     *
+     * Placeholders: __PKG_NAME__
+     */
+    val MAGISK_UNINSTALL_SCRIPT =
+        """
+        #!/system/bin/sh
+        package_name="__PKG_NAME__"
+        rm -rf "/data/adb/revanced/${"$"}{package_name}"
+        """.trimIndent()
+
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
                 "mkdir -p \"${"$"}(dirname \"${"$"}{base_path}\")\" && " +
