@@ -20,6 +20,26 @@ internal object Constants {
     const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH"
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
 
+    const val MAGISK_MODULES_PATH = "/data/adb/modules/"
+    const val MAGISK_MODULE_ID = "revanced_$PLACEHOLDER"
+    const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
+
+    const val COPY_APK_TO_MODULE =
+        "cp $TMP_FILE_PATH $PLACEHOLDER && " +
+                "chmod 644 $PLACEHOLDER && " +
+                "chown system:system $PLACEHOLDER && " +
+                "chcon $SELINUX_CONTEXT $PLACEHOLDER"
+
+    val MAGISK_MODULE_PROP =
+        $$"""
+        id=$$MAGISK_MODULE_ID
+        name=ReVanced $$PLACEHOLDER
+        version=1.0
+        versionCode=1
+        author=ReVanced
+        description=Patched by ReVanced
+        """.trimIndent()
+
     const val MOUNT_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
                 $$"mv $$TMP_FILE_PATH $base_path && " +
