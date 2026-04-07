@@ -1,3 +1,10 @@
+## [4.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v4.0.1...v4.0.2-dev.1) (2026-04-04)
+
+
+### Bug Fixes
+
+* Ensure stdout/stderr is captured to avoid empty command output ([#117](https://github.com/ReVanced/revanced-library/issues/117)) ([429a5f0](https://github.com/ReVanced/revanced-library/commit/429a5f0adb50d88ddcc450e5e22e25063ddad067))
+
 ## [4.0.1](https://github.com/ReVanced/revanced-library/compare/v4.0.0...v4.0.1) (2026-02-25)
 
 
