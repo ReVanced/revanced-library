@@ -1,3 +1,17 @@
+## [4.0.2-dev.2](https://github.com/ReVanced/revanced-library/compare/v4.0.2-dev.1...v4.0.2-dev.2) (2026-04-09)
+
+
+### Performance Improvements
+
+* Build patched DEX files and resources before opening APK for writing to reduce memory usage on one spot ([369eb03](https://github.com/ReVanced/revanced-library/commit/369eb0392f539187dce0b0c246d5ca72e0d80c99))
+
+## [4.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v4.0.1...v4.0.2-dev.1) (2026-04-04)
+
+
+### Bug Fixes
+
+* Ensure stdout/stderr is captured to avoid empty command output ([#117](https://github.com/ReVanced/revanced-library/issues/117)) ([429a5f0](https://github.com/ReVanced/revanced-library/commit/429a5f0adb50d88ddcc450e5e22e25063ddad067))
+
 ## [4.0.1](https://github.com/ReVanced/revanced-library/compare/v4.0.0...v4.0.1) (2026-02-25)
 
 
