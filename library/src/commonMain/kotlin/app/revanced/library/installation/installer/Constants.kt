@@ -162,15 +162,26 @@ object Constants {
         package_name="__PATCHED_PKG__"
         version="__VERSION__"
 
-        rm -f "${"$"}{DIR}/log"
-
         # Write a boot token so the guard script can detect whether service.sh ran this boot.
         cp /proc/sys/kernel/random/boot_id "${"$"}{DIR}/.boot_token"
 
+        LOG="${"$"}{DIR}/log"
+        MAX_LOG_LINES=200
+
+        # Trim log to last MAX_LOG_LINES lines to prevent unbounded growth.
+        if [ -f "${"$"}{LOG}" ]; then
+            tail -n "${"$"}{MAX_LOG_LINES}" "${"$"}{LOG}" > "${"$"}{LOG}.tmp" && mv "${"$"}{LOG}.tmp" "${"$"}{LOG}"
+        fi
+
         {
 
+        echo "--- ${"$"}(date '+%Y-%m-%d %H:%M:%S') | pkg=${"$"}{package_name} | ver=${"$"}{version} ---"
+
         until [ "${"$"}(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
-        sleep 10
+
+        # Wait for the package manager service to be registered and ready for transactions.
+        until service check package 2>/dev/null | grep -q "found"; do sleep 3; done
+        sleep 5
 
         base_path="/data/adb/revanced/__PKG_NAME__/base.apk"
 
@@ -191,12 +202,19 @@ object Constants {
         if pm list packages --user 0 | grep -q "^package:${"$"}{package_name}$"; then
             echo "Package already installed, skipping."
         else
-            echo "Installing ${"$"}{base_path}"
-            pm install -r -d --user 0 "${"$"}{base_path}"
-            echo "Install exit code: $?"
+            attempt=0
+            while [ ${"$"}{attempt} -lt 3 ]; do
+                attempt=${"$"}((attempt + 1))
+                echo "Install attempt ${"$"}{attempt}/3"
+                pm install -r -d --user 0 "${"$"}{base_path}"
+                install_exit=$?
+                echo "Install exit code: ${"$"}{install_exit}"
+                [ ${"$"}{install_exit} -eq 0 ] && break
+                [ ${"$"}{attempt} -lt 3 ] && { echo "Retrying in 10s..."; sleep 10; }
+            done
         fi
 
-        } >> "${"$"}{DIR}/log"
+        } >> "${"$"}{LOG}"
         """.trimIndent()
 
     /**
