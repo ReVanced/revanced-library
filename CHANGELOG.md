@@ -1,3 +1,10 @@
+## [4.0.2-dev.2](https://github.com/ReVanced/revanced-library/compare/v4.0.2-dev.1...v4.0.2-dev.2) (2026-04-09)
+
+
+### Performance Improvements
+
+* Build patched DEX files and resources before opening APK for writing to reduce memory usage on one spot ([369eb03](https://github.com/ReVanced/revanced-library/commit/369eb0392f539187dce0b0c246d5ca72e0d80c99))
+
 ## [4.0.2-dev.1](https://github.com/ReVanced/revanced-library/compare/v4.0.1...v4.0.2-dev.1) (2026-04-04)
 
 
