@@ -59,10 +59,12 @@ abstract class RootInstaller internal constructor(
         CREATE_INSTALLATION_PATH().waitFor()
         MOUNT_APK(packageName)().waitFor()
 
-        // Install and run.
+        // Install mount script.
         TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
         INSTALL_MOUNT_SCRIPT(packageName)().waitFor()
-        MOUNT_SCRIPT_PATH(packageName)().waitFor()
+
+        // Mount and restart.
+        mount(packageName)
         RESTART(packageName)()
 
         DELETE(TMP_FILE_PATH)()
@@ -73,7 +75,7 @@ abstract class RootInstaller internal constructor(
     override suspend fun uninstall(packageName: String): RootInstallerResult {
         logger.info("Uninstalling $packageName by unmounting")
 
-        UMOUNT(packageName)()
+        unmount(packageName)
 
         DELETE(MOUNTED_APK_PATH)(packageName)()
         DELETE(MOUNT_SCRIPT_PATH)(packageName)()
@@ -93,8 +95,29 @@ abstract class RootInstaller internal constructor(
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
             patchedApkPath,
-            MOUNT_GREP(patchedApkPath)().exitCode == 0,
+            isMounted(packageName),
         )
+    }
+
+    suspend fun mount(packageName: String): RootInstallerResult {
+        logger.info("Mounting $packageName")
+
+        MOUNT_SCRIPT_PATH(packageName)().waitFor()
+
+        return RootInstallerResult.SUCCESS
+    }
+
+    suspend fun unmount(packageName: String): RootInstallerResult {
+        logger.info("Unmounting $packageName")
+
+        UMOUNT(packageName)()
+
+        return RootInstallerResult.SUCCESS
+    }
+
+    suspend fun isMounted(packageName: String): Boolean {
+        val patchedApkPath = MOUNTED_APK_PATH(packageName)
+        return MOUNT_GREP(patchedApkPath)().exitCode == 0
     }
 
     /**
