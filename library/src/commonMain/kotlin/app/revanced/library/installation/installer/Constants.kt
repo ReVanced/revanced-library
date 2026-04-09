@@ -29,11 +29,14 @@ object Constants {
 
     /**
      * Magisk module property template.
-     * Placeholders: __PKG_NAME__, __VERSION__, __LABEL__
+     * The id MUST match the module directory name (revanced___FORMATTED_PKG__) so that
+     * Magisk/APatch/KernelSU can find the module by id for enable/disable operations.
+     *
+     * Placeholders: __FORMATTED_PKG__ (original with dots→underscores), __VERSION__, __LABEL__
      */
     val MAGISK_MODULE_PROP =
         """
-        id=__PKG_NAME__-ReVanced
+        id=revanced___FORMATTED_PKG__
         name=__LABEL__ ReVanced
         version=__VERSION__
         versionCode=0
@@ -43,16 +46,50 @@ object Constants {
 
     /**
      * Magisk module uninstall script template. Magisk runs this when the module is
-     * removed via the Magisk app. It cleans up the unified source-of-truth APK that
-     * lives outside the module directory (which Magisk itself does not know about).
+     * removed via the Magisk app. It cleans up the unified source-of-truth APK and
+     * the boot-time guard script.
      *
-     * Placeholders: __PKG_NAME__
+     * Placeholders: __PKG_NAME__ (original), __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
      */
     val MAGISK_UNINSTALL_SCRIPT =
         """
         #!/system/bin/sh
-        package_name="__PKG_NAME__"
-        rm -rf "/data/adb/revanced/${"$"}{package_name}"
+        pm uninstall --user 0 "__PATCHED_PKG__"
+        rm -rf "/data/adb/revanced/__PKG_NAME__"
+        rm -f "/data/adb/service.d/revanced_guard___FORMATTED_PKG__.sh"
+        """.trimIndent()
+
+    const val GUARD_SCRIPT_PATH = "/data/adb/service.d/revanced_guard_$PLACEHOLDER.sh"
+
+    /**
+     * Boot-time guard script. Runs on every boot (via service.d, independent of module state).
+     * Uninstalls the patched app when the module is disabled or removed, so the app
+     * disappears when the module is toggled off.
+     *
+     * Placeholders: __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
+     */
+    val GUARD_SCRIPT =
+        """
+        #!/system/bin/sh
+        patched_pkg="__PATCHED_PKG__"
+        module_path="/data/adb/modules/revanced___FORMATTED_PKG__"
+
+        until [ "${"$"}(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
+        sleep 11
+
+        # Module was fully removed — uninstall app and self-destruct this script.
+        if [ ! -d "${"$"}{module_path}" ]; then
+            pm uninstall --user 0 "${"$"}{patched_pkg}" 2>/dev/null
+            rm -f "$0"
+            exit 0
+        fi
+
+        # If service.sh did not run this boot, the module is disabled — uninstall the app.
+        current_boot_id=${"$"}(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
+        stored_boot_id=${"$"}(cat "${"$"}{module_path}/.boot_token" 2>/dev/null)
+        if [ "${"$"}{stored_boot_id}" != "${"$"}{current_boot_id}" ]; then
+            pm uninstall --user 0 "${"$"}{patched_pkg}" 2>/dev/null
+        fi
         """.trimIndent()
 
     const val MOUNT_APK =
@@ -112,111 +149,52 @@ object Constants {
 
 
     /**
-     * Induction service script template.
-     * Placeholders: __PKG_NAME__, __VERSION__, __LABEL__
+     * Magisk module service script template. Runs on every boot when the module is enabled.
+     * Installs the patched APK if not already installed.
+     *
+     * Placeholders: __PKG_NAME__ (original, used for APK path), __PATCHED_PKG__ (patched, used for pm commands), __VERSION__
      */
     val INDUCTION_SERVICE_SCRIPT =
         """
         #!/system/bin/sh
         DIR=${"$"}{0%/*}
 
-        package_name="__PKG_NAME__"
+        package_name="__PATCHED_PKG__"
         version="__VERSION__"
-        label="__LABEL__"
-        sanitized_package_name=${"$"}(echo "${"$"}{package_name}" | sed 's/\./_/g')
-
-        ReadVolumeKeys() {
-            local result=${"$"}(getevent -ql | while read dev type code value; do
-                case "${"$"}{code}" in
-                    KEY_VOLUMEUP) [ "${"$"}{value}" = "DOWN" ] && echo 1 && break ;;
-                    KEY_VOLUMEDOWN) [ "${"$"}{value}" = "DOWN" ] && echo 2 && break ;;
-                esac
-            done)
-            return "${"$"}{result:-0}"
-        }
-
-        vibrate() {
-            su -lp 2000 -c "cmd vibrator vibrate ${"$"}{1:-500}" > /dev/null 2>&1
-        }
-
-        notify() {
-            su -lp 2000 -c "cmd notification post -S bigtext -t '${"$"}{1}' 'ReVancedInduction' '${"$"}{2}'" > /dev/null 2>&1
-        }
 
         rm -f "${"$"}{DIR}/log"
 
-        {
-        # Induction check for ${"$"}{package_name}
+        # Write a boot token so the guard script can detect whether service.sh ran this boot.
+        cp /proc/sys/kernel/random/boot_id "${"$"}{DIR}/.boot_token"
 
-        # This loop waits for the system to finish booting before attempting the bind-mount.
-        # This is required for boot-time execution (service.sh) but is not needed for
-        # manual/direct mounts performed while the system is already running.
+        {
+
         until [ "${"$"}(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
-        # Wait a bit more for package manager to settle
         sleep 10
 
-        # Unified path for the patched APK (Source of truth)
-        base_path="/data/adb/revanced/${"$"}{package_name}/base.apk"
-        
-        # Fallback to local path if unified path doesn't exist (Legacy compatibility)
-        if [ ! -f "${"$"}{base_path}" ]; then
-            base_path="${"$"}{DIR}/system/app/${"$"}{sanitized_package_name}/base.apk"
-        fi
-        if [ ! -f "${"$"}{base_path}" ]; then
-            base_path="${"$"}{DIR}/${"$"}{package_name}.apk"
-        fi
+        base_path="/data/adb/revanced/__PKG_NAME__/base.apk"
 
-        stock_path="${"$"}(pm path "${"$"}{package_name}" | grep base | sed 's/package://g' | head -n 1)"
-        stock_version="${"$"}(dumpsys package "${"$"}{package_name}" | grep versionName | cut -d "=" -f2 | head -n 1 | sed 's/ //g')"
+        # Fallback for legacy compatibility.
+        if [ ! -f "${"$"}{base_path}" ]; then
+            base_path="${"$"}{DIR}/__PKG_NAME__.apk"
+        fi
 
         echo "Base path: ${"$"}{base_path}"
-        echo "Stock path: ${"$"}{stock_path}"
         echo "Base version: ${"$"}{version}"
-        echo "Stock version: ${"$"}{stock_version}"
 
-        if [ -z "${"$"}{stock_path}" ]; then
-          echo "App ${"$"}{package_name} is not installed. System app induction might have failed or still being processed."
-          exit 1
+        if [ ! -f "${"$"}{base_path}" ]; then
+            echo "Patched APK not found."
+            exit 1
         fi
 
-        if echo "${"$"}{stock_path}" | grep -q "^/system/"; then
-          echo "App is already running from system partition (likely our Magisk overlay). Proceeding with mount."
-        fi
-
-        if mount | grep -q "${"$"}{stock_path}" ; then
-          echo "Stock path is already mounted. Performing remount."
-          umount -l "${"$"}{stock_path}"
-        fi
-
-        if [ "${"$"}{version}" != "${"$"}{stock_version}" ]; then
-          echo "The version of the installed app (${"$"}{stock_version}) does not match the patched app (${"$"}{version})."
-          
-          vibrate 300
-          notify "Version Mismatch for ${"$"}{label}" "Press Volume Up to mount anyway, or Volume Down to skip."
-          
-          ReadVolumeKeys
-          case ${"$"}{?} in
-            2)
-              echo "User pressed Volume Down. Skipping bind mount."
-              exit 0
-              ;;
-            *)
-              echo "User pressed Volume Up. Proceeding with mount."
-              ;;
-          esac
-        fi
-
-        echo "Setting permissions for ${"$"}{base_path}"
-        chmod 644 "${"$"}{base_path}"
-        chown system:system "${"$"}{base_path}"
-        if echo "${"$"}{base_path}" | grep -q "/system/"; then
-          chcon u:object_r:system_file:s0 "${"$"}{base_path}"
+        # Skip install if the app is already present (pm install persists across reboots).
+        if pm list packages --user 0 | grep -q "^package:${"$"}{package_name}$"; then
+            echo "Package already installed, skipping."
         else
-          chcon u:object_r:apk_data_file:s0 "${"$"}{base_path}"
+            echo "Installing ${"$"}{base_path}"
+            pm install -r -d --user 0 "${"$"}{base_path}"
+            echo "Install exit code: $?"
         fi
-
-        echo "Mounting patched APK over stock path (${"$"}{base_path} => ${"$"}{stock_path})"
-        mount -o bind "${"$"}{base_path}" "${"$"}{stock_path}"
 
         } >> "${"$"}{DIR}/log"
         """.trimIndent()

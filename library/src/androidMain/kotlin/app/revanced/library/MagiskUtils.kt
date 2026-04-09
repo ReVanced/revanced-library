@@ -10,10 +10,33 @@ import java.util.zip.ZipFile
 object MagiskUtils {
     const val MODULES_PATH = "/data/adb/modules"
 
+    /*
+    Shell.isAppGrantedRoot() queries libsu's internal state.
+    It returns false until a root shell has actually been built and verified by libsu.
+    */
     fun hasRootAccess() = Shell.isAppGrantedRoot() ?: false
 
+    /*
+    Checks whether su exists in PATH. Pure filesystem check, no shell needed.
+    Returns true as soon as APatch makes su available, regardless of whether your app was granted root.
+    */
     fun isDeviceRooted() =
         System.getenv("PATH")?.split(":")?.any { path -> File(path, "su").canExecute() } ?: false
+
+    /*
+    Shell.getShell().isRoot forces a shell to be built (or returns the cached one) and checks if it came up as root.
+    This is the only reliable "root is usable right now" check.
+     */
+    fun isMagiskInstalled() = Shell.getShell().isRoot
+
+    /*
+    Returns true if root was granted, false if denied.
+    Must be called on a background thread.
+     */
+    fun requestRoot(): Boolean {
+        Shell.getCachedShell()?.takeIf { !it.isRoot }?.close()
+        return Shell.getShell().isRoot
+    }
 
     fun isInstalled(packageName: String, remoteFS: FileSystemManager) =
         remoteFS.getFile("$MODULES_PATH/$packageName-revanced").exists()
@@ -21,38 +44,34 @@ object MagiskUtils {
     fun isInstalledAsMagiskModule(packageName: String, remoteFS: FileSystemManager) =
         remoteFS.getFile("$MODULES_PATH/revanced_${packageName.replace('.', '_')}").exists()
 
-    /**
-     * Bind-mounts the patched APK over the stock APK path.
-     * Matches the logic in the induction service script.
-     */
+    /*
+    Bind-mounts the patched APK over the stock APK path using the Magisk mirror when
+    available, ensuring the mount is visible across all process namespaces (required on
+    Zygisk/MIUI).
+    */
     fun mount(packageName: String, sourceDir: String) {
-        // Induction check: verify if already mounted, if so unmount to ensure clean remount
-        val checkMount = Shell.getShell().newJob().add("mount | grep -q \"$sourceDir\"").exec()
-        if (checkMount.isSuccess) unmount(sourceDir)
+        if (Shell.getShell().newJob().add("mount | grep -q \"$sourceDir\"").exec().isSuccess) {
+            unmount(sourceDir)
+        }
 
-        // Induction check: verify if app is already running from system (e.g. Magisk overlay active)
-        Shell.getShell().newJob().add("pm path \"$packageName\" | grep -q \"^package:/system/\"").exec()
-        // Proceed with mount even if already in system partition
+        val patchedApkPath = Constants.MOUNTED_APK_PATH(packageName)
+        val fallbackPath = "$MODULES_PATH/$packageName-revanced/$packageName.apk"
 
-        val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
-        val fallbackModulePath = "$MODULES_PATH/$packageName-revanced"
+        val patchedApk = when {
+            Shell.getShell().newJob().add("[ -f \"$patchedApkPath\" ]").exec().isSuccess -> patchedApkPath
+            Shell.getShell().newJob().add("[ -f \"$fallbackPath\" ]").exec().isSuccess -> fallbackPath
+            else -> throw ShellCommandException("Patched APK not found for $packageName", -1, emptyList(), emptyList())
+        }
 
-        // Automatic detection of APK path (Unified Path vs Magisk Induction vs Legacy Root)
-        val patchedApkCandidates = listOf(
-            Constants.MOUNTED_APK_PATH(packageName),
-            "$modulePath/system/app/$formattedPackageName/base.apk",
-            "$fallbackModulePath/$packageName.apk"
-        )
-
-        val patchedApk = patchedApkCandidates.firstOrNull { path ->
-            Shell.getShell().newJob().add("[ -f \"$path\" ]").exec().isSuccess
-        } ?: throw Exception("Patch APK not found for $packageName")
-
-        Shell.getShell().newJob()
-            .add("mount -o bind \"$patchedApk\" \"$sourceDir\"")
-            .exec()
-            .assertSuccess("Failed to mount APK")
+        Shell.getShell().newJob().add("""
+            MIRROR=""
+            if command -v magisk >/dev/null 2>&1; then
+                if ! MAGISKTMP=${"$"}(magisk --path 2>/dev/null); then MAGISKTMP=/sbin; fi
+                MIRROR=${"$"}{MAGISKTMP}/.magisk/mirror
+                [ -d "${"$"}{MIRROR}" ] || MIRROR=""
+            fi
+            mount -o bind "${"$"}{MIRROR}$patchedApk" "$sourceDir"
+        """.trimIndent()).exec().assertSuccess("Failed to mount APK")
     }
 
     fun unmount(sourceDir: String) {
@@ -74,11 +93,18 @@ object MagiskUtils {
             .also { if (!it) throw Exception("Failed to delete files") }
     }
 
-    fun uninstallMagiskModule(packageName: String, remoteFS: FileSystemManager) {
+    fun uninstallMagiskModule(packageName: String, patchedPackageName: String, remoteFS: FileSystemManager) {
         val unifiedPath = Constants.MOUNTED_APK_PATH(packageName).substringBeforeLast("/")
         remoteFS.getFile(unifiedPath).deleteRecursively()
 
         val formattedPackageName = packageName.replace('.', '_')
+        val guardScriptPath = Constants.GUARD_SCRIPT_PATH(formattedPackageName)
+
+        Shell.getShell().newJob()
+            .add("pm uninstall --user 0 \"$patchedPackageName\"")
+            .add("rm -f \"$guardScriptPath\"")
+            .exec()
+
         remoteFS.getFile("$MODULES_PATH/revanced_$formattedPackageName").deleteRecursively()
             .also { if (!it) throw Exception("Failed to delete Magisk module files") }
     }
@@ -120,9 +146,21 @@ object MagiskUtils {
         }
     }
 
+    fun installApk(apkPath: String) =
+        Shell.getShell().newJob()
+            .add("pm install -r -d --user 0 \"$apkPath\"")
+            .exec()
+            .assertSuccess("Failed to install APK: $apkPath")
+
+    fun uninstallKeepData(packageName: String) =
+        Shell.getShell().newJob()
+            .add("pm uninstall -k --user 0 $packageName")
+            .exec()
+
     fun provisionMagiskModule(
         remoteFS: FileSystemManager,
         packageName: String,
+        patchedPackageName: String,
         version: String,
         label: String,
         patchedApk: File
@@ -130,6 +168,7 @@ object MagiskUtils {
         val formattedPackageName = packageName.replace('.', '_')
         val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
         val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
+        val guardScriptPath = Constants.GUARD_SCRIPT_PATH(formattedPackageName)
 
         // Ensure directories exist
         val unifiedDir = unifiedApkPath.substringBeforeLast("/")
@@ -139,7 +178,13 @@ object MagiskUtils {
             .exec()
             .assertSuccess("Failed to create induction directories")
 
-        writeInductionFiles(remoteFS, modulePath, packageName, version, label)
+        writeInductionFiles(remoteFS, modulePath, packageName, patchedPackageName, version, label)
+
+        // Guard script: uninstalls the patched app when the module is disabled or removed.
+        val guardSh = Constants.GUARD_SCRIPT
+            .replace("__PATCHED_PKG__", patchedPackageName)
+            .replace("__FORMATTED_PKG__", formattedPackageName)
+        remoteFS.getFile(guardScriptPath).newOutputStream().use { it.write(guardSh.toByteArray()) }
 
         // Source of truth APK
         copyApk(remoteFS, patchedApk, unifiedApkPath)
@@ -151,6 +196,7 @@ object MagiskUtils {
             .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
             .add("chmod +x \"$modulePath/uninstall.sh\"")
+            .add("chmod +x \"$guardScriptPath\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
     }
@@ -173,7 +219,8 @@ object MagiskUtils {
             .exec()
             .assertSuccess("Failed to create induction directories")
 
-        writeInductionFiles(remoteFS, modulePath, packageName, version, label)
+        // MOUNT type: patched package name == original package name (bind-mount, no rename)
+        writeInductionFiles(remoteFS, modulePath, packageName, packageName, version, label)
 
         // Source of truth APK
         copyApk(remoteFS, patchedApk, unifiedApkPath)
@@ -192,23 +239,28 @@ object MagiskUtils {
         remoteFS: FileSystemManager,
         modulePath: String,
         packageName: String,
+        patchedPackageName: String,
         version: String,
         label: String
     ) {
+        val formattedPackageName = packageName.replace('.', '_')
+
         val moduleProp = Constants.MAGISK_MODULE_PROP
-            .replace("__PKG_NAME__", packageName)
+            .replace("__FORMATTED_PKG__", formattedPackageName)
             .replace("__VERSION__", version)
             .replace("__LABEL__", label)
         remoteFS.getFile("$modulePath/module.prop").newOutputStream().use { it.write(moduleProp.toByteArray()) }
 
         val serviceSh = Constants.INDUCTION_SERVICE_SCRIPT
             .replace("__PKG_NAME__", packageName)
+            .replace("__PATCHED_PKG__", patchedPackageName)
             .replace("__VERSION__", version)
-            .replace("__LABEL__", label)
         remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { it.write(serviceSh.toByteArray()) }
-        
+
         val uninstallSh = Constants.MAGISK_UNINSTALL_SCRIPT
             .replace("__PKG_NAME__", packageName)
+            .replace("__PATCHED_PKG__", patchedPackageName)
+            .replace("__FORMATTED_PKG__", formattedPackageName)
         remoteFS.getFile("$modulePath/uninstall.sh").newOutputStream().use { it.write(uninstallSh.toByteArray()) }
     }
 

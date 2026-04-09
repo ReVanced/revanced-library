@@ -11,6 +11,7 @@ import app.revanced.library.installation.installer.Constants.MAGISK_MODULE_PROP
 import app.revanced.library.installation.installer.Constants.MAGISK_UNINSTALL_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
 import app.revanced.library.installation.installer.Constants.MOUNT_APK
+import app.revanced.library.installation.installer.Constants.MOUNT_GREP
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
@@ -68,7 +69,6 @@ abstract class MagiskInstaller internal constructor(
         val serviceScript = INDUCTION_SERVICE_SCRIPT
             .replace("__PKG_NAME__", packageName)
             .replace("__VERSION__", apk.version ?: "1.0")
-            .replace("__LABEL__", apk.label ?: packageName)
         val serviceScriptPath = "$modulePath/service.sh"
         serviceScriptPath.write(serviceScript)
         "chmod +x $serviceScriptPath"().waitFor()
@@ -125,10 +125,11 @@ abstract class MagiskInstaller internal constructor(
         val moduleExists = EXISTS("$modulePath/module.prop")().exitCode == 0
         if (!moduleExists) return null
 
+        val patchedApkPath = MOUNTED_APK_PATH(packageName)
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
-            modulePath,
-            moduleExists,
+            patchedApkPath,
+            MOUNT_GREP(patchedApkPath)().exitCode == 0,
         )
     }
 

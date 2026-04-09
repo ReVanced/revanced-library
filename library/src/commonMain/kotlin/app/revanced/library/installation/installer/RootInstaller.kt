@@ -55,7 +55,7 @@ abstract class RootInstaller internal constructor(
 
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
-        CREATE_INSTALLATION_PATH().waitFor()
+        CREATE_INSTALLATION_PATH(packageName)().waitFor()
         MOUNT_APK(packageName)().waitFor()
 
         // Install and run.
@@ -87,7 +87,7 @@ abstract class RootInstaller internal constructor(
         val patchedApkPath = MOUNTED_APK_PATH(packageName)
 
         val patchedApkExists = EXISTS(patchedApkPath)().exitCode == 0
-        if (patchedApkExists) return null
+        if (!patchedApkExists) return null
 
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
