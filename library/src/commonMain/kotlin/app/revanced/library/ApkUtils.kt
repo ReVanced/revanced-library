@@ -51,6 +51,10 @@ object ApkUtils {
      * @param apkFile The file to apply the patched files to.
      */
     fun PatchesResult.applyTo(apkFile: File) {
+        // Resolve before opening the APK file, since these are lazy properties and require some memory.
+        val dexFiles = dexFiles
+        val resources = resources
+
         ZFile.openReadWrite(apkFile, zFileOptions).use { targetApkZFile ->
             dexFiles.forEach { dexFile ->
                 targetApkZFile.add(dexFile.name, dexFile.stream)
