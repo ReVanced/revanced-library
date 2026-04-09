@@ -10,6 +10,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import app.revanced.library.installation.installer.Constants.splitFileName
 import app.revanced.library.installation.installer.Installer.Apk
 import java.io.Closeable
 import java.io.File
@@ -57,12 +58,15 @@ class LocalInstaller(
     }
 
     override suspend fun install(apk: Apk) {
-        logger.info("Installing ${apk.file.name}")
+        logger.info("Installing ${apk.file.name} with ${apk.splitFiles.size} split APK(s)")
 
         val packageInstaller = context.packageManager.packageInstaller
 
         packageInstaller.openSession(packageInstaller.createSession(sessionParams)).use { session ->
-            session.writeApk(apk.file)
+            session.writeApk("base.apk", apk.file)
+            apk.splitFiles.forEach { (splitName, splitFile) ->
+                session.writeApk(splitFileName(splitName), splitFile)
+            }
             session.commit(intentSender)
         }
     }
@@ -96,9 +100,9 @@ class LocalInstaller(
             setInstallReason(PackageManager.INSTALL_REASON_USER)
         }
 
-        private fun PackageInstaller.Session.writeApk(apk: File) {
+        private fun PackageInstaller.Session.writeApk(name: String, apk: File) {
             apk.inputStream().use { inputStream ->
-                openWrite(apk.name, 0, apk.length()).use { outputStream ->
+                openWrite(name, 0, apk.length()).use { outputStream ->
                     inputStream.copyTo(outputStream, 1024 * 1024)
                     fsync(outputStream)
                 }
