@@ -2,9 +2,9 @@ package app.revanced.library.installation.installer
 
 import java.io.File
 
-class RootInstallOptions(
+class RootInstallerOptions(
     patchedApk: Installer.Apk,
-    val stockApk: StockApk
-) : InstallOptions(patchedApk)
+    val stockApk: Apk,
+) : InstallerOptions(patchedApk)
 
-class StockApk(file: File, val packageName: String, val versionCode: Int) : Installer.Apk(file)
+class Apk(file: File, val packageName: String, val versionName: String) : Installer.Apk(file)

@@ -25,7 +25,7 @@ import java.io.File
 class LocalInstaller(
     private val context: Context,
     onResult: (result: LocalInstallerResult) -> Unit,
-) : Installer<Unit, Installation, InstallOptions>(), Closeable {
+) : Installer<Unit, Installation, InstallerOptions>(), Closeable {
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val pmStatus = intent.getIntExtra(LocalInstallerService.EXTRA_STATUS, -999)
@@ -55,8 +55,8 @@ class LocalInstaller(
         )
     }
 
-    override suspend fun install(options: InstallOptions) {
-        val patchedApk = options.patchedApk
+    override suspend fun install(options: InstallerOptions) {
+        val patchedApk = options.apk
         logger.info("Installing ${patchedApk.file.name}")
 
         val packageInstaller = context.packageManager.packageInstaller

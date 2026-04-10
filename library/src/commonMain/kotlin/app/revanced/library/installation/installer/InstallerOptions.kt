@@ -1,5 +1,5 @@
 package app.revanced.library.installation.installer
 
-open class InstallOptions(
-    val patchedApk: Installer.Apk
+open class InstallerOptions(
+    val apk: Installer.Apk
 )

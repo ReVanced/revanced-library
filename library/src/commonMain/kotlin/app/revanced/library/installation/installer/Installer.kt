@@ -9,7 +9,7 @@ import java.util.logging.Logger
  * @param TInstallerResult The type of the result of the installation.
  * @param TInstallation The type of the installation.
  */
-abstract class Installer<TInstallerResult, TInstallation : Installation, TInstallOptions : InstallOptions> internal constructor() {
+abstract class Installer<TInstallerResult, TInstallation : Installation, TInstallerOptions : InstallerOptions> internal constructor() {
     /**
      * The [Logger].
      */
@@ -18,11 +18,11 @@ abstract class Installer<TInstallerResult, TInstallation : Installation, TInstal
     /**
      * Installs the [Apk] file.
      *
-     * @param options The [InstallOptions].
+     * @param options The [InstallerOptions].
      *
      * @return The result of the installation.
      */
-    abstract suspend fun install(options: TInstallOptions): TInstallerResult
+    abstract suspend fun install(options: TInstallerOptions): TInstallerResult
 
     /**
      * Uninstalls the package.

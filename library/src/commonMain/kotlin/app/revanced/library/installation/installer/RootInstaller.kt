@@ -5,6 +5,7 @@ import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.GET_INSTALLED_VERSION_CODE
+import app.revanced.library.installation.installer.Constants.GET_INSTALLED_VERSION_NAME
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.INSTALL_STOCK_APK
@@ -27,15 +28,14 @@ import java.io.File
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  */
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 abstract class RootInstaller internal constructor(
     shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
-) : Installer<RootInstallerResult, RootInstallation, RootInstallOptions>() {
+) : Installer<RootInstallerResult, RootInstallation, RootInstallerOptions>() {
 
     /**
      * The command runner used to run commands on the device.
      */
-    @Suppress("LeakingThis")
     protected val shellCommandRunner = shellCommandRunnerSupplier(this)
 
     init {
@@ -43,41 +43,46 @@ abstract class RootInstaller internal constructor(
     }
 
     /**
-     * Installs the given APK by mounting it over a stock installation.
+     * Installs the given patched APK by mounting it over a regular installation of the stock APK.
      *
-     * The stock APK is used to ensure a valid base for mounting. If the currently
-     * installed version differs from the expected stock version, the stock APK is
-     * installed first. If the installed version is newer than the expected version,
-     * reinstallation may be required.
+     * The stock APK is used to ensure a valid base installation for mounting. If the app is not
+     * currently installed, the stock APK is installed first. If the installed app version does not
+     * match the expected stock APK version, installation is aborted.
      *
-     * @param options The install options containing the patched APK to mount and the
-     * stock APK to use as the installation base.
+     * @param options The installer options containing the patched APK to mount and the stock APK
+     * used as the installation base.
      *
-     * @throws PackageDowngradeRequiredException If the installed app version is
-     * newer than the expected stock version.
+     * @throws PackageVersionMismatchException If the installed app version does not match the
+     * expected stock APK version.
      */
-    override suspend fun install(options: RootInstallOptions): RootInstallerResult {
-        val patchedApk = options.patchedApk
+    override suspend fun install(options: RootInstallerOptions): RootInstallerResult {
         val stockApk = options.stockApk
         val packageName = stockApk.packageName
-        val expectedVersionCode = stockApk.versionCode
         logger.info("Installing $packageName by mounting")
 
         // Ensure the installed base app matches the stock APK version.
-        val installedVersionCode = getInstalledVersionCode(packageName)
-
-        if (installedVersionCode != null && installedVersionCode > expectedVersionCode) {
-            throw PackageDowngradeRequiredException(packageName)
+        val installedVersionName = try {
+            getInstalledVersionName(packageName)
+        } catch (_: PackageNotInstalledException) {
+            null
         }
 
-        if (installedVersionCode != expectedVersionCode) {
-            logger.info("Installing stock APK for $packageName")
-            INSTALL_STOCK_APK(stockApk.file.absolutePath)().waitFor()
+        when {
+            installedVersionName == null -> {
+                logger.info("Installing stock APK for $packageName")
+                INSTALL_STOCK_APK(stockApk.file.absolutePath)().waitFor()
+                packageName.assertInstalled()
+            }
+
+            installedVersionName != stockApk.versionName -> {
+                throw PackageVersionMismatchException(packageName)
+            }
         }
+
         packageName.assertInstalled()
 
         // Setup files.
-        patchedApk.file.move(TMP_FILE_PATH)
+        options.stockApk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH().waitFor()
         MOUNT_APK(packageName)().waitFor()
 
@@ -119,6 +124,22 @@ abstract class RootInstaller internal constructor(
         )
     }
 
+    fun getInstalledVersionName(packageName: String): String =
+        GET_INSTALLED_VERSION_NAME(packageName)()
+            .waitFor()
+            .output
+            .trim()
+            .takeIf { it.isNotEmpty() }
+            ?: throw PackageNotInstalledException(packageName)
+
+    fun getInstalledVersionCode(packageName: String): Int =
+        GET_INSTALLED_VERSION_CODE(packageName)()
+            .waitFor()
+            .output
+            .trim()
+            .toIntOrNull()
+            ?: throw PackageNotInstalledException(packageName)
+
     /**
      * Runs a command on the device.
      */
@@ -142,28 +163,20 @@ abstract class RootInstaller internal constructor(
     /**
      * Asserts that the package is installed.
      *
-     * @throws FailedToFindInstalledPackageException If the package is not installed.
+     * @throws PackageNotInstalledException If the package is not installed.
      */
     private fun String.assertInstalled() {
         if (INSTALLED_APK_PATH(this)().output.isEmpty()) {
-            throw FailedToFindInstalledPackageException(this)
+            throw PackageNotInstalledException(this)
         }
     }
 
-    private fun getInstalledVersionCode(packageName: String): Int? {
-        val result = GET_INSTALLED_VERSION_CODE(packageName)().waitFor()
+    internal class PackageVersionMismatchException internal constructor(packageName: String) :
+        Exception("Package $packageName does not match the expected version")
 
-        if (result.exitCode != 0) return null
-
-        return result.output.trim().toIntOrNull()
-    }
-
-    internal class PackageDowngradeRequiredException internal constructor(packageName: String) :
-        Exception("$packageName requires reinstallation for a downgrade, data wipe is likely")
-
-    internal class FailedToFindInstalledPackageException internal constructor(packageName: String) :
-        Exception("Failed to resolve installed APK path for package \"$packageName\"")
+    internal class PackageNotInstalledException internal constructor(packageName: String) :
+        Exception("Package $packageName is not installed")
 
     internal class NoRootPermissionException internal constructor() :
-        Exception("No root permission")
+        Exception("Root permission is not granted")
 }
