@@ -1,6 +1,5 @@
 package app.revanced.library.installation.installer
 
-import app.revanced.library.installation.installer.Installer.Apk
 import java.io.File
 import java.util.logging.Logger
 
@@ -10,7 +9,7 @@ import java.util.logging.Logger
  * @param TInstallerResult The type of the result of the installation.
  * @param TInstallation The type of the installation.
  */
-abstract class Installer<TInstallerResult, TInstallation : Installation> internal constructor() {
+abstract class Installer<TInstallerResult, TInstallation : Installation, TInstallerOptions : InstallerOptions> internal constructor() {
     /**
      * The [Logger].
      */
@@ -19,11 +18,11 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
     /**
      * Installs the [Apk] file.
      *
-     * @param apk The [Apk] file.
+     * @param options The [InstallerOptions].
      *
      * @return The result of the installation.
      */
-    abstract suspend fun install(apk: Apk): TInstallerResult
+    abstract suspend fun install(options: TInstallerOptions): TInstallerResult
 
     /**
      * Uninstalls the package.
@@ -43,11 +42,5 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
      */
     abstract suspend fun getInstallation(packageName: String): TInstallation?
 
-    /**
-     * Apk file for [Installer].
-     *
-     * @param file The [Apk] file.
-     * @param packageName The package name of the [Apk] file.
-     */
-    class Apk(val file: File, val packageName: String? = null)
+    open class Apk(val file: File)
 }

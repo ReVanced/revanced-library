@@ -18,7 +18,7 @@ import se.vidstige.jadb.managers.PackageManager.UPDATE_OWNERSHIP
  */
 class AdbInstaller(
     deviceSerial: String? = null,
-) : Installer<AdbInstallerResult, Installation>() {
+) : Installer<AdbInstallerResult, Installation, InstallerOptions>() {
     private val shellCommandRunner: ShellCommandRunner
     private val packageManager: PackageManager
 
@@ -30,11 +30,13 @@ class AdbInstaller(
         logger.fine("Connected to $deviceSerial")
     }
 
-    override suspend fun install(apk: Apk): AdbInstallerResult {
+    override suspend fun install(options: InstallerOptions): AdbInstallerResult {
+        val patchedApk = options.apk
+
         return runPackageManager {
             val sdkVersion = shellCommandRunner(GET_SDK_VERSION).output.toInt()
-            if (sdkVersion < 34) install(apk.file)
-            else installWithOptions(apk.file, listOf(UPDATE_OWNERSHIP))
+            if (sdkVersion < 34) install(patchedApk.file)
+            else installWithOptions(patchedApk.file, listOf(UPDATE_OWNERSHIP))
         }
     }
 

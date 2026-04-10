@@ -22,5 +22,5 @@ interface RunResult {
     /**
      * Waits for the command to finish.
      */
-    fun waitFor() {}
+    fun waitFor(): RunResult = this
 }

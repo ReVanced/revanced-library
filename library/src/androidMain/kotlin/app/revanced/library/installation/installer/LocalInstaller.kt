@@ -10,7 +10,6 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import app.revanced.library.installation.installer.Installer.Apk
 import java.io.Closeable
 import java.io.File
 
@@ -26,7 +25,7 @@ import java.io.File
 class LocalInstaller(
     private val context: Context,
     onResult: (result: LocalInstallerResult) -> Unit,
-) : Installer<Unit, Installation>(), Closeable {
+) : Installer<Unit, Installation, InstallerOptions>(), Closeable {
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val pmStatus = intent.getIntExtra(LocalInstallerService.EXTRA_STATUS, -999)
@@ -56,13 +55,14 @@ class LocalInstaller(
         )
     }
 
-    override suspend fun install(apk: Apk) {
-        logger.info("Installing ${apk.file.name}")
+    override suspend fun install(options: InstallerOptions) {
+        val patchedApk = options.apk
+        logger.info("Installing ${patchedApk.file.name}")
 
         val packageInstaller = context.packageManager.packageInstaller
 
         packageInstaller.openSession(packageInstaller.createSession(sessionParams)).use { session ->
-            session.writeApk(apk.file)
+            session.writeApk(patchedApk.file)
             session.commit(intentSender)
         }
     }

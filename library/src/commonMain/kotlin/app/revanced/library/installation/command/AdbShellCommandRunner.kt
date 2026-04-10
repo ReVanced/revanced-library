@@ -38,8 +38,9 @@ class AdbShellCommandRunner : ShellCommandRunner {
             override val output by lazy { process.inputStream.bufferedReader().readText().removeSuffix("\n") }
             override val error by lazy { process.errorStream.bufferedReader().readText() }
 
-            override fun waitFor() {
+            override fun waitFor(): RunResult {
                 process.waitFor()
+                return this
             }
         }
     }
