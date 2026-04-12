@@ -63,14 +63,14 @@ object MagiskUtils {
             else -> throw ShellCommandException("Patched APK not found for $packageName", -1, emptyList(), emptyList())
         }
 
-        Shell.getShell().newJob().add("""
+        Shell.getShell().newJob().add($$"""
             MIRROR=""
             if command -v magisk >/dev/null 2>&1; then
-                if ! MAGISKTMP=${"$"}(magisk --path 2>/dev/null); then MAGISKTMP=/sbin; fi
-                MIRROR=${"$"}{MAGISKTMP}/.magisk/mirror
-                [ -d "${"$"}{MIRROR}" ] || MIRROR=""
+                if ! MAGISKTMP=$(magisk --path 2>/dev/null); then MAGISKTMP=/sbin; fi
+                MIRROR=${MAGISKTMP}/.magisk/mirror
+                [ -d "${MIRROR}" ] || MIRROR=""
             fi
-            mount -o bind "${"$"}{MIRROR}$patchedApk" "$sourceDir"
+            mount -o bind "${MIRROR}$$patchedApk" "$$sourceDir"
         """.trimIndent()).exec().assertSuccess("Failed to mount APK")
     }
 
@@ -98,11 +98,11 @@ object MagiskUtils {
         remoteFS.getFile(unifiedPath).deleteRecursively()
 
         val formattedPackageName = packageName.replace('.', '_')
-        val guardScriptPath = Constants.GUARD_SCRIPT_PATH(formattedPackageName)
+        val watchdogScriptPath = Constants.WATCHDOG_SCRIPT_PATH(formattedPackageName)
 
         Shell.getShell().newJob()
             .add("pm uninstall --user 0 \"$patchedPackageName\"")
-            .add("rm -f \"$guardScriptPath\"")
+            .add("rm -f \"$watchdogScriptPath\"")
             .exec()
 
         remoteFS.getFile("$MODULES_PATH/revanced_$formattedPackageName").deleteRecursively()
@@ -154,21 +154,19 @@ object MagiskUtils {
 
     fun uninstallKeepData(packageName: String) =
         Shell.getShell().newJob()
-            .add("pm uninstall -k --user 0 $packageName")
+            .add("pm uninstall -k --user 0 \"$packageName\"")
             .exec()
 
     fun provisionMagiskModule(
         remoteFS: FileSystemManager,
         packageName: String,
         patchedPackageName: String,
-        version: String,
-        label: String,
         patchedApk: File
     ) {
         val formattedPackageName = packageName.replace('.', '_')
         val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
         val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
-        val guardScriptPath = Constants.GUARD_SCRIPT_PATH(formattedPackageName)
+        val watchdogScriptPath = Constants.WATCHDOG_SCRIPT_PATH(formattedPackageName)
 
         // Ensure directories exist
         val unifiedDir = unifiedApkPath.substringBeforeLast("/")
@@ -176,27 +174,27 @@ object MagiskUtils {
             .add("mkdir -p \"$modulePath\"")
             .add("mkdir -p \"$unifiedDir\"")
             .exec()
-            .assertSuccess("Failed to create induction directories")
+            .assertSuccess("Failed to create module directories")
 
-        writeInductionFiles(remoteFS, modulePath, packageName, patchedPackageName, version, label)
+        writeModuleFiles(remoteFS, modulePath, packageName, patchedPackageName)
 
-        // Guard script: uninstalls the patched app when the module is disabled or removed.
-        val guardSh = Constants.GUARD_SCRIPT
+        // Watchdog script: uninstalls the patched app when the module is disabled or removed.
+        val watchdogSh = Constants.WATCHDOG_SCRIPT
             .replace("__PATCHED_PKG__", patchedPackageName)
             .replace("__FORMATTED_PKG__", formattedPackageName)
-        remoteFS.getFile(guardScriptPath).newOutputStream().use { it.write(guardSh.toByteArray()) }
+        remoteFS.getFile(watchdogScriptPath).newOutputStream().use { it.write(watchdogSh.toByteArray()) }
 
         // Source of truth APK
         copyApk(remoteFS, patchedApk, unifiedApkPath)
 
-        // Set permissions for unified path
+        // Set permissions
         Shell.getShell().newJob()
             .add("chmod 644 \"$unifiedApkPath\"")
             .add("chown system:system \"$unifiedApkPath\"")
             .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
             .add("chmod +x \"$modulePath/uninstall.sh\"")
-            .add("chmod +x \"$guardScriptPath\"")
+            .add("chmod +x \"$watchdogScriptPath\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
     }
@@ -204,8 +202,6 @@ object MagiskUtils {
     fun provisionRootFolder(
         remoteFS: FileSystemManager,
         packageName: String,
-        version: String,
-        label: String,
         patchedApk: File
     ) {
         val modulePath = "$MODULES_PATH/$packageName-revanced"
@@ -217,10 +213,10 @@ object MagiskUtils {
             .add("mkdir -p \"$modulePath\"")
             .add("mkdir -p \"$unifiedDir\"")
             .exec()
-            .assertSuccess("Failed to create induction directories")
+            .assertSuccess("Failed to create module directories")
 
         // MOUNT type: patched package name == original package name (bind-mount, no rename)
-        writeInductionFiles(remoteFS, modulePath, packageName, packageName, version, label)
+        writeModuleFiles(remoteFS, modulePath, packageName, packageName)
 
         // Source of truth APK
         copyApk(remoteFS, patchedApk, unifiedApkPath)
@@ -235,26 +231,22 @@ object MagiskUtils {
             .assertSuccess("Failed to set file permissions")
     }
 
-    private fun writeInductionFiles(
+    private fun writeModuleFiles(
         remoteFS: FileSystemManager,
         modulePath: String,
         packageName: String,
         patchedPackageName: String,
-        version: String,
-        label: String
     ) {
         val formattedPackageName = packageName.replace('.', '_')
 
         val moduleProp = Constants.MAGISK_MODULE_PROP
             .replace("__FORMATTED_PKG__", formattedPackageName)
-            .replace("__VERSION__", version)
-            .replace("__LABEL__", label)
+            .replace("__PKG_NAME__", packageName)
         remoteFS.getFile("$modulePath/module.prop").newOutputStream().use { it.write(moduleProp.toByteArray()) }
 
-        val serviceSh = Constants.INDUCTION_SERVICE_SCRIPT
+        val serviceSh = Constants.MODULE_SERVICE_SCRIPT
             .replace("__PKG_NAME__", packageName)
             .replace("__PATCHED_PKG__", patchedPackageName)
-            .replace("__VERSION__", version)
         remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { it.write(serviceSh.toByteArray()) }
 
         val uninstallSh = Constants.MAGISK_UNINSTALL_SCRIPT

@@ -8,7 +8,9 @@ object Constants {
     const val TMP_FILE_PATH = "/data/local/tmp/revanced.tmp"
     const val MOUNT_PATH = "/data/adb/revanced/"
     const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER/base.apk"
+    const val MOUNTED_APK_PATH_LEGACY = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
+    const val WATCHDOG_SCRIPT_PATH = "/data/adb/service.d/revanced_watchdog_$PLACEHOLDER.sh"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
     const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
@@ -19,10 +21,22 @@ object Constants {
     const val INSTALLED_APK_PATH = "pm path $PLACEHOLDER"
     const val CREATE_INSTALLATION_PATH = "$CREATE_DIR $MOUNT_PATH$PLACEHOLDER"
     const val GET_SDK_VERSION = "getprop ro.build.version.sdk"
+    const val MODULE_PROP_FILE = "module.prop"
+    const val SERVICE_SCRIPT_FILE = "service.sh"
+    const val UNINSTALL_SCRIPT_FILE = "uninstall.sh"
 
     const val MAGISK_MODULES_PATH = "/data/adb/modules/"
     const val MAGISK_MODULE_ID = "revanced_$PLACEHOLDER"
     const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
+    const val STAGE_APK =
+        "base_path=\"$MOUNTED_APK_PATH\" && " +
+                "mkdir -p \"\$(dirname \"\${base_path}\")\" && " +
+                "mv $TMP_FILE_PATH \"\${base_path}\" && " +
+                "chmod 644 \"\${base_path}\" && " +
+                "chown system:system \"\${base_path}\" && " +
+                "chcon $SELINUX_CONTEXT \"\${base_path}\""
+
+    const val INSTALL_MOUNT_SCRIPT = "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
 
     const val MOVE = "mv $TMP_FILE_PATH $PLACEHOLDER"
     const val SET_MOUNTING_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"
@@ -30,15 +44,14 @@ object Constants {
     /**
      * Magisk module property template.
      * The id MUST match the module directory name (revanced___FORMATTED_PKG__) so that
-     * Magisk/APatch/KernelSU can find the module by id for enable/disable operations.
+     * Magisk can find the module by ID for enable/disable operations.
      *
      * Placeholders: __FORMATTED_PKG__ (original with dots→underscores), __VERSION__, __LABEL__
      */
-    val MAGISK_MODULE_PROP =
-        """
+    val MAGISK_MODULE_PROP = """
         id=revanced___FORMATTED_PKG__
-        name=__LABEL__ ReVanced
-        version=__VERSION__
+        name=__PKG_NAME__ ReVanced
+        version=1.0
         versionCode=0
         author=ReVanced
         description=Mounts the patched APK on top of the original one
@@ -47,174 +60,166 @@ object Constants {
     /**
      * Magisk module uninstall script template. Magisk runs this when the module is
      * removed via the Magisk app. It cleans up the unified source-of-truth APK and
-     * the boot-time guard script.
+     * the boot-time watchdog script.
      *
      * Placeholders: __PKG_NAME__ (original), __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
      */
-    val MAGISK_UNINSTALL_SCRIPT =
-        """
+    val MAGISK_UNINSTALL_SCRIPT = """
         #!/system/bin/sh
         pm uninstall --user 0 "__PATCHED_PKG__"
         rm -rf "/data/adb/revanced/__PKG_NAME__"
-        rm -f "/data/adb/service.d/revanced_guard___FORMATTED_PKG__.sh"
+        rm -f "/data/adb/service.d/revanced_watchdog___FORMATTED_PKG__.sh"
         """.trimIndent()
 
-    const val GUARD_SCRIPT_PATH = "/data/adb/service.d/revanced_guard_$PLACEHOLDER.sh"
-
     /**
-     * Boot-time guard script. Runs on every boot (via service.d, independent of module state).
+     * Boot-time watchdog script. Runs on every boot (via service.d, independent of module state).
      * Uninstalls the patched app when the module is disabled or removed, so the app
      * disappears when the module is toggled off.
      *
      * Placeholders: __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
      */
-    val GUARD_SCRIPT =
-        """
+    val WATCHDOG_SCRIPT = $$"""
         #!/system/bin/sh
         patched_pkg="__PATCHED_PKG__"
         module_path="/data/adb/modules/revanced___FORMATTED_PKG__"
 
-        until [ "${"$"}(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
+        until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
         sleep 11
 
         # Module was fully removed — uninstall app and self-destruct this script.
-        if [ ! -d "${"$"}{module_path}" ]; then
-            pm uninstall --user 0 "${"$"}{patched_pkg}" 2>/dev/null
+        if [ ! -d "${module_path}" ]; then
+            pm uninstall --user 0 "${patched_pkg}" 2>/dev/null
             rm -f "$0"
             exit 0
         fi
 
         # If service.sh did not run this boot, the module is disabled — uninstall the app.
-        current_boot_id=${"$"}(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
-        stored_boot_id=${"$"}(cat "${"$"}{module_path}/.boot_token" 2>/dev/null)
-        if [ "${"$"}{stored_boot_id}" != "${"$"}{current_boot_id}" ]; then
-            pm uninstall --user 0 "${"$"}{patched_pkg}" 2>/dev/null
+        current_boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
+        stored_boot_id=$(cat "${module_path}/.boot_token" 2>/dev/null)
+        if [ "${stored_boot_id}" != "${current_boot_id}" ]; then
+            pm uninstall --user 0 "${patched_pkg}" 2>/dev/null
         fi
         """.trimIndent()
 
-    const val MOUNT_APK =
-        "base_path=\"$MOUNTED_APK_PATH\" && " +
-                "mkdir -p \"${"$"}(dirname \"${"$"}{base_path}\")\" && " +
-                "mv $TMP_FILE_PATH \"${"$"}{base_path}\" && " +
-                "chmod 644 \"${"$"}{base_path}\" && " +
-                "chown system:system \"${"$"}{base_path}\" && " +
-                "chcon $SELINUX_CONTEXT \"${"$"}{base_path}\""
-
-    val UMOUNT =
-        """
-        grep $PLACEHOLDER /proc/mounts | 
-        while read -r line; do echo ${"$"}{line} | 
-        cut -d ' ' -f 2 | 
-        sed 's/apk.*/apk/' | 
+    val UMOUNT = $$"""
+        grep -F "/$$PLACEHOLDER/" /proc/mounts |
+        while read -r line; do echo ${line} |
+        cut -d ' ' -f 2 |
+        sed 's/apk.*/apk/' |
         xargs -r umount -l; done
         """.trimIndent()
 
-    const val INSTALL_MOUNT_SCRIPT =
-        "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
-
-    val MOUNT_SCRIPT =
-        """
+    val MOUNT_SCRIPT = $$"""
         #!/system/bin/sh
-        until [ "${"$"}( getprop sys.boot_completed )" = 1 ]; do sleep 3; done
+        until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
         until [ -d "/sdcard/Android" ]; do sleep 1; done
 
-        stock_path=${"$"}( pm path $PLACEHOLDER | grep base | sed 's/package://g' )
+        stock_path=$(pm path $$PLACEHOLDER | grep base | sed 's/package://g')
 
         # Make sure the app is installed.
-        if [ -z "${"$"}{stock_path}" ]; then
+        if [ -z "${stock_path}" ]; then
             exit 1
         fi
 
         # Unmount any existing installations to prevent multiple unnecessary mounts.
-        $UMOUNT
+        $$UMOUNT
 
-        base_path="${"$"}{MOUNTED_APK_PATH}"
+        base_path="$$MOUNTED_APK_PATH"
 
-        chcon $SELINUX_CONTEXT ${"$"}{base_path}
+        chcon $$SELINUX_CONTEXT ${base_path}
 
         # Mount using Magisk mirror, if available.
         if command -v magisk >/dev/null 2>&1; then
-            if ! MAGISKTMP="${"$"}(magisk --path 2>/dev/null)"; then
+            if ! MAGISKTMP="$(magisk --path 2>/dev/null)"; then
                 MAGISKTMP=/sbin
             fi
-            MIRROR="${"$"}{MAGISKTMP}/.magisk/mirror"
-            [ -d "${"$"}{MIRROR}" ] || MIRROR=""
+            MIRROR="${MAGISKTMP}/.magisk/mirror"
+            [ -d "${MIRROR}" ] || MIRROR=""
         fi
 
-        mount -o bind ${"$"}{MIRROR}${"$"}{base_path} ${"$"}{stock_path}
+        mount -o bind ${MIRROR}${base_path} ${stock_path}
 
         # Kill the app to force it to restart the mounted APK in case it's currently running.
-        $KILL
+        $$KILL
         """.trimIndent()
 
 
     /**
      * Magisk module service script template. Runs on every boot when the module is enabled.
-     * Installs the patched APK if not already installed.
+     * Installs the patched APK as a standalone app if not already installed.
      *
-     * Placeholders: __PKG_NAME__ (original, used for APK path), __PATCHED_PKG__ (patched, used for pm commands), __VERSION__
+     * Placeholders: __PKG_NAME__ (original, used for APK path), __PATCHED_PKG__ (patched, used for pm commands)
      */
-    val INDUCTION_SERVICE_SCRIPT =
-        """
+    val MODULE_SERVICE_SCRIPT = $$"""
         #!/system/bin/sh
-        DIR=${"$"}{0%/*}
+        DIR=${0%/*}
 
         package_name="__PATCHED_PKG__"
-        version="__VERSION__"
 
-        # Write a boot token so the guard script can detect whether service.sh ran this boot.
-        cp /proc/sys/kernel/random/boot_id "${"$"}{DIR}/.boot_token"
+        # Write a boot token so the watchdog script can detect whether service.sh ran this boot.
+        cp /proc/sys/kernel/random/boot_id "${DIR}/.boot_token"
 
-        LOG="${"$"}{DIR}/log"
+        LOG="${DIR}/log"
         MAX_LOG_LINES=200
 
         # Trim log to last MAX_LOG_LINES lines to prevent unbounded growth.
-        if [ -f "${"$"}{LOG}" ]; then
-            tail -n "${"$"}{MAX_LOG_LINES}" "${"$"}{LOG}" > "${"$"}{LOG}.tmp" && mv "${"$"}{LOG}.tmp" "${"$"}{LOG}"
+        if [ -f "${LOG}" ]; then
+            tail -n "${MAX_LOG_LINES}" "${LOG}" > "${LOG}.tmp" && mv "${LOG}.tmp" "${LOG}"
         fi
 
         {
 
-        echo "--- ${"$"}(date '+%Y-%m-%d %H:%M:%S') | pkg=${"$"}{package_name} | ver=${"$"}{version} ---"
+        echo "--- $(date '+%Y-%m-%d %H:%M:%S') | pkg=${package_name} ---"
 
-        until [ "${"$"}(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
+        until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
 
-        # Wait for the package manager service to be registered and ready for transactions.
-        until service check package 2>/dev/null | grep -q "found"; do sleep 3; done
-        sleep 5
+        # Wait until PM is fully responsive — sys.boot_completed=1 fires before the PM
+        # binder handles transactions. Poll until it returns at least one package entry.
+        until pm list packages --user 0 2>/dev/null | grep -q "^package:"; do sleep 5; done
 
         base_path="/data/adb/revanced/__PKG_NAME__/base.apk"
 
         # Fallback for legacy compatibility.
-        if [ ! -f "${"$"}{base_path}" ]; then
-            base_path="${"$"}{DIR}/__PKG_NAME__.apk"
+        if [ ! -f "${base_path}" ]; then
+            base_path="${DIR}/__PKG_NAME__.apk"
         fi
 
-        echo "Base path: ${"$"}{base_path}"
-        echo "Base version: ${"$"}{version}"
+        echo "Base path: ${base_path}"
 
-        if [ ! -f "${"$"}{base_path}" ]; then
+        if [ ! -f "${base_path}" ]; then
             echo "Patched APK not found."
             exit 1
         fi
 
         # Skip install if the app is already present (pm install persists across reboots).
-        if pm list packages --user 0 | grep -q "^package:${"$"}{package_name}$"; then
+        if pm list packages --user 0 | grep -q "^package:${package_name}$"; then
             echo "Package already installed, skipping."
         else
+            # Retry loop — sys.boot_completed=1 fires before the PM binder is stable for
+            # write transactions, causing "Failed transaction" errors. Pipe-based install
+            # (pm install -S size < file) uses a simpler code path than session-based
+            # (install-create/write/commit) and is less prone to early-boot binder failures.
+            # NOTE: On Xiaomi devices (MIUI/HyperOS), pm install may still fail due to
+            # package verification restrictions. Manual install via ReVanced Manager
+            # may be required in that case.
+            max_retries=3
             attempt=0
-            while [ ${"$"}{attempt} -lt 3 ]; do
-                attempt=${"$"}((attempt + 1))
-                echo "Install attempt ${"$"}{attempt}/3"
-                pm install -r -d --user 0 "${"$"}{base_path}"
+            install_exit=1
+
+            while [ ${attempt} -lt ${max_retries} ] && [ ${install_exit} -ne 0 ]; do
+                attempt=$((attempt + 1))
+                echo "Install attempt ${attempt}/${max_retries}..."
+                pm install -r -d --user 0 -S $(stat -c%s "${base_path}") < "${base_path}"
                 install_exit=$?
-                echo "Install exit code: ${"$"}{install_exit}"
-                [ ${"$"}{install_exit} -eq 0 ] && break
-                [ ${"$"}{attempt} -lt 3 ] && { echo "Retrying in 10s..."; sleep 10; }
+                echo "Install exit code: ${install_exit}"
+                if [ ${install_exit} -ne 0 ] && [ ${attempt} -lt ${max_retries} ]; then
+                    echo "Retrying in 15s..."
+                    sleep 5
+                fi
             done
         fi
 
-        } >> "${"$"}{LOG}"
+        } >> "${LOG}"
         """.trimIndent()
 
     /**
