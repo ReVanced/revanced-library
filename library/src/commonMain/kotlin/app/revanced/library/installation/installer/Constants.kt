@@ -25,7 +25,7 @@ object Constants {
     const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
 
     const val MOVE = "mv $TMP_FILE_PATH $PLACEHOLDER"
-    const val SET_FILE_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"
+    const val SET_MOUNTING_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"
 
     /**
      * Magisk module property template.
