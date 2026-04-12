@@ -7,8 +7,7 @@ object Constants {
     const val SELINUX_CONTEXT = "u:object_r:apk_data_file:s0"
     const val TMP_FILE_PATH = "/data/local/tmp/revanced.tmp"
     const val MOUNT_PATH = "/data/adb/revanced/"
-    const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER/base.apk"
-    const val MOUNTED_APK_PATH_LEGACY = "$MOUNT_PATH$PLACEHOLDER.apk"
+    const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
     const val WATCHDOG_SCRIPT_PATH = "/data/adb/service.d/revanced_watchdog_$PLACEHOLDER.sh"
 
@@ -67,7 +66,7 @@ object Constants {
     val MAGISK_UNINSTALL_SCRIPT = """
         #!/system/bin/sh
         pm uninstall --user 0 "__PATCHED_PKG__"
-        rm -rf "/data/adb/revanced/__PKG_NAME__"
+        rm -f "/data/adb/revanced/__PKG_NAME__.apk"
         rm -f "/data/adb/service.d/revanced_watchdog___FORMATTED_PKG__.sh"
         """.trimIndent()
 
@@ -177,12 +176,7 @@ object Constants {
         # binder handles transactions. Poll until it returns at least one package entry.
         until pm list packages --user 0 2>/dev/null | grep -q "^package:"; do sleep 5; done
 
-        base_path="/data/adb/revanced/__PKG_NAME__/base.apk"
-
-        # Fallback for legacy compatibility.
-        if [ ! -f "${base_path}" ]; then
-            base_path="${DIR}/__PKG_NAME__.apk"
-        fi
+        base_path="/data/adb/revanced/__PKG_NAME__.apk"
 
         echo "Base path: ${base_path}"
 

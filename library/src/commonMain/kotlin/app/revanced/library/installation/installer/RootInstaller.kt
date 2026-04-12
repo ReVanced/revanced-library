@@ -8,7 +8,6 @@ import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
-import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH_LEGACY
 import app.revanced.library.installation.installer.Constants.MOUNT_GREP
 import app.revanced.library.installation.installer.Constants.STAGE_APK
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT
@@ -80,7 +79,6 @@ abstract class RootInstaller internal constructor(
         UMOUNT(packageName)()
 
         DELETE(MOUNTED_APK_PATH(packageName))()
-        DELETE(MOUNTED_APK_PATH_LEGACY(packageName))() // Remove legacy flat-file path if present.
         DELETE(MOUNT_SCRIPT_PATH(packageName))()
         DELETE(TMP_FILE_PATH)() // Remove residual.
 
@@ -90,10 +88,7 @@ abstract class RootInstaller internal constructor(
     }
 
     override suspend fun getInstallation(packageName: String): RootInstallation? {
-        // Check current path first, fall back to legacy flat-file path for existing installations
-        val patchedApkPath = MOUNTED_APK_PATH(packageName).takeIf { EXISTS(it)().exitCode == 0 }
-            ?: MOUNTED_APK_PATH_LEGACY(packageName).takeIf { EXISTS(it)().exitCode == 0 }
-            ?: return null
+        val patchedApkPath = MOUNTED_APK_PATH(packageName).takeIf { EXISTS(it)().exitCode == 0 } ?: return null
 
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
