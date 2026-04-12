@@ -98,11 +98,11 @@ object MagiskUtils {
         remoteFS.getFile(unifiedPath).deleteRecursively()
 
         val formattedPackageName = packageName.replace('.', '_')
-        val watchdogScriptPath = Constants.WATCHDOG_SCRIPT_PATH(formattedPackageName)
+        val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(formattedPackageName)
 
         Shell.getShell().newJob()
             .add("pm uninstall --user 0 \"$patchedPackageName\"")
-            .add("rm -f \"$watchdogScriptPath\"")
+            .add("rm -f \"$handleDisabledScriptPath\"")
             .exec()
 
         remoteFS.getFile("$MODULES_PATH/revanced_$formattedPackageName").deleteRecursively()
@@ -166,7 +166,7 @@ object MagiskUtils {
         val formattedPackageName = packageName.replace('.', '_')
         val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
         val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
-        val watchdogScriptPath = Constants.WATCHDOG_SCRIPT_PATH(formattedPackageName)
+        val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(formattedPackageName)
 
         // Ensure directories exist
         val unifiedDir = unifiedApkPath.substringBeforeLast("/")
@@ -178,11 +178,11 @@ object MagiskUtils {
 
         writeModuleFiles(remoteFS, modulePath, packageName, patchedPackageName)
 
-        // Watchdog script: uninstalls the patched app when the module is disabled or removed.
-        val watchdogSh = Constants.WATCHDOG_SCRIPT
+        // Handle-disabled script: uninstalls the patched app when the module is disabled or removed.
+        val handleDisabledSh = Constants.HANDLE_DISABLED_SCRIPT
             .replace("__PATCHED_PKG__", patchedPackageName)
             .replace("__FORMATTED_PKG__", formattedPackageName)
-        remoteFS.getFile(watchdogScriptPath).newOutputStream().use { it.write(watchdogSh.toByteArray()) }
+        remoteFS.getFile(handleDisabledScriptPath).newOutputStream().use { it.write(handleDisabledSh.toByteArray()) }
 
         // Source of truth APK
         copyApk(remoteFS, patchedApk, unifiedApkPath)
@@ -194,7 +194,7 @@ object MagiskUtils {
             .add("chcon u:object_r:apk_data_file:s0 \"$unifiedApkPath\"")
             .add("chmod +x \"$modulePath/service.sh\"")
             .add("chmod +x \"$modulePath/uninstall.sh\"")
-            .add("chmod +x \"$watchdogScriptPath\"")
+            .add("chmod +x \"$handleDisabledScriptPath\"")
             .exec()
             .assertSuccess("Failed to set file permissions")
     }

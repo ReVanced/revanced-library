@@ -9,7 +9,7 @@ object Constants {
     const val MOUNT_PATH = "/data/adb/revanced/"
     const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
-    const val WATCHDOG_SCRIPT_PATH = "/data/adb/service.d/revanced_watchdog_$PLACEHOLDER.sh"
+    const val HANDLE_DISABLED_SCRIPT_PATH = "/data/adb/service.d/revanced_handle_disabled_$PLACEHOLDER.sh"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
     const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
@@ -59,7 +59,7 @@ object Constants {
     /**
      * Magisk module uninstall script template. Magisk runs this when the module is
      * removed via the Magisk app. It cleans up the unified source-of-truth APK and
-     * the boot-time watchdog script.
+     * the boot-time handle-disabled script.
      *
      * Placeholders: __PKG_NAME__ (original), __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
      */
@@ -67,17 +67,17 @@ object Constants {
         #!/system/bin/sh
         pm uninstall --user 0 "__PATCHED_PKG__"
         rm -f "/data/adb/revanced/__PKG_NAME__.apk"
-        rm -f "/data/adb/service.d/revanced_watchdog___FORMATTED_PKG__.sh"
+        rm -f "/data/adb/service.d/revanced_handle_disabled___FORMATTED_PKG__.sh"
         """.trimIndent()
 
     /**
-     * Boot-time watchdog script. Runs on every boot (via service.d, independent of module state).
+     * Boot-time handle-disabled script. Runs on every boot (via service.d, independent of module state).
      * Uninstalls the patched app when the module is disabled or removed, so the app
      * disappears when the module is toggled off.
      *
      * Placeholders: __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
      */
-    val WATCHDOG_SCRIPT = $$"""
+    val HANDLE_DISABLED_SCRIPT = $$"""
         #!/system/bin/sh
         patched_pkg="__PATCHED_PKG__"
         module_path="/data/adb/modules/revanced___FORMATTED_PKG__"
@@ -155,7 +155,7 @@ object Constants {
 
         package_name="__PATCHED_PKG__"
 
-        # Write a boot token so the watchdog script can detect whether service.sh ran this boot.
+        # Write a boot token so the handle-disabled script can detect whether service.sh ran this boot.
         cp /proc/sys/kernel/random/boot_id "${DIR}/.boot_token"
 
         LOG="${DIR}/log"
