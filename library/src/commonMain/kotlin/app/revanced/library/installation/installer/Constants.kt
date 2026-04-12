@@ -10,6 +10,9 @@ object Constants {
     const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
     const val HANDLE_DISABLED_SCRIPT_PATH = "/data/adb/service.d/revanced_handle_disabled_$PLACEHOLDER.sh"
+    const val MAGISK_MODULES_PATH = "/data/adb/modules/"
+    const val MAGISK_MODULE_ID = "revanced_$PLACEHOLDER"
+    const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
     const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
@@ -23,10 +26,6 @@ object Constants {
     const val MODULE_PROP_FILE = "module.prop"
     const val SERVICE_SCRIPT_FILE = "service.sh"
     const val UNINSTALL_SCRIPT_FILE = "uninstall.sh"
-
-    const val MAGISK_MODULES_PATH = "/data/adb/modules/"
-    const val MAGISK_MODULE_ID = "revanced_$PLACEHOLDER"
-    const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
     const val STAGE_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
                 "mkdir -p \"\$(dirname \"\${base_path}\")\" && " +
