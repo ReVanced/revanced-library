@@ -8,16 +8,15 @@ import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
-import app.revanced.library.installation.installer.Constants.MOUNT_APK
+import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH_LEGACY
 import app.revanced.library.installation.installer.Constants.MOUNT_GREP
+import app.revanced.library.installation.installer.Constants.STAGE_APK
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
 import app.revanced.library.installation.installer.Constants.invoke
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import java.io.File
 
 /**
@@ -42,6 +41,12 @@ abstract class RootInstaller internal constructor(
     }
 
     /**
+     * Stages the APK from [TMP_FILE_PATH] to the unified source-of-truth path for [packageName],
+     * creating the directory and applying permissions/SELinux context.
+     */
+    protected fun stageApk(packageName: String) = STAGE_APK(packageName)().waitFor()
+
+    /**
      * Installs the given [apk] by mounting.
      *
      * @param apk The [Apk] to install.
@@ -56,7 +61,7 @@ abstract class RootInstaller internal constructor(
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH(packageName)().waitFor()
-        MOUNT_APK(packageName)().waitFor()
+        stageApk(packageName)
 
         // Install and run.
         TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
@@ -74,8 +79,9 @@ abstract class RootInstaller internal constructor(
 
         UMOUNT(packageName)()
 
-        DELETE(MOUNTED_APK_PATH)(packageName)()
-        DELETE(MOUNT_SCRIPT_PATH)(packageName)()
+        DELETE(MOUNTED_APK_PATH(packageName))()
+        DELETE(MOUNTED_APK_PATH_LEGACY(packageName))() // Remove legacy flat-file path if present.
+        DELETE(MOUNT_SCRIPT_PATH(packageName))()
         DELETE(TMP_FILE_PATH)() // Remove residual.
 
         KILL(packageName)()
@@ -84,10 +90,10 @@ abstract class RootInstaller internal constructor(
     }
 
     override suspend fun getInstallation(packageName: String): RootInstallation? {
-        val patchedApkPath = MOUNTED_APK_PATH(packageName)
-
-        val patchedApkExists = EXISTS(patchedApkPath)().exitCode == 0
-        if (!patchedApkExists) return null
+        // Check current path first, fall back to legacy flat-file path for existing installations
+        val patchedApkPath = MOUNTED_APK_PATH(packageName).takeIf { EXISTS(it)().exitCode == 0 }
+            ?: MOUNTED_APK_PATH_LEGACY(packageName).takeIf { EXISTS(it)().exitCode == 0 }
+            ?: return null
 
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
@@ -120,7 +126,7 @@ abstract class RootInstaller internal constructor(
      *
      * @throws FailedToFindInstalledPackageException If the package is not installed.
      */
-    private fun String.assertInstalled() {
+    protected fun String.assertInstalled() {
         if (INSTALLED_APK_PATH(this)().output.isEmpty()) {
             throw FailedToFindInstalledPackageException(this)
         }
