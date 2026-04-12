@@ -92,11 +92,12 @@ object Constants {
             exit 0
         fi
 
-        # If service.sh did not run this boot, the module is disabled — uninstall the app.
+        # If service.sh did not run this boot, the module is disabled — disable the app so it
+        # disappears from the launcher without losing data. service.sh re-enables it on next boot.
         current_boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
         stored_boot_id=$(cat "${module_path}/.boot_token" 2>/dev/null)
         if [ "${stored_boot_id}" != "${current_boot_id}" ]; then
-            pm uninstall --user 0 "${patched_pkg}" 2>/dev/null
+            pm disable-user --user 0 "${patched_pkg}" 2>/dev/null
         fi
         """.trimIndent()
 
@@ -185,9 +186,11 @@ object Constants {
             exit 1
         fi
 
-        # Skip install if the app is already present (pm install persists across reboots).
+        # Re-enable the app if it was disabled by the handle-disabled script (module was toggled off
+        # then back on). If not installed at all, fall through to the install block.
         if pm list packages --user 0 | grep -q "^package:${package_name}$"; then
-            echo "Package already installed, skipping."
+            pm enable --user 0 "${package_name}" 2>/dev/null
+            echo "Package enabled."
         else
             # Retry loop — sys.boot_completed=1 fires before the PM binder is stable for
             # write transactions, causing "Failed transaction" errors. Pipe-based install
