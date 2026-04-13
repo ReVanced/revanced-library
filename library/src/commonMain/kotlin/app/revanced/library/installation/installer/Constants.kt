@@ -84,7 +84,7 @@ object Constants {
         until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
         sleep 11
 
-        # Module was fully removed — uninstall app and self-destruct this script.
+        # Module was fully removed. Uninstall app and self-destruct this script.
         if [ ! -d "${module_path}" ]; then
             pm uninstall --user 0 "${patched_pkg}" 2>/dev/null
             rm -f "$0"
