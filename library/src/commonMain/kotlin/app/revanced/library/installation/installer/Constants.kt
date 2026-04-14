@@ -26,7 +26,7 @@ object Constants {
     const val MODULE_PROP_FILE = "module.prop"
     const val SERVICE_SCRIPT_FILE = "service.sh"
     const val UNINSTALL_SCRIPT_FILE = "uninstall.sh"
-    const val STAGE_APK =
+    const val PREPARE_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
                 "mkdir -p \"\$(dirname \"\${base_path}\")\" && " +
                 "mv $TMP_FILE_PATH \"\${base_path}\" && " +
@@ -34,7 +34,7 @@ object Constants {
                 "chown system:system \"\${base_path}\" && " +
                 "chcon $SELINUX_CONTEXT \"\${base_path}\""
 
-    const val INSTALL_MOUNT_SCRIPT = "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
+    const val PREPARE_MOUNT_SCRIPT = "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
 
     const val MOVE = "mv $TMP_FILE_PATH $PLACEHOLDER"
     const val SET_MOUNTING_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"

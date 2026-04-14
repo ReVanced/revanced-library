@@ -34,10 +34,10 @@ abstract class MagiskInstaller internal constructor(
     /**
      * Installs the given [apk] as a Magisk module.
      *
-     * The patched APK is staged at the unified source-of-truth path
+     * The patched APK is prepared at the unified source-of-truth path
      * `/data/adb/revanced/<packageName>/base.apk` (the same location used by the
      * non-Magisk root installer), and the module ships a `service.sh` that
-     * installs the patched APK on every boot. After provisioning,
+     * installs the patched APK on every boot. After preparation,
      * `service.sh` is executed inline so the install takes effect immediately,
      * without requiring a reboot.
      *
@@ -52,9 +52,9 @@ abstract class MagiskInstaller internal constructor(
         val formattedPackageName = packageName.replace('.', '_')
         val modulePath = MAGISK_MODULE_PATH(formattedPackageName)
 
-        // Stage the patched APK at the unified source-of-truth path.
+        // Prepare the patched APK at the unified source-of-truth path.
         apk.file.move(TMP_FILE_PATH)
-        stageApk(packageName)
+        prepareApk(packageName)
 
         // Create the Magisk module directory.
         "mkdir -p $modulePath"().waitFor()

@@ -157,7 +157,7 @@ object MagiskUtils {
             .add("pm uninstall -k \"$packageName\"")
             .exec()
 
-    fun provisionMagiskModule(
+    fun prepareMagiskModule(
         remoteFS: FileSystemManager,
         packageName: String,
         patchedPackageName: String,
@@ -199,7 +199,7 @@ object MagiskUtils {
             .assertSuccess("Failed to set file permissions")
     }
 
-    fun provisionRootFolder(
+    fun prepareRootFolder(
         remoteFS: FileSystemManager,
         packageName: String,
         patchedApk: File

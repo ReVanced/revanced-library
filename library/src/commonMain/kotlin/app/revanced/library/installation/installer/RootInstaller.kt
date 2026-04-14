@@ -5,11 +5,11 @@ import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
-import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
+import app.revanced.library.installation.installer.Constants.PREPARE_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
 import app.revanced.library.installation.installer.Constants.MOUNT_GREP
-import app.revanced.library.installation.installer.Constants.STAGE_APK
+import app.revanced.library.installation.installer.Constants.PREPARE_APK
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
@@ -40,10 +40,10 @@ abstract class RootInstaller internal constructor(
     }
 
     /**
-     * Stages the APK from [TMP_FILE_PATH] to the unified source-of-truth path for [packageName],
+     * Prepares the APK from [TMP_FILE_PATH] to the unified source-of-truth path for [packageName],
      * creating the directory and applying permissions/SELinux context.
      */
-    protected fun stageApk(packageName: String) = STAGE_APK(packageName)().waitFor()
+    protected fun prepareApk(packageName: String) = PREPARE_APK(packageName)().waitFor()
 
     /**
      * Installs the given [apk] by mounting.
@@ -60,11 +60,11 @@ abstract class RootInstaller internal constructor(
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH(packageName)().waitFor()
-        stageApk(packageName)
+        prepareApk(packageName)
 
         // Install and run.
         TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
-        INSTALL_MOUNT_SCRIPT(packageName)().waitFor()
+        PREPARE_MOUNT_SCRIPT(packageName)().waitFor()
         MOUNT_SCRIPT_PATH(packageName)().waitFor()
         RESTART(packageName)()
 
