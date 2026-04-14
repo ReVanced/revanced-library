@@ -64,7 +64,7 @@ object Constants {
      */
     val MAGISK_UNINSTALL_SCRIPT = """
         #!/system/bin/sh
-        pm uninstall --user 0 "__PATCHED_PKG__"
+        pm uninstall "__PATCHED_PKG__"
         rm -f "/data/adb/revanced/__PKG_NAME__.apk"
         rm -f "/data/adb/service.d/revanced_handle_disabled___FORMATTED_PKG__.sh"
         """.trimIndent()
@@ -86,7 +86,7 @@ object Constants {
 
         # Module was fully removed. Uninstall app and self-destruct this script.
         if [ ! -d "${module_path}" ]; then
-            pm uninstall --user 0 "${patched_pkg}" 2>/dev/null
+            pm uninstall "${patched_pkg}" 2>/dev/null
             rm -f "$0"
             exit 0
         fi

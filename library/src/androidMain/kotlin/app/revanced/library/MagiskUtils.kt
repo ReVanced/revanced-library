@@ -101,7 +101,7 @@ object MagiskUtils {
         val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(formattedPackageName)
 
         Shell.getShell().newJob()
-            .add("pm uninstall --user 0 \"$patchedPackageName\"")
+            .add("pm uninstall \"$patchedPackageName\"")
             .add("rm -f \"$handleDisabledScriptPath\"")
             .exec()
 
@@ -154,7 +154,7 @@ object MagiskUtils {
 
     fun uninstallKeepData(packageName: String) =
         Shell.getShell().newJob()
-            .add("pm uninstall -k --user 0 \"$packageName\"")
+            .add("pm uninstall -k \"$packageName\"")
             .exec()
 
     fun provisionMagiskModule(
