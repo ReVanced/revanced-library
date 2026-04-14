@@ -10,9 +10,7 @@ object Constants {
     const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
     const val HANDLE_DISABLED_SCRIPT_PATH = "/data/adb/service.d/revanced_handle_disabled_$PLACEHOLDER.sh"
-    const val MAGISK_MODULES_PATH = "/data/adb/modules/"
-    const val MAGISK_MODULE_ID = "revanced_$PLACEHOLDER"
-    const val MAGISK_MODULE_PATH = "$MAGISK_MODULES_PATH$MAGISK_MODULE_ID"
+    const val MAGISK_MODULE_PATH = "/data/adb/modules/revanced_$PLACEHOLDER"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
     const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
@@ -36,9 +34,6 @@ object Constants {
 
     const val PREPARE_MOUNT_SCRIPT = "mv $TMP_FILE_PATH $MOUNT_SCRIPT_PATH && chmod +x $MOUNT_SCRIPT_PATH"
 
-    const val MOVE = "mv $TMP_FILE_PATH $PLACEHOLDER"
-    const val SET_MOUNTING_PERMISSIONS = "chmod 644 $PLACEHOLDER && chown system:system $PLACEHOLDER && chcon $SELINUX_CONTEXT $PLACEHOLDER"
-
     /**
      * Magisk module property template.
      * The id MUST match the module directory name (revanced___FORMATTED_PKG__) so that
@@ -57,10 +52,11 @@ object Constants {
 
     /**
      * Magisk module uninstall script template. Magisk runs this when the module is
-     * removed via the Magisk app. It cleans up the unified source-of-truth APK and
-     * the boot-time handle-disabled script.
+     * removed via the Magisk app. It cleans up the patched APK file and the
+     * boot-time handle-disabled script.
      *
-     * Placeholders: __PKG_NAME__ (original), __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
+     * Placeholders: __PKG_NAME__ (unpatched), __PATCHED_PKG__ (patched),
+     * __FORMATTED_PKG__ (unpatched package name with dots replaced by underscores, used as Magisk module ID)
      */
     val MAGISK_UNINSTALL_SCRIPT = """
         #!/system/bin/sh
