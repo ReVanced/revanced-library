@@ -5,9 +5,9 @@ import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
 import app.revanced.library.installation.installer.Constants.KILL
-import app.revanced.library.installation.installer.Constants.MAGISK_MODULE_PATH
-import app.revanced.library.installation.installer.Constants.MAGISK_MODULE_PROP
-import app.revanced.library.installation.installer.Constants.MAGISK_UNINSTALL_SCRIPT
+import app.revanced.library.installation.installer.Constants.MODULE_PATH
+import app.revanced.library.installation.installer.Constants.MODULE_PROP
+import app.revanced.library.installation.installer.Constants.MODULE_UNINSTALL_SCRIPT
 import app.revanced.library.installation.installer.Constants.MODULE_PROP_FILE
 import app.revanced.library.installation.installer.Constants.MODULE_SERVICE_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
@@ -20,26 +20,19 @@ import app.revanced.library.installation.installer.Constants.UNINSTALL_SCRIPT_FI
 import app.revanced.library.installation.installer.Constants.invoke
 
 /**
- * [MagiskInstaller] for installing and uninstalling [Apk] files using root permissions via Magisk modules.
+ * [MagiskRootInstaller] for installing and uninstalling [Apk] files using root permissions via Magisk modules.
  *
  * @param shellCommandRunnerSupplier A supplier for the [ShellCommandRunner] to use.
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class MagiskInstaller internal constructor(
+abstract class MagiskRootInstaller internal constructor(
     shellCommandRunnerSupplier: () -> ShellCommandRunner,
 ) : RootInstaller(shellCommandRunnerSupplier) {
 
     /**
      * Installs the given [apk] as a Magisk module.
-     *
-     * The patched APK is prepared at the unified source-of-truth path
-     * `/data/adb/revanced/<packageName>/base.apk` (the same location used by the
-     * non-Magisk root installer), and the module ships a `service.sh` that
-     * installs the patched APK on every boot. After preparation,
-     * `service.sh` is executed inline so the install takes effect immediately,
-     * without requiring a reboot.
      *
      * @param apk The [Apk] to install.
      *
@@ -50,7 +43,7 @@ abstract class MagiskInstaller internal constructor(
 
         val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
         val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = MAGISK_MODULE_PATH(formattedPackageName)
+        val modulePath = MODULE_PATH(formattedPackageName)
 
         // Prepare the patched APK at the unified source-of-truth path.
         apk.file.move(TMP_FILE_PATH)
@@ -60,7 +53,7 @@ abstract class MagiskInstaller internal constructor(
         "mkdir -p $modulePath"().waitFor()
 
         // Write module.prop.
-        val moduleProp = MAGISK_MODULE_PROP
+        val moduleProp = MODULE_PROP
             .replace("__FORMATTED_PKG__", formattedPackageName)
             .replace("__PKG_NAME__", packageName)
         "$modulePath/$MODULE_PROP_FILE".write(moduleProp)
@@ -71,7 +64,7 @@ abstract class MagiskInstaller internal constructor(
         "chmod +x $serviceScriptPath"().waitFor()
 
         // Write uninstall.sh — Magisk runs this when the module is removed via the Magisk app.
-        "$modulePath/$UNINSTALL_SCRIPT_FILE".write(MAGISK_UNINSTALL_SCRIPT.replace("__PKG_NAME__", packageName))
+        "$modulePath/$UNINSTALL_SCRIPT_FILE".write(MODULE_UNINSTALL_SCRIPT.replace("__PKG_NAME__", packageName))
         "chmod +x $modulePath/$UNINSTALL_SCRIPT_FILE"()
 
         // Live trigger: execute service.sh now so the install takes effect without a reboot.
@@ -97,7 +90,7 @@ abstract class MagiskInstaller internal constructor(
         UMOUNT(packageName)()
 
         // Remove the Magisk module directory.
-        DELETE(MAGISK_MODULE_PATH(formattedPackageName))().waitFor()
+        DELETE(MODULE_PATH(formattedPackageName))().waitFor()
 
         // Remove the unified source APK.
         DELETE(MOUNTED_APK_PATH(packageName))().waitFor()
@@ -112,7 +105,7 @@ abstract class MagiskInstaller internal constructor(
 
     override suspend fun getInstallation(packageName: String): RootInstallation? {
         val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = MAGISK_MODULE_PATH(formattedPackageName)
+        val modulePath = MODULE_PATH(formattedPackageName)
 
         val moduleExists = EXISTS("$modulePath/module.prop")().exitCode == 0
         if (!moduleExists) return null

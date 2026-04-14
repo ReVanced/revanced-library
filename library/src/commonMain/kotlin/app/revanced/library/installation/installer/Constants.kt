@@ -10,7 +10,7 @@ object Constants {
     const val MOUNTED_APK_PATH = "$MOUNT_PATH$PLACEHOLDER.apk"
     const val MOUNT_SCRIPT_PATH = "/data/adb/service.d/mount_revanced_$PLACEHOLDER.sh"
     const val HANDLE_DISABLED_SCRIPT_PATH = "/data/adb/service.d/revanced_handle_disabled_$PLACEHOLDER.sh"
-    const val MAGISK_MODULE_PATH = "/data/adb/modules/revanced_$PLACEHOLDER"
+    const val MODULE_PATH = "/data/adb/modules/revanced_$PLACEHOLDER"
 
     const val EXISTS = "[[ -f $PLACEHOLDER ]] || exit 1"
     const val MOUNT_GREP = "grep -F $PLACEHOLDER /proc/mounts"
@@ -41,7 +41,7 @@ object Constants {
      *
      * Placeholders: __FORMATTED_PKG__ (original with dots→underscores), __VERSION__, __LABEL__
      */
-    val MAGISK_MODULE_PROP = """
+    val MODULE_PROP = """
         id=revanced___FORMATTED_PKG__
         name=__PKG_NAME__ ReVanced
         version=1.0
@@ -58,7 +58,7 @@ object Constants {
      * Placeholders: __PKG_NAME__ (unpatched), __PATCHED_PKG__ (patched),
      * __FORMATTED_PKG__ (unpatched package name with dots replaced by underscores, used as Magisk module ID)
      */
-    val MAGISK_UNINSTALL_SCRIPT = """
+    val MODULE_UNINSTALL_SCRIPT = """
         #!/system/bin/sh
         pm uninstall "__PATCHED_PKG__"
         rm -f "/data/adb/revanced/__PKG_NAME__.apk"

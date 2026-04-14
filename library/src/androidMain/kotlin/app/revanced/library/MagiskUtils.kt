@@ -239,7 +239,7 @@ object MagiskUtils {
     ) {
         val formattedPackageName = packageName.replace('.', '_')
 
-        val moduleProp = Constants.MAGISK_MODULE_PROP
+        val moduleProp = Constants.MODULE_PROP
             .replace("__FORMATTED_PKG__", formattedPackageName)
             .replace("__PKG_NAME__", packageName)
         remoteFS.getFile("$modulePath/module.prop").newOutputStream().use { it.write(moduleProp.toByteArray()) }
@@ -249,7 +249,7 @@ object MagiskUtils {
             .replace("__PATCHED_PKG__", patchedPackageName)
         remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { it.write(serviceSh.toByteArray()) }
 
-        val uninstallSh = Constants.MAGISK_UNINSTALL_SCRIPT
+        val uninstallSh = Constants.MODULE_UNINSTALL_SCRIPT
             .replace("__PKG_NAME__", packageName)
             .replace("__PATCHED_PKG__", patchedPackageName)
             .replace("__FORMATTED_PKG__", formattedPackageName)
