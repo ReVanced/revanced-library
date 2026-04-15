@@ -41,9 +41,12 @@ abstract class MagiskRootInstaller internal constructor(
     override suspend fun install(apk: Apk): RootInstallerResult {
         logger.info("Installing ${apk.packageName} as a Magisk module")
 
-        val packageName = apk.packageName?.also { it.assertInstalled() } ?: throw PackageNameRequiredException()
+        val packageName = apk.packageName ?: throw PackageNameRequiredException()
         val formattedPackageName = packageName.replace('.', '_')
         val modulePath = MODULE_PATH(formattedPackageName)
+
+        // Track whether the app was already on-device so uninstall() knows whether to pm uninstall.
+        val isPreInstalled = INSTALLED_APK_PATH(packageName)().output.isNotEmpty()
 
         // Prepare the patched APK at the unified source-of-truth path.
         apk.file.move(TMP_FILE_PATH)
@@ -60,12 +63,20 @@ abstract class MagiskRootInstaller internal constructor(
 
         // Write service.sh — Magisk runs this on every boot to install the patched APK.
         val serviceScriptPath = "$modulePath/$SERVICE_SCRIPT_FILE"
-        serviceScriptPath.write(MODULE_SERVICE_SCRIPT.replace("__PKG_NAME__", packageName))
+        serviceScriptPath.write(MODULE_SERVICE_SCRIPT
+            .replace("__PKG_NAME__", packageName)
+            .replace("__PATCHED_PKG__", packageName))
         "chmod +x $serviceScriptPath"().waitFor()
 
         // Write uninstall.sh — Magisk runs this when the module is removed via the Magisk app.
-        "$modulePath/$UNINSTALL_SCRIPT_FILE".write(MODULE_UNINSTALL_SCRIPT.replace("__PKG_NAME__", packageName))
+        "$modulePath/$UNINSTALL_SCRIPT_FILE".write(MODULE_UNINSTALL_SCRIPT
+            .replace("__PKG_NAME__", packageName)
+            .replace("__PATCHED_PKG__", packageName)
+            .replace("__FORMATTED_PKG__", formattedPackageName))
         "chmod +x $modulePath/$UNINSTALL_SCRIPT_FILE"()
+
+        // Mark as newly installed so uninstall() also calls pm uninstall.
+        if (!isPreInstalled) "$modulePath/.newly_installed".write("")
 
         // Live trigger: execute service.sh now so the install takes effect without a reboot.
         "sh $serviceScriptPath"().waitFor()
@@ -85,18 +96,25 @@ abstract class MagiskRootInstaller internal constructor(
         logger.info("Uninstalling $packageName Magisk module")
 
         val formattedPackageName = packageName.replace('.', '_')
+        val modulePath = MODULE_PATH(formattedPackageName)
+
+        // Read the flag before removing the module directory.
+        val newlyInstalled = EXISTS("$modulePath/.newly_installed")().exitCode == 0
 
         // Live unmount so the stock APK is restored immediately.
         UMOUNT(packageName)()
 
         // Remove the Magisk module directory.
-        DELETE(MODULE_PATH(formattedPackageName))().waitFor()
+        DELETE(modulePath)().waitFor()
 
         // Remove the unified source APK.
         DELETE(MOUNTED_APK_PATH(packageName))().waitFor()
 
         // Clean up any residual tmp file.
         DELETE(TMP_FILE_PATH)()
+
+        // If the app was freshly installed by the module, fully remove it.
+        if (newlyInstalled) "pm uninstall $packageName"()
 
         KILL(packageName)()
 
