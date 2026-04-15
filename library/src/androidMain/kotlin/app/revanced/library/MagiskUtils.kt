@@ -5,7 +5,6 @@ import app.revanced.library.installation.installer.Constants.invoke
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.nio.FileSystemManager
 import java.io.File
-import java.util.zip.ZipFile
 
 object MagiskUtils {
     const val MODULES_PATH = "/data/adb/modules"
@@ -109,42 +108,67 @@ object MagiskUtils {
             .also { if (!it) throw Exception("Failed to delete Magisk module files") }
     }
 
-    fun extractNativeLibraries(apkFile: File, systemAppPath: String, remoteFS: FileSystemManager) {
-        val libPath = "$systemAppPath/lib"
-        remoteFS.getFile(libPath).apply {
-            if (exists()) deleteRecursively()
-            mkdirs()
-        }
-
-        ZipFile(apkFile).use { zip ->
-            zip.entries().asSequence()
-                .filter { it.name.startsWith("lib/") && it.name.endsWith(".so") }
-                .forEach { entry ->
-                    val parts = entry.name.split("/")
-                    if (parts.size < 3) return@forEach
-
-                    val apkAbi = parts[1]
-                    val libName = parts.last()
-                    val systemAbi = when (apkAbi) {
-                        "arm64-v8a" -> "arm64"
-                        "armeabi-v7a" -> "arm"
-                        "x86_64" -> "x86_64"
-                        "x86" -> "x86"
-                        else -> apkAbi
-                    }
-
-                    val targetDir = "$libPath/$systemAbi"
-                    remoteFS.getFile(targetDir).apply { if (!exists()) mkdirs() }
-
-                    val targetFile = "$targetDir/$libName"
-                    zip.getInputStream(entry).use { inputStream ->
-                        remoteFS.getFile(targetFile).newOutputStream().use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                        }
-                    }
-                }
-        }
-    }
+    /*
+    * When bind-mounting a patched APK over the unpatched/stock APK, Android's PM
+    * does not re-extract native libraries - it reuses whatever it already extracted from
+    * the unpatched APK at install time. If the patched APK introduces a new .so file that was
+    * never in the stock APK (i.e. libelements.so added by a Rev YT patch), PM's
+    * lib directory will never contain it, causing a crash at runtime:
+    * > UnsatisfiedLinkError: dlopen failed: library "libelements.so" not found
+    *
+    * This function addresses that by manually unpacking every .so from the patched APK into
+    * the app's target lib directory, fixing that issue
+    *
+    * This was commented out because:
+    * 1. Not needed for the Magisk module install path - service.sh calls pm install, so PM
+    *    installs the patched APK fresh and extracts all native libs automatically
+    *
+    * 2. This logic would need to be moved since it belongs in RootInstaller.install()
+    *
+    * 3. Some potential issue is that writing to [system app's path]/lib would fail on read-only
+    *    system partition (/system/app, /product/app, etc)
+    *    Right now it's assuming it can write to it - Wrong!
+    *
+    * Considering the points above, if the bind-mount path needs to support patches
+    * that introduce new native libraries, this could very well be used
+    *
+    * fun extractNativeLibraries(apkFile: File, systemAppPath: String, remoteFS: FileSystemManager) {
+    *     val libPath = "$systemAppPath/lib"
+    *     remoteFS.getFile(libPath).apply {
+    *         if (exists()) deleteRecursively()
+    *         mkdirs()
+    *     }
+    *
+    *     ZipFile(apkFile).use { zip ->
+    *         zip.entries().asSequence()
+    *             .filter { it.name.startsWith("lib/") && it.name.endsWith(".so") }
+    *             .forEach { entry ->
+    *                 val parts = entry.name.split("/")
+    *                 if (parts.size < 3) return@forEach
+    *
+    *                 val apkAbi = parts[1]
+    *                 val libName = parts.last()
+    *                 val systemAbi = when (apkAbi) {
+    *                     "arm64-v8a" -> "arm64"
+    *                     "armeabi-v7a" -> "arm"
+    *                     "x86_64" -> "x86_64"
+    *                     "x86" -> "x86"
+    *                     else -> apkAbi
+    *                 }
+    *
+    *                 val targetDir = "$libPath/$systemAbi"
+    *                 remoteFS.getFile(targetDir).apply { if (!exists()) mkdirs() }
+    *
+    *                 val targetFile = "$targetDir/$libName"
+    *                 zip.getInputStream(entry).use { inputStream ->
+    *                     remoteFS.getFile(targetFile).newOutputStream().use { outputStream ->
+    *                         inputStream.copyTo(outputStream)
+    *                     }
+    *                 }
+    *             }
+    *     }
+    * }
+    */
 
     fun installApk(apkPath: String) =
         Shell.getShell().newJob()
