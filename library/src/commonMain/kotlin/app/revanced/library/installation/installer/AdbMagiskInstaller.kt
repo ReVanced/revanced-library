@@ -14,7 +14,7 @@ import app.revanced.library.installation.command.AdbShellCommandRunner
  */
 class AdbMagiskRootInstaller(
     deviceSerial: String? = null,
-) : MagiskRootInstaller({ AdbShellCommandRunner(deviceSerial) }) {
+) : MagiskRootInstaller(AdbShellCommandRunner(deviceSerial)) {
     init {
         logger.fine("Connected to $deviceSerial")
     }

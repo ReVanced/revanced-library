@@ -22,7 +22,7 @@ class LocalMagiskRootInstaller private constructor(
     onReady: LocalMagiskRootInstaller.() -> Unit,
     private val readyHook: Array<(() -> Unit)?>,
 ) : MagiskRootInstaller(
-    { LocalShellCommandRunner(context) { readyHook[0]?.invoke() } },
+    LocalShellCommandRunner(context) { readyHook[0]?.invoke() }
 ),
     Closeable {
 
@@ -32,10 +32,10 @@ class LocalMagiskRootInstaller private constructor(
     ) : this(context, onReady, arrayOfNulls(1))
 
     init {
-        // The supplier passed to [MagiskRootInstaller] runs during super-init, before `this`
-        // exists as a subclass reference, so the ready callback cannot capture it directly.
-        // Instead we route through [readyHook], which is populated here — safe because
-        // [LocalShellCommandRunner.onServiceConnected] fires asynchronously after IPC bind.
+        // `this` doesn't exist as a subclass reference until after super-init, so the
+        // ready callback cannot capture it directly in the constructor argument above.
+        // Routing through [readyHook] is safe because [LocalShellCommandRunner.onServiceConnected]
+        // fires asynchronously after IPC bind — well after this init block completes.
         readyHook[0] = { onReady() }
     }
 

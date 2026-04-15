@@ -16,7 +16,7 @@ import app.revanced.library.installation.installer.RootInstaller.NoRootPermissio
  */
 class AdbRootInstaller(
     deviceSerial: String? = null,
-) : RootInstaller({ AdbShellCommandRunner(deviceSerial) }) {
+) : RootInstaller(AdbShellCommandRunner(deviceSerial)) {
     init {
         logger.fine("Connected to $deviceSerial")
     }

@@ -22,14 +22,14 @@ import app.revanced.library.installation.installer.Constants.invoke
 /**
  * [MagiskRootInstaller] for installing and uninstalling [Apk] files using root permissions via Magisk modules.
  *
- * @param shellCommandRunnerSupplier A supplier for the [ShellCommandRunner] to use.
+ * @param shellCommandRunner The [ShellCommandRunner] to use.
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class MagiskRootInstaller internal constructor(
-    shellCommandRunnerSupplier: () -> ShellCommandRunner,
-) : RootInstaller(shellCommandRunnerSupplier) {
+    shellCommandRunner: ShellCommandRunner,
+) : RootInstaller(shellCommandRunner) {
 
     /**
      * Installs the given [apk] as a Magisk module.

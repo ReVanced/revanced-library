@@ -21,19 +21,14 @@ import java.io.File
 /**
  * [RootInstaller] for installing and uninstalling [Apk] files using root permissions by mounting.
  *
- * @param shellCommandRunnerSupplier A supplier for the [ShellCommandRunner] to use.
+ * @param shellCommandRunner The [ShellCommandRunner] to use.
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class RootInstaller internal constructor(
-    shellCommandRunnerSupplier: () -> ShellCommandRunner,
+    protected val shellCommandRunner: ShellCommandRunner,
 ) : Installer<RootInstallerResult, RootInstallation>() {
-
-    /**
-     * The command runner used to run commands on the device.
-     */
-    protected val shellCommandRunner = shellCommandRunnerSupplier()
 
     init {
         if (!shellCommandRunner.hasRootPermission()) throw NoRootPermissionException()
