@@ -151,7 +151,7 @@ object Constants {
 
         package_name="__PATCHED_PKG__"
 
-        # Write a boot token so the handle-disabled script can detect whether service.sh ran this boot.
+        # Write a boot token so the handle-disabled script can detect whether the module was enabled this boot.
         cp /proc/sys/kernel/random/boot_id "${DIR}/.boot_token"
 
         LOG="${DIR}/log"
