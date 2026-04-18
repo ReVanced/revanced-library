@@ -11,7 +11,6 @@ import app.revanced.library.installation.installer.Constants.MODULE_UNINSTALL_SC
 import app.revanced.library.installation.installer.Constants.MODULE_PROP_FILE
 import app.revanced.library.installation.installer.Constants.MODULE_SERVICE_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
-import app.revanced.library.installation.installer.Constants.MOUNT_GREP
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.SERVICE_SCRIPT_FILE
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
@@ -129,11 +128,10 @@ abstract class MagiskRootInstaller internal constructor(
         val moduleExists = EXISTS("$modulePath/module.prop")().exitCode == 0
         if (!moduleExists) return null
 
-        val patchedApkPath = MOUNTED_APK_PATH(packageName)
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
-            patchedApkPath,
-            MOUNT_GREP(patchedApkPath)().exitCode == 0,
+            MOUNTED_APK_PATH(packageName),
+            false, // Magisk module install uses pm install, not bind-mount.
         )
     }
 }
