@@ -173,12 +173,6 @@ object MagiskUtils {
     * }
     */
 
-    fun installApk(apkPath: String) =
-        Shell.getShell().newJob()
-            .add("pm install -r -d --user $currentUserId \"$apkPath\"")
-            .exec()
-            .assertSuccess("Failed to install APK: $apkPath")
-
     fun uninstallKeepData(packageName: String) =
         Shell.getShell().newJob()
             .add("pm uninstall -k \"$packageName\"")
