@@ -92,7 +92,7 @@ object Constants {
         current_boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
         stored_boot_id=$(cat "${module_path}/.boot_token" 2>/dev/null)
         if [ "${stored_boot_id}" != "${current_boot_id}" ]; then
-            pm disable-user --user 0 "${patched_pkg}" 2>/dev/null
+            pm disable-user --user __USER_ID__ "${patched_pkg}" 2>/dev/null
         fi
         """.trimIndent()
 
@@ -170,7 +170,7 @@ object Constants {
 
         # Wait until PM is fully responsive — sys.boot_completed=1 fires before the PM
         # binder handles transactions. Poll until it returns at least one package entry.
-        until pm list packages --user 0 2>/dev/null | grep -q "^package:"; do sleep 5; done
+        until pm list packages --user __USER_ID__ 2>/dev/null | grep -q "^package:"; do sleep 5; done
 
         base_path="/data/adb/revanced/__PKG_NAME__.apk"
 
@@ -183,8 +183,8 @@ object Constants {
 
         # Re-enable the app if it was disabled by the handle-disabled script (module was toggled off
         # then back on). If not installed at all, fall through to the install block.
-        if pm list packages --user 0 | grep -q "^package:${package_name}$"; then
-            pm enable --user 0 "${package_name}" 2>/dev/null
+        if pm list packages --user __USER_ID__ | grep -q "^package:${package_name}$"; then
+            pm enable --user __USER_ID__ "${package_name}" 2>/dev/null
             echo "Package enabled."
         else
             # Retry loop — sys.boot_completed=1 fires before the PM binder is stable for
@@ -201,7 +201,7 @@ object Constants {
             while [ ${attempt} -lt ${max_retries} ] && [ ${install_exit} -ne 0 ]; do
                 attempt=$((attempt + 1))
                 echo "Install attempt ${attempt}/${max_retries}..."
-                pm install -r -d --user 0 -S $(stat -c%s "${base_path}") < "${base_path}"
+                pm install -r -d --user __USER_ID__ -S $(stat -c%s "${base_path}") < "${base_path}"
                 install_exit=$?
                 echo "Install exit code: ${install_exit}"
                 if [ ${install_exit} -ne 0 ] && [ ${attempt} -lt ${max_retries} ]; then

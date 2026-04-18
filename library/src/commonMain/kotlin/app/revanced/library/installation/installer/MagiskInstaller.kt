@@ -65,7 +65,8 @@ abstract class MagiskRootInstaller internal constructor(
         val serviceScriptPath = "$modulePath/$SERVICE_SCRIPT_FILE"
         serviceScriptPath.write(MODULE_SERVICE_SCRIPT
             .replace("__PKG_NAME__", packageName)
-            .replace("__PATCHED_PKG__", packageName))
+            .replace("__PATCHED_PKG__", packageName)
+            .replace("__USER_ID__", "0"))
         "chmod +x $serviceScriptPath"().waitFor()
 
         // Write uninstall.sh — Magisk runs this when the module is removed via the Magisk app.

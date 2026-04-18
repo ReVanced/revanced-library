@@ -9,6 +9,9 @@ import java.io.File
 object MagiskUtils {
     const val MODULES_PATH = "/data/adb/modules"
 
+    // Android user (0 for primary, 10+ for secondary/work profiles) via pure public API.
+    private val currentUserId = android.os.Process.myUid() / 100000
+
     /*
     Shell.isAppGrantedRoot() queries libsu's internal state.
     It returns false until a root shell has actually been built and verified by libsu.
@@ -172,7 +175,7 @@ object MagiskUtils {
 
     fun installApk(apkPath: String) =
         Shell.getShell().newJob()
-            .add("pm install -r -d --user 0 \"$apkPath\"")
+            .add("pm install -r -d --user $currentUserId \"$apkPath\"")
             .exec()
             .assertSuccess("Failed to install APK: $apkPath")
 
@@ -206,6 +209,7 @@ object MagiskUtils {
         val handleDisabledSh = Constants.HANDLE_DISABLED_SCRIPT
             .replace("__PATCHED_PKG__", patchedPackageName)
             .replace("__FORMATTED_PKG__", formattedPackageName)
+            .replace("__USER_ID__", currentUserId.toString())
         remoteFS.getFile(handleDisabledScriptPath).newOutputStream().use { it.write(handleDisabledSh.toByteArray()) }
 
         // Source of truth APK
@@ -271,6 +275,7 @@ object MagiskUtils {
         val serviceSh = Constants.MODULE_SERVICE_SCRIPT
             .replace("__PKG_NAME__", packageName)
             .replace("__PATCHED_PKG__", patchedPackageName)
+            .replace("__USER_ID__", currentUserId.toString())
         remoteFS.getFile("$modulePath/service.sh").newOutputStream().use { it.write(serviceSh.toByteArray()) }
 
         val uninstallSh = Constants.MODULE_UNINSTALL_SCRIPT
