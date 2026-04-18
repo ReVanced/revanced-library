@@ -35,7 +35,7 @@ class LocalRootInstaller private constructor(
         // `this` doesn't exist as a subclass reference until after super-init, so the
         // ready callback cannot capture it directly in the constructor argument above.
         // Routing through [readyHook] is safe because [LocalShellCommandRunner.onServiceConnected]
-        // fires asynchronously after IPC bind — well after this init block completes.
+        // fires asynchronously after IPC bind - well after this init block completes.
         readyHook[0] = { onReady() }
     }
 

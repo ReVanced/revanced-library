@@ -35,8 +35,8 @@ abstract class RootInstaller internal constructor(
     }
 
     /**
-     * Prepares the APK from [TMP_FILE_PATH] to the unified source-of-truth path for [packageName],
-     * creating the directory and applying permissions/SELinux context.
+     * Prepares the APK from tmp file path "[TMP_FILE_PATH]" by saving it to a
+     * persistent location and applying permissions/SELinux context.
      */
     protected fun prepareApk(packageName: String) = PREPARE_APK(packageName)().waitFor()
 

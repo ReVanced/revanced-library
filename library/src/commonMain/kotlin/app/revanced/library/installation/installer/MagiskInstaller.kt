@@ -61,7 +61,7 @@ abstract class MagiskRootInstaller internal constructor(
             .replace("__PKG_NAME__", packageName)
         "$modulePath/$MODULE_PROP_FILE".write(moduleProp)
 
-        // Write service.sh — Magisk runs this on every boot to install the patched APK.
+        // Write service.sh - Magisk runs this on every boot to install the patched APK.
         val serviceScriptPath = "$modulePath/$SERVICE_SCRIPT_FILE"
         serviceScriptPath.write(MODULE_SERVICE_SCRIPT
             .replace("__PKG_NAME__", packageName)
@@ -69,7 +69,7 @@ abstract class MagiskRootInstaller internal constructor(
             .replace("__USER_ID__", "0"))
         "chmod +x $serviceScriptPath"().waitFor()
 
-        // Write uninstall.sh — Magisk runs this when the module is removed via the Magisk app.
+        // Write uninstall.sh - Magisk runs this when the module is removed via the Magisk app.
         "$modulePath/$UNINSTALL_SCRIPT_FILE".write(MODULE_UNINSTALL_SCRIPT
             .replace("__PKG_NAME__", packageName)
             .replace("__PATCHED_PKG__", packageName)

@@ -87,7 +87,7 @@ object Constants {
             exit 0
         fi
 
-        # If service.sh did not run this boot, the module is disabled — disable the app so it
+        # If service.sh did not run this boot, the module is disabled - disable the app so it
         # disappears from the launcher without losing data. service.sh re-enables it on next boot.
         current_boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
         stored_boot_id=$(cat "${module_path}/.boot_token" 2>/dev/null)
@@ -168,7 +168,7 @@ object Constants {
 
         until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
 
-        # Wait until PM is fully responsive — sys.boot_completed=1 fires before the PM
+        # Wait until PM is fully responsive - sys.boot_completed=1 fires before the PM
         # binder handles transactions. Poll until it returns at least one package entry.
         until pm list packages --user __USER_ID__ 2>/dev/null | grep -q "^package:"; do sleep 5; done
 
@@ -187,7 +187,7 @@ object Constants {
             pm enable --user __USER_ID__ "${package_name}" 2>/dev/null
             echo "Package enabled."
         else
-            # Retry loop — sys.boot_completed=1 fires before the PM binder is stable for
+            # Retry loop - sys.boot_completed=1 fires before the PM binder is stable for
             # write transactions, causing "Failed transaction" errors. Pipe-based install
             # (pm install -S size < file) uses a simpler code path than session-based
             # (install-create/write/commit) and is less prone to early-boot binder failures.
