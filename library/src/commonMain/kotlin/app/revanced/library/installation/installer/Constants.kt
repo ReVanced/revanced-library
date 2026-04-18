@@ -90,7 +90,7 @@ object Constants {
         # If service.sh did not run this boot, the module is disabled - disable the app so it
         # disappears from the launcher without losing data. service.sh re-enables it on next boot.
         current_boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
-        stored_boot_id=$(cat "${module_path}/.boot_token" 2>/dev/null)
+        stored_boot_id=$(cat "${module_path}/.last_boot_id" 2>/dev/null)
         if [ "${stored_boot_id}" != "${current_boot_id}" ]; then
             pm disable-user --user __USER_ID__ "${patched_pkg}" 2>/dev/null
         fi
@@ -152,7 +152,7 @@ object Constants {
         package_name="__PATCHED_PKG__"
 
         # Write a boot token so the handle-disabled script can detect whether the module was enabled this boot.
-        cp /proc/sys/kernel/random/boot_id "${DIR}/.boot_token"
+        cp /proc/sys/kernel/random/boot_id "${DIR}/.last_boot_id"
 
         LOG="${DIR}/log"
         MAX_LOG_LINES=200
