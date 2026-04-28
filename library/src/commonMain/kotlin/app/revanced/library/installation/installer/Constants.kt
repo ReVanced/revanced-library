@@ -154,18 +154,6 @@ object Constants {
         # Write a boot token so the handle-disabled script can detect whether the module was enabled this boot.
         cp /proc/sys/kernel/random/boot_id "${DIR}/.last_boot_id"
 
-        LOG="${DIR}/log"
-        MAX_LOG_LINES=200
-
-        # Trim log to last MAX_LOG_LINES lines to prevent unbounded growth.
-        if [ -f "${LOG}" ]; then
-            tail -n "${MAX_LOG_LINES}" "${LOG}" > "${LOG}.tmp" && mv "${LOG}.tmp" "${LOG}"
-        fi
-
-        {
-
-        echo "--- $(date '+%Y-%m-%d %H:%M:%S') | pkg=${package_name} ---"
-
         until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
 
         # Wait until PM is fully responsive - sys.boot_completed=1 fires before the PM
@@ -174,18 +162,12 @@ object Constants {
 
         base_path="/data/adb/revanced/__PKG_NAME__.apk"
 
-        echo "Base path: ${base_path}"
-
-        if [ ! -f "${base_path}" ]; then
-            echo "Patched APK not found."
-            exit 1
-        fi
+        [ ! -f "${base_path}" ] && exit 1
 
         # Re-enable the app if it was disabled by the handle-disabled script (module was toggled off
         # then back on). If not installed at all, fall through to the install block.
         if pm list packages --user __USER_ID__ | grep -q "^package:${package_name}$"; then
             pm enable --user __USER_ID__ "${package_name}" 2>/dev/null
-            echo "Package enabled."
         else
             # Retry loop - sys.boot_completed=1 fires before the PM binder is stable for
             # write transactions, causing "Failed transaction" errors. Pipe-based install
@@ -200,18 +182,11 @@ object Constants {
 
             while [ ${attempt} -lt ${max_retries} ] && [ ${install_exit} -ne 0 ]; do
                 attempt=$((attempt + 1))
-                echo "Install attempt ${attempt}/${max_retries}..."
                 pm install -r -d --user __USER_ID__ -S $(stat -c%s "${base_path}") < "${base_path}"
                 install_exit=$?
-                echo "Install exit code: ${install_exit}"
-                if [ ${install_exit} -ne 0 ] && [ ${attempt} -lt ${max_retries} ]; then
-                    echo "Retrying in 15s..."
-                    sleep 5
-                fi
+                [ ${install_exit} -ne 0 ] && [ ${attempt} -lt ${max_retries} ] && sleep 5
             done
         fi
-
-        } >> "${LOG}"
         """.trimIndent()
 
     /**
