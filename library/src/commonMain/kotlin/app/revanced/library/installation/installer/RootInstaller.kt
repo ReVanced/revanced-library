@@ -74,10 +74,10 @@ abstract class RootInstaller internal constructor(
     * the unpatched APK at install time. If the patched APK introduces a new .so file that was
     * never in the stock APK (i.e. libelements.so added by a Rev YT patch), PM's
     * lib directory will never contain it, causing a crash at runtime:
-    * > UnsatisfiedLinkError: dlopen failed: library "libelements.so" not found
+    * > UnsatisfiedLinkError: dlopen failed: library "libelements.so" not found.
     *
     * This function addresses that by manually unpacking every .so from the patched APK into
-    * the app's target lib directory, fixing that issue
+    * the app's target lib directory, fixing that issue.
     *
     * This was commented out because:
     * 1. Not needed for the Magisk module install path - service.sh calls pm install, so PM
@@ -85,12 +85,12 @@ abstract class RootInstaller internal constructor(
     *
     * 2. This logic would need to be moved since it belongs in RootInstaller.install()
     *
-    * 3. Some potential issue is that writing to [system app's path]/lib would fail on read-only
-    *    system partition (/system/app, /product/app, etc)
-    *    Right now it's assuming it can write to it - Wrong!
+    * 3. Writing to [system app's path]/lib fails on read-only system partitions (/system/app,
+    *    /product/app, etc). A preferred fix would be to extract libs to /data/adb/revanced/<pkg>/lib/
+    *    and bind-mount that over the app's native lib path, this avoids the read-only partition issue.
     *
     * Considering the points above, if the bind-mount path needs to support patches
-    * that introduce new native libraries, this could very well be used
+    * that introduce new native libraries, this could very well be used.
     *
     * fun extractNativeLibraries(apkFile: File, systemAppPath: String, remoteFS: FileSystemManager) {
     *     val libPath = "$systemAppPath/lib"
