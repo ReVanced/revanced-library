@@ -26,7 +26,6 @@ object Constants {
     const val UNINSTALL_SCRIPT_FILE = "uninstall.sh"
     const val PREPARE_APK =
         "base_path=\"$MOUNTED_APK_PATH\" && " +
-                "mkdir -p \"\$(dirname \"\${base_path}\")\" && " +
                 "mv $TMP_FILE_PATH \"\${base_path}\" && " +
                 "chmod 644 \"\${base_path}\" && " +
                 "chown system:system \"\${base_path}\" && " +

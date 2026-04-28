@@ -1,6 +1,7 @@
 package app.revanced.library.installation.installer
 
 import app.revanced.library.installation.command.ShellCommandRunner
+import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION_PATH
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
@@ -53,6 +54,7 @@ abstract class RootInstaller internal constructor(
 
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
+        CREATE_INSTALLATION_PATH().waitFor()
         prepareApk(packageName)
 
         // Install and run.
