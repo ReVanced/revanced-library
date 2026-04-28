@@ -41,8 +41,7 @@ abstract class MagiskRootInstaller internal constructor(
         logger.info("Installing ${apk.packageName} as a Magisk module")
 
         val packageName = apk.packageName ?: throw PackageNameRequiredException()
-        val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = MODULE_PATH(formattedPackageName)
+        val modulePath = MODULE_PATH(packageName)
 
         // Track whether the app was already on-device so uninstall() knows whether to pm uninstall.
         val isPreInstalled = INSTALLED_APK_PATH(packageName)().output.isNotEmpty()
@@ -56,7 +55,6 @@ abstract class MagiskRootInstaller internal constructor(
 
         // Write module.prop.
         val moduleProp = MODULE_PROP
-            .replace("__FORMATTED_PKG__", formattedPackageName)
             .replace("__PKG_NAME__", packageName)
         "$modulePath/$MODULE_PROP_FILE".write(moduleProp)
 
@@ -71,8 +69,7 @@ abstract class MagiskRootInstaller internal constructor(
         // Write uninstall.sh - Magisk runs this when the module is removed via the Magisk app.
         "$modulePath/$UNINSTALL_SCRIPT_FILE".write(MODULE_UNINSTALL_SCRIPT
             .replace("__PKG_NAME__", packageName)
-            .replace("__PATCHED_PKG__", packageName)
-            .replace("__FORMATTED_PKG__", formattedPackageName))
+            .replace("__PATCHED_PKG__", packageName))
         "chmod +x $modulePath/$UNINSTALL_SCRIPT_FILE"()
 
         // Mark as newly installed so uninstall() also calls pm uninstall.
@@ -95,8 +92,7 @@ abstract class MagiskRootInstaller internal constructor(
     override suspend fun uninstall(packageName: String): RootInstallerResult {
         logger.info("Uninstalling $packageName Magisk module")
 
-        val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = MODULE_PATH(formattedPackageName)
+        val modulePath = MODULE_PATH(packageName)
 
         // Read the flag before removing the module directory.
         val newlyInstalled = EXISTS("$modulePath/.newly_installed")().exitCode == 0
@@ -122,8 +118,7 @@ abstract class MagiskRootInstaller internal constructor(
     }
 
     override suspend fun getInstallation(packageName: String): RootInstallation? {
-        val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = MODULE_PATH(formattedPackageName)
+        val modulePath = MODULE_PATH(packageName)
 
         val moduleExists = EXISTS("$modulePath/module.prop")().exitCode == 0
         if (!moduleExists) return null

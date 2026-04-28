@@ -35,13 +35,13 @@ object Constants {
 
     /**
      * Magisk module property template.
-     * The id MUST match the module directory name (revanced___FORMATTED_PKG__) so that
+     * The id MUST match the module directory name (revanced___PKG_NAME__) so that
      * Magisk can find the module by ID for enable/disable operations.
      *
-     * Placeholders: __FORMATTED_PKG__ (original with dots→underscores), __VERSION__, __LABEL__
+     * Placeholders: __PKG_NAME__ (original package name)
      */
     val MODULE_PROP = """
-        id=revanced___FORMATTED_PKG__
+        id=revanced___PKG_NAME__
         name=__PKG_NAME__ ReVanced
         version=1.0
         versionCode=0
@@ -54,14 +54,13 @@ object Constants {
      * removed via the Magisk app. It cleans up the patched APK file and the
      * boot-time handle-disabled script.
      *
-     * Placeholders: __PKG_NAME__ (unpatched), __PATCHED_PKG__ (patched),
-     * __FORMATTED_PKG__ (unpatched package name with dots replaced by underscores, used as Magisk module ID)
+     * Placeholders: __PKG_NAME__ (unpatched), __PATCHED_PKG__ (patched)
      */
     val MODULE_UNINSTALL_SCRIPT = """
         #!/system/bin/sh
         pm uninstall "__PATCHED_PKG__"
         rm -f "/data/adb/revanced/__PKG_NAME__.apk"
-        rm -f "/data/adb/service.d/revanced_handle_disabled___FORMATTED_PKG__.sh"
+        rm -f "/data/adb/service.d/revanced_handle_disabled___PKG_NAME__.sh"
         """.trimIndent()
 
     /**
@@ -69,12 +68,12 @@ object Constants {
      * Uninstalls the patched app when the module is disabled or removed, so the app
      * disappears when the module is toggled off.
      *
-     * Placeholders: __PATCHED_PKG__ (patched), __FORMATTED_PKG__ (original with dots→underscores)
+     * Placeholders: __PATCHED_PKG__ (patched), __PKG_NAME__ (unpatched)
      */
     val HANDLE_DISABLED_SCRIPT = $$"""
         #!/system/bin/sh
         patched_pkg="__PATCHED_PKG__"
-        module_path="/data/adb/modules/revanced___FORMATTED_PKG__"
+        module_path="/data/adb/modules/revanced___PKG_NAME__"
 
         until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 5; done
         sleep 11

@@ -44,7 +44,7 @@ object MagiskUtils {
         remoteFS.getFile("$MODULES_PATH/$packageName-revanced").exists()
 
     fun isInstalledAsMagiskModule(packageName: String, remoteFS: FileSystemManager) =
-        remoteFS.getFile("$MODULES_PATH/revanced_${packageName.replace('.', '_')}").exists()
+        remoteFS.getFile("$MODULES_PATH/revanced_$packageName").exists()
 
     /*
     Bind-mounts the patched APK over the stock APK path using the Magisk mirror when
@@ -99,15 +99,14 @@ object MagiskUtils {
         val unifiedPath = Constants.MOUNTED_APK_PATH(packageName).substringBeforeLast("/")
         remoteFS.getFile(unifiedPath).deleteRecursively()
 
-        val formattedPackageName = packageName.replace('.', '_')
-        val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(formattedPackageName)
+        val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(packageName)
 
         Shell.getShell().newJob()
             .add("pm uninstall \"$patchedPackageName\"")
             .add("rm -f \"$handleDisabledScriptPath\"")
             .exec()
 
-        remoteFS.getFile("$MODULES_PATH/revanced_$formattedPackageName").deleteRecursively()
+        remoteFS.getFile("$MODULES_PATH/revanced_$packageName").deleteRecursively()
             .also { if (!it) throw Exception("Failed to delete Magisk module files") }
     }
 
@@ -122,10 +121,9 @@ object MagiskUtils {
         patchedPackageName: String,
         patchedApk: File
     ) {
-        val formattedPackageName = packageName.replace('.', '_')
-        val modulePath = "$MODULES_PATH/revanced_$formattedPackageName"
+        val modulePath = "$MODULES_PATH/revanced_$packageName"
         val unifiedApkPath = Constants.MOUNTED_APK_PATH(packageName)
-        val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(formattedPackageName)
+        val handleDisabledScriptPath = Constants.HANDLE_DISABLED_SCRIPT_PATH(packageName)
 
         // Ensure directories exist
         val unifiedDir = unifiedApkPath.substringBeforeLast("/")
@@ -140,7 +138,7 @@ object MagiskUtils {
         // Handle-disabled script: uninstalls the patched app when the module is disabled or removed.
         val handleDisabledSh = Constants.HANDLE_DISABLED_SCRIPT
             .replace("__PATCHED_PKG__", patchedPackageName)
-            .replace("__FORMATTED_PKG__", formattedPackageName)
+            .replace("__PKG_NAME__", packageName)
             .replace("__USER_ID__", currentUserId.toString())
         remoteFS.getFile(handleDisabledScriptPath).newOutputStream().use { it.write(handleDisabledSh.toByteArray()) }
 
@@ -197,10 +195,7 @@ object MagiskUtils {
         packageName: String,
         patchedPackageName: String,
     ) {
-        val formattedPackageName = packageName.replace('.', '_')
-
         val moduleProp = Constants.MODULE_PROP
-            .replace("__FORMATTED_PKG__", formattedPackageName)
             .replace("__PKG_NAME__", packageName)
         remoteFS.getFile("$modulePath/module.prop").newOutputStream().use { it.write(moduleProp.toByteArray()) }
 
@@ -213,7 +208,6 @@ object MagiskUtils {
         val uninstallSh = Constants.MODULE_UNINSTALL_SCRIPT
             .replace("__PKG_NAME__", packageName)
             .replace("__PATCHED_PKG__", patchedPackageName)
-            .replace("__FORMATTED_PKG__", formattedPackageName)
         remoteFS.getFile("$modulePath/uninstall.sh").newOutputStream().use { it.write(uninstallSh.toByteArray()) }
     }
 
