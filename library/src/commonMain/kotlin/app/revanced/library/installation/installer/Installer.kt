@@ -1,6 +1,5 @@
 package app.revanced.library.installation.installer
 
-import app.revanced.library.installation.installer.Installer.Apk
 import java.io.File
 import java.util.logging.Logger
 
@@ -49,5 +48,8 @@ abstract class Installer<TInstallerResult, TInstallation : Installation> interna
      * @param file The [Apk] file.
      * @param packageName The package name of the [Apk] file.
      */
-    class Apk(val file: File, val packageName: String? = null)
+    class Apk(
+        val file: File,
+        val packageName: String? = null,
+    )
 }

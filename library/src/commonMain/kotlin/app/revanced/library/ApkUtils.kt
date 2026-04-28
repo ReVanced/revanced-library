@@ -45,7 +45,7 @@ object ApkUtils {
      * 2. Delete all resources in the target APK
      * 3. Merge resources.apk compiled by AAPT.
      * 4. Write raw resources.
-     * 5. Delete resources staged for deletion.
+     * 5. Delete resources marked for deletion.
      * 6. Realign the APK.
      *
      * @param apkFile The file to apply the patched files to.
@@ -57,8 +57,9 @@ object ApkUtils {
 
         ZFile.openReadWrite(apkFile, zFileOptions).use { targetApkZFile ->
             dexFiles.forEach { dexFile ->
-                targetApkZFile.add(dexFile.name, dexFile.stream)
-                dexFile.stream.close()
+                dexFile.stream.use { stream ->
+                    targetApkZFile.add(dexFile.name, stream)
+                }
             }
 
             resources?.let { resources ->
@@ -84,7 +85,7 @@ object ApkUtils {
                     }
                 }
 
-                // Delete resources that were staged for deletion.
+                // Delete resources that were marked for deletion.
                 if (resources.deleteResources.isNotEmpty()) {
                     targetApkZFile.entries().filter { entry ->
                         entry.centralDirectoryHeader.name in resources.deleteResources

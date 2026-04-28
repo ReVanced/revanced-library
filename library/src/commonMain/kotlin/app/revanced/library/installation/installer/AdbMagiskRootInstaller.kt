@@ -1,22 +1,20 @@
 package app.revanced.library.installation.installer
 
 import app.revanced.library.installation.command.AdbShellCommandRunner
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 
 /**
- * [AdbRootInstaller] for installing and uninstalling [Apk] files with using ADB root permissions by mounting.
+ * [AdbMagiskRootInstaller] for installing and uninstalling [Apk] files using ADB root permissions via Magisk modules.
  *
  * @param deviceSerial The device serial. If null, the first connected device will be used.
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  *
- * @see RootInstaller
+ * @see MagiskRootInstaller
  * @see AdbShellCommandRunner
  */
-class AdbRootInstaller(
+class AdbMagiskRootInstaller(
     deviceSerial: String? = null,
-) : RootInstaller(AdbShellCommandRunner(deviceSerial)) {
+) : MagiskRootInstaller(AdbShellCommandRunner(deviceSerial)) {
     init {
         logger.fine("Connected to $deviceSerial")
     }
