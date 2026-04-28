@@ -173,8 +173,7 @@ object Constants {
             # (pm install -S size < file) uses a simpler code path than session-based
             # (install-create/write/commit) and is less prone to early-boot binder failures.
             # NOTE: On Xiaomi devices (MIUI/HyperOS), pm install may still fail due to
-            # package verification restrictions. Manual install via ReVanced Manager
-            # may be required in that case.
+            # package verification restrictions. Manual installation may be required.
             max_retries=3
             attempt=0
             install_exit=1
