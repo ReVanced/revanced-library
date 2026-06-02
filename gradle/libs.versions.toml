@@ -11,7 +11,7 @@ kotlinx-serialization = "1.10.0"
 libsu = "6.0.0"
 revanced-patcher = "22.0.0"
 bouncy-castle = "1.83"
-sigstore = "2.0.0"
+sigstore = "2.1.0"
 vanniktechMavenPublish = "0.36.0"
 
 [libraries]
