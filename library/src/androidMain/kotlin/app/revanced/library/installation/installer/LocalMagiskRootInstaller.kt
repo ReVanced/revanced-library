@@ -6,10 +6,10 @@ import com.topjohnwu.superuser.ipc.RootService
 import java.io.Closeable
 
 /**
- * [LocalRootInstaller] for installing and uninstalling [Apk] files locally with using root permissions by mounting.
+ * [LocalMagiskRootInstaller] for installing and uninstalling [Apk] files locally with root permissions via Magisk modules.
  *
  * @param context The [Context] to use for binding to the [RootService].
- * @param onReady A callback to be invoked when [LocalRootInstaller] is ready to be used.
+ * @param onReady A callback to be invoked when [LocalMagiskRootInstaller] is ready to be used.
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  *
@@ -17,18 +17,18 @@ import java.io.Closeable
  * @see LocalShellCommandRunner
  */
 @Suppress("unused")
-class LocalRootInstaller private constructor(
+class LocalMagiskRootInstaller private constructor(
     context: Context,
-    onReady: LocalRootInstaller.() -> Unit,
+    onReady: LocalMagiskRootInstaller.() -> Unit,
     private val readyHook: Array<(() -> Unit)?>,
-) : RootInstaller(
+) : MagiskRootInstaller(
     LocalShellCommandRunner(context) { readyHook[0]?.invoke() }
 ),
     Closeable {
 
     constructor(
         context: Context,
-        onReady: LocalRootInstaller.() -> Unit = {},
+        onReady: LocalMagiskRootInstaller.() -> Unit = {},
     ) : this(context, onReady, arrayOfNulls(1))
 
     init {

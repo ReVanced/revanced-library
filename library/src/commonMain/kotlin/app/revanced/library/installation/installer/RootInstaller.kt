@@ -5,42 +5,40 @@ import app.revanced.library.installation.installer.Constants.CREATE_INSTALLATION
 import app.revanced.library.installation.installer.Constants.DELETE
 import app.revanced.library.installation.installer.Constants.EXISTS
 import app.revanced.library.installation.installer.Constants.INSTALLED_APK_PATH
-import app.revanced.library.installation.installer.Constants.INSTALL_MOUNT_SCRIPT
+import app.revanced.library.installation.installer.Constants.PREPARE_MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.KILL
 import app.revanced.library.installation.installer.Constants.MOUNTED_APK_PATH
-import app.revanced.library.installation.installer.Constants.MOUNT_APK
 import app.revanced.library.installation.installer.Constants.MOUNT_GREP
+import app.revanced.library.installation.installer.Constants.PREPARE_APK
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT
 import app.revanced.library.installation.installer.Constants.MOUNT_SCRIPT_PATH
 import app.revanced.library.installation.installer.Constants.RESTART
 import app.revanced.library.installation.installer.Constants.TMP_FILE_PATH
 import app.revanced.library.installation.installer.Constants.UMOUNT
 import app.revanced.library.installation.installer.Constants.invoke
-import app.revanced.library.installation.installer.Installer.Apk
-import app.revanced.library.installation.installer.RootInstaller.NoRootPermissionException
 import java.io.File
 
 /**
  * [RootInstaller] for installing and uninstalling [Apk] files using root permissions by mounting.
  *
- * @param shellCommandRunnerSupplier A supplier for the [ShellCommandRunner] to use.
+ * @param shellCommandRunner The [ShellCommandRunner] to use.
  *
  * @throws NoRootPermissionException If the device does not have root permission.
  */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class RootInstaller internal constructor(
-    shellCommandRunnerSupplier: (RootInstaller) -> ShellCommandRunner,
+    protected val shellCommandRunner: ShellCommandRunner,
 ) : Installer<RootInstallerResult, RootInstallation>() {
-
-    /**
-     * The command runner used to run commands on the device.
-     */
-    @Suppress("LeakingThis")
-    protected val shellCommandRunner = shellCommandRunnerSupplier(this)
 
     init {
         if (!shellCommandRunner.hasRootPermission()) throw NoRootPermissionException()
     }
+
+    /**
+     * Prepares the APK from tmp file path "[TMP_FILE_PATH]" by saving it to a
+     * persistent location and applying permissions/SELinux context.
+     */
+    protected fun prepareApk(packageName: String) = PREPARE_APK(packageName)().waitFor()
 
     /**
      * Installs the given [apk] by mounting.
@@ -57,11 +55,11 @@ abstract class RootInstaller internal constructor(
         // Setup files.
         apk.file.move(TMP_FILE_PATH)
         CREATE_INSTALLATION_PATH().waitFor()
-        MOUNT_APK(packageName)().waitFor()
+        prepareApk(packageName)
 
         // Install and run.
         TMP_FILE_PATH.write(MOUNT_SCRIPT(packageName))
-        INSTALL_MOUNT_SCRIPT(packageName)().waitFor()
+        PREPARE_MOUNT_SCRIPT(packageName)().waitFor()
         MOUNT_SCRIPT_PATH(packageName)().waitFor()
         RESTART(packageName)()
 
@@ -70,13 +68,75 @@ abstract class RootInstaller internal constructor(
         return RootInstallerResult.SUCCESS
     }
 
+    /*
+    * When bind-mounting a patched APK over the unpatched/stock APK, Android's PM
+    * does not re-extract native libraries - it reuses whatever it already extracted from
+    * the unpatched APK at install time. If the patched APK introduces a new .so file that was
+    * never in the stock APK (i.e. libelements.so added by a Rev YT patch), PM's
+    * lib directory will never contain it, causing a crash at runtime:
+    * > UnsatisfiedLinkError: dlopen failed: library "libelements.so" not found.
+    *
+    * This function addresses that by manually unpacking every .so from the patched APK into
+    * the app's target lib directory, fixing that issue.
+    *
+    * This was commented out because:
+    * 1. Not needed for the Magisk module install path - service.sh calls pm install, so PM
+    *    installs the patched APK fresh and extracts all native libs automatically
+    *
+    * 2. This logic would need to be moved since it belongs in RootInstaller.install()
+    *
+    * 3. Writing to [system app's path]/lib fails on read-only system partitions (/system/app,
+    *    /product/app, etc). A preferred fix would be to extract libs to /data/adb/revanced/<pkg>/lib/
+    *    and bind-mount that over the app's native lib path, this avoids the read-only partition issue.
+    *
+    * Considering the points above, if the bind-mount path needs to support patches
+    * that introduce new native libraries, this could very well be used.
+    *
+    * fun extractNativeLibraries(apkFile: File, systemAppPath: String, remoteFS: FileSystemManager) {
+    *     val libPath = "$systemAppPath/lib"
+    *     remoteFS.getFile(libPath).apply {
+    *         if (exists()) deleteRecursively()
+    *         mkdirs()
+    *     }
+    *
+    *     ZipFile(apkFile).use { zip ->
+    *         zip.entries().asSequence()
+    *             .filter { it.name.startsWith("lib/") && it.name.endsWith(".so") }
+    *             .forEach { entry ->
+    *                 val parts = entry.name.split("/")
+    *                 if (parts.size < 3) return@forEach
+    *
+    *                 val apkAbi = parts[1]
+    *                 val libName = parts.last()
+    *                 val systemAbi = when (apkAbi) {
+    *                     "arm64-v8a" -> "arm64"
+    *                     "armeabi-v7a" -> "arm"
+    *                     "x86_64" -> "x86_64"
+    *                     "x86" -> "x86"
+    *                     else -> apkAbi
+    *                 }
+    *
+    *                 val targetDir = "$libPath/$systemAbi"
+    *                 remoteFS.getFile(targetDir).apply { if (!exists()) mkdirs() }
+    *
+    *                 val targetFile = "$targetDir/$libName"
+    *                 zip.getInputStream(entry).use { inputStream ->
+    *                     remoteFS.getFile(targetFile).newOutputStream().use { outputStream ->
+    *                         inputStream.copyTo(outputStream)
+    *                     }
+    *                 }
+    *             }
+    *     }
+    * }
+    */
+    
     override suspend fun uninstall(packageName: String): RootInstallerResult {
         logger.info("Uninstalling $packageName by unmounting")
 
         UMOUNT(packageName)()
 
-        DELETE(MOUNTED_APK_PATH)(packageName)()
-        DELETE(MOUNT_SCRIPT_PATH)(packageName)()
+        DELETE(MOUNTED_APK_PATH(packageName))()
+        DELETE(MOUNT_SCRIPT_PATH(packageName))()
         DELETE(TMP_FILE_PATH)() // Remove residual.
 
         KILL(packageName)()
@@ -85,10 +145,7 @@ abstract class RootInstaller internal constructor(
     }
 
     override suspend fun getInstallation(packageName: String): RootInstallation? {
-        val patchedApkPath = MOUNTED_APK_PATH(packageName)
-
-        val patchedApkExists = EXISTS(patchedApkPath)().exitCode == 0
-        if (patchedApkExists) return null
+        val patchedApkPath = MOUNTED_APK_PATH(packageName).takeIf { EXISTS(it)().exitCode == 0 } ?: return null
 
         return RootInstallation(
             INSTALLED_APK_PATH(packageName)().output.ifEmpty { null },
@@ -121,7 +178,7 @@ abstract class RootInstaller internal constructor(
      *
      * @throws FailedToFindInstalledPackageException If the package is not installed.
      */
-    private fun String.assertInstalled() {
+    protected fun String.assertInstalled() {
         if (INSTALLED_APK_PATH(this)().output.isEmpty()) {
             throw FailedToFindInstalledPackageException(this)
         }
