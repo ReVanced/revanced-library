@@ -12,7 +12,7 @@ libsu = "6.0.0"
 revanced-patcher = "22.0.0"
 bouncy-castle = "1.83"
 sigstore = "2.0.0"
-vanniktechMavenPublish = "0.36.0"
+vanniktechMavenPublish = "0.37.0"
 
 [libraries]
 apkzlib = { module = "com.android.tools.build:apkzlib", version.ref = "android" }
